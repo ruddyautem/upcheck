@@ -1,0 +1,446 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  --bg-main: #050b12;
+  --text-main: #e8f2f5;
+  --surface-1: #07131d;
+  --surface-2: #09202a;
+  --surface-3: #0d2a34;
+  --surface-raised: rgba(7, 19, 29, 0.94);
+  --line: rgba(0, 166, 150, 0.25);
+  --line-strong: rgba(0, 221, 171, 0.52);
+  --muted: #7e99a8;
+  --brand: #00cfa0;
+  --brand-hover: #22e2b5;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: "IBM Plex Mono", "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  min-height: 100vh;
+}
+
+.app-shell {
+  background-color: #050b12;
+  background-image:
+    linear-gradient(rgba(20, 79, 89, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 79, 89, 0.07) 1px, transparent 1px),
+    radial-gradient(circle at 50% -8rem, rgba(0, 207, 160, 0.075), transparent 34rem),
+    linear-gradient(180deg, #08131e 0%, #050b12 100%);
+  background-size: 32px 32px, 32px 32px, auto, auto;
+}
+
+.hero-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  align-items: center;
+  gap: clamp(2rem, 5vw, 5rem);
+  padding: clamp(1.5rem, 4vw, 3.5rem) 0 clamp(1rem, 2vw, 2rem);
+}
+
+.hero-layout--compact {
+  padding: 0;
+  grid-template-columns: 1fr;
+}
+.hero-layout--compact .hero-copy { display: none; }
+
+.hero-copy { min-width: 0; }
+.hero-eyebrow, .section-kicker {
+  color: #00cfa0;
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.hero-eyebrow { display: flex; align-items: center; gap: 0.65rem; }
+.hero-eyebrow-dot, .report-status span {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: #00dca5;
+  box-shadow: 0 0 0 4px rgba(0, 220, 165, 0.14);
+}
+.hero-heading {
+  max-width: 12ch;
+  margin-top: 1.35rem;
+  font-size: clamp(2.6rem, 4.4vw, 4.75rem);
+  text-wrap: balance;
+}
+.hero-description {
+  max-width: 34rem;
+  margin-top: 1.4rem;
+  font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+}
+.hero-proof { display: flex; flex-wrap: wrap; gap: 0.75rem 1.35rem; margin-top: 2rem; }
+.hero-proof span { display: inline-flex; align-items: center; gap: 0.5rem; color: #a8b6cc; font-size: 0.76rem; font-weight: 600; }
+.hero-scan {
+  min-width: 0;
+  padding: clamp(1.1rem, 2.3vw, 2rem);
+  border: 1px solid rgba(0, 178, 159, 0.38);
+  border-radius: 1.5rem;
+  background: #07131d;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28), inset 0 1px rgba(255, 255, 255, 0.05);
+}
+.hero-scan-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-bottom: 1.3rem; margin-bottom: 1.3rem; border-bottom: 1px solid rgba(100, 116, 139, 0.2); }
+.hero-scan-icon { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border: 1px solid rgba(0, 207, 160, 0.35); border-radius: 0.75rem; color: #20dfb0; background: rgba(0, 207, 160, 0.1); }
+.scan-input-surface { border: 1px solid rgba(0, 178, 159, 0.28); background: #050f17; }
+.hero-layout--compact .hero-heading { font-size: clamp(2rem, 3vw, 3.1rem); max-width: 16ch; margin-top: 0.85rem; }
+.hero-layout--compact .hero-description { margin-top: 0.8rem; font-size: 0.9rem; }
+.hero-layout--compact .hero-scan { padding: 1.2rem 1.4rem; }
+.hero-layout--compact .hero-scan-heading { padding-bottom: 0.85rem; margin-bottom: 0.85rem; }
+
+.report-heading, .workspace-heading { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+.report-heading { padding-bottom: 1.25rem; border-bottom: 1px solid rgba(100, 116, 139, 0.27); }
+.report-heading > div:first-child { min-width: 0; }
+.section-kicker { overflow-wrap: anywhere; }
+.section-kicker span { color: #64748b; padding: 0 0.35rem; }
+.report-status { display: inline-flex; align-items: center; gap: 0.7rem; white-space: nowrap; color: #20dfb0; background: rgba(0, 207, 160, 0.09); border: 1px solid rgba(0, 207, 160, 0.25); border-radius: 999px; padding: 0.55rem 0.85rem; font-size: 0.72rem; font-weight: 700; }
+.report-status span { background: #00dca5; box-shadow: 0 0 0 4px rgba(0, 220, 165, 0.12); }
+
+/* Report Workspace 3-column layout */
+.report-workspace { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(320px, 0.9fr); align-items: start; gap: 2rem; }
+.report-workspace--three-col {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.88fr) minmax(0, 1.55fr) minmax(310px, 0.95fr);
+  align-items: start;
+  gap: 1.5rem;
+}
+.report-workspace--three-col .report-workspace__left { min-width: 0; }
+.report-workspace--three-col .report-workspace__center { min-width: 0; }
+.report-workspace--three-col .report-workspace__right { min-width: 0; }
+
+@media (max-width: 1280px) {
+  .report-workspace--three-col {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.95fr);
+  }
+  .report-workspace--three-col .report-workspace__left {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  .report-workspace--three-col {
+    grid-template-columns: 1fr;
+  }
+  .report-workspace--three-col .report-workspace__left,
+  .report-workspace--three-col .report-workspace__center,
+  .report-workspace--three-col .report-workspace__right {
+    grid-column: auto;
+  }
+}
+
+/* =========================================================================
+   PRIORITY ALERTS (RED BACKGROUND FOR CRITICAL, ORANGE BACKGROUND FOR BREAKING)
+   ========================================================================= */
+
+.priority-alert {
+  min-width: 0;
+  border-radius: 1.15rem;
+  padding: 1.25rem;
+}
+
+/* FULL RED CONTAINER FOR CRITICAL & HIGH SECURITY RISKS */
+.priority-alert--critical {
+  /* Reuse the wine-red security-advisory surface for the immediate-action panel. */
+  border: 1px solid #d42661;
+  background: #2b0d1b;
+  box-shadow: 0 12px 36px rgba(79, 7, 31, 0.28), inset 0 1px 0 rgba(255, 162, 189, 0.08);
+}
+
+/* FULL ORANGE/AMBER CONTAINER FOR MAJOR VERSION CHANGES */
+.priority-alert--breaking {
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  background: linear-gradient(145deg, rgba(146, 64, 14, 0.35), rgba(80, 35, 10, 0.45));
+  box-shadow: 0 12px 36px rgba(180, 83, 9, 0.2), inset 0 1px 0 rgba(253, 230, 138, 0.08);
+}
+
+.priority-alert-header { display: flex; align-items: center; gap: 0.8rem; }
+.priority-alert-icon { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; flex: none; border-radius: 0.75rem; }
+
+.priority-alert--critical .priority-alert-icon {
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.28);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+}
+.priority-alert--breaking .priority-alert-icon {
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.28);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+}
+
+.priority-alert--critical .priority-alert-kicker {
+  color: #fca5a5;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.priority-alert--breaking .priority-alert-kicker {
+  color: #fde68a;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.priority-alert h3 { color: #fff; font-size: 1.15rem; line-height: 1.2; font-weight: 800; margin-top: 0.15rem; }
+.priority-alert--critical h3 span {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  margin-left: 0.2rem;
+  border-radius: 999px;
+  background: rgba(239, 68, 68, 0.35);
+  border: 1px solid rgba(239, 68, 68, 0.55);
+  color: #fee2e2;
+  font-size: 0.8rem;
+}
+.priority-alert--breaking h3 span {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  margin-left: 0.2rem;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.35);
+  border: 1px solid rgba(245, 158, 11, 0.55);
+  color: #fef3c7;
+  font-size: 0.8rem;
+}
+
+.priority-alert-description { color: #cbd5e1; font-size: 0.77rem; line-height: 1.5; margin: 0.85rem 0 1rem; }
+.priority-alert-list { display: grid; gap: 0.65rem; }
+
+/* INNER CARDS (MATCHING EXACT SCREENSHOT STYLE: media_1791829591071_af631b5c.png) */
+.priority-alert-card {
+  display: block;
+  width: 100%;
+  padding: 0.85rem 0.95rem;
+  border-radius: 0.75rem;
+  background: #0f1422;
+  cursor: pointer;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+  user-select: none;
+}
+.priority-alert-card:hover {
+  transform: translateY(-1px);
+}
+.priority-alert-card--critical {
+  border: 1px solid #d42661;
+  background: #310e1e;
+}
+.priority-alert-card--critical:hover {
+  border-color: #ff4a7e;
+  background: #421126;
+}
+.priority-alert-card--breaking {
+  border: 1px solid rgba(245, 158, 11, 0.42);
+}
+.priority-alert-card--breaking:hover {
+  border-color: rgba(245, 158, 11, 0.75);
+  background: #141b2c;
+}
+
+.priority-alert-more { color: var(--muted); font-size: 0.7rem; margin-top: 0.6rem; }
+
+.health-score-panel {
+  background: #0f172a;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.welcome-features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid rgba(100, 116, 139, 0.28); padding-top: 1.6rem; }
+.welcome-feature { display: grid; grid-template-columns: auto 1fr; column-gap: 1rem; align-content: start; padding: 0.5rem 1.6rem; border-right: 1px solid rgba(100, 116, 139, 0.22); }
+.welcome-feature:first-child { padding-left: 0; }
+.welcome-feature:last-child { border-right: 0; }
+.welcome-feature-icon { grid-row: span 2; width: 2.15rem; height: 2.15rem; border-radius: 0.65rem; display: grid; place-items: center; background: rgba(51, 65, 85, 0.34); }
+.welcome-feature h3 { align-self: end; }
+.welcome-feature p { max-width: 19rem; }
+
+@media (max-width: 1150px) {
+  .hero-layout, .hero-layout--compact { grid-template-columns: 1fr; gap: 2rem; }
+  .hero-heading { max-width: 18ch; }
+  .hero-description { max-width: 46rem; }
+  .report-workspace { grid-template-columns: 1fr; }
+  .report-workspace aside { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+}
+@media (max-width: 700px) {
+  .hero-layout { padding-top: 0.5rem; }
+  .hero-heading { font-size: clamp(2.3rem, 9vw, 3.4rem); }
+  .hero-proof { gap: 0.8rem 1rem; margin-top: 1.3rem; }
+  .hero-scan { padding: 1rem; border-radius: 1.25rem; }
+  .welcome-features { grid-template-columns: 1fr; padding-top: 0.5rem; }
+  .welcome-feature, .welcome-feature:first-child { padding: 1rem 0; border-right: 0; border-bottom: 1px solid rgba(100, 116, 139, 0.22); }
+  .welcome-feature:last-child { border-bottom: 0; }
+  .report-workspace aside { display: block; }
+  .report-workspace aside > div + div { margin-top: 1.5rem; }
+  .report-status { display: none; }
+}
+
+/* Metric cards: clean, solid, no colored left border */
+.metric-card {
+  position: relative;
+  overflow: hidden;
+  border-color: var(--line);
+  box-shadow: 0 4px 14px rgba(8, 15, 30, 0.06);
+}
+.metric-card:hover { border-color: var(--line-strong); transform: translateY(-2px); }
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #111827;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Square technical report style. This intentionally overrides utility radii
+   so cards, buttons, fields, alerts, and badges share the same hard edge. */
+.app-shell,
+.app-shell *,
+.app-shell *::before,
+.app-shell *::after {
+  border-radius: 0 !important;
+}
+
+.app-shell .shadow-sm,
+.app-shell .shadow-md,
+.app-shell .shadow-lg,
+.app-shell .shadow-xl,
+.app-shell .shadow-2xl,
+.app-shell .shadow-inner,
+.app-shell .metric-card,
+.app-shell .priority-alert,
+.app-shell .priority-alert-card,
+.app-shell .hero-scan,
+.app-shell .health-score-panel {
+  box-shadow: none !important;
+}
+
+.app-shell .priority-alert,
+.app-shell .priority-alert-card,
+.app-shell .metric-card,
+.app-shell .hero-scan,
+.app-shell .health-score-panel {
+  border-width: 1px !important;
+}
+
+/* Shared report surface: matches the Package Inspector and Update Queue. */
+.app-shell .report-surface,
+.app-shell .metric-card {
+  background-color: #071721 !important;
+  border-color: rgba(0, 158, 146, 0.28) !important;
+}
+.app-shell .metric-card:hover {
+  background-color: #0a202a !important;
+  border-color: rgba(0, 220, 165, 0.5) !important;
+}
+
+html.light .app-shell .report-surface,
+html.light .app-shell .metric-card {
+  background-color: #ffffff !important;
+  border-color: #d4dde8 !important;
+}
+
+/* The table keeps its columns inside the report workspace. Package rows open
+   the inspector directly, so action buttons only appear when there is room. */
+@media (max-width: 1535px) {
+  .package-table th,
+  .package-table td { padding-left: 0.75rem; padding-right: 0.75rem; }
+}
+
+/* Reserve breathing room between inspector content and Firefox's scrollbar. */
+.package-inspector-scroll {
+  scrollbar-gutter: stable;
+  padding-inline-end: 0.6rem;
+}
+
+/* Temporis palette -------------------------------------------------------
+   Keep the dashboard's existing Tailwind structure, but give every shared
+   utility surface the same navy/teal terminal treatment as Temporis. */
+.app-shell .bg-slate-950, .app-shell .bg-slate-950\/50, .app-shell .bg-slate-950\/60, .app-shell .bg-slate-950\/70, .app-shell .bg-slate-950\/80 { background-color: #050f17 !important; }
+.app-shell .bg-slate-900, .app-shell .bg-slate-900\/60, .app-shell .bg-slate-900\/80, .app-shell .bg-slate-900\/95 { background-color: #071721 !important; }
+.app-shell .bg-slate-800, .app-shell .bg-slate-800\/90 { background-color: #0b2530 !important; }
+.app-shell .bg-slate-700 { background-color: #123440 !important; }
+.app-shell .hover\:bg-slate-950:hover { background-color: #071923 !important; }
+.app-shell .hover\:bg-slate-900:hover { background-color: #0a202a !important; }
+.app-shell .hover\:bg-slate-800:hover, .app-shell .hover\:bg-slate-700:hover { background-color: #10313b !important; }
+.app-shell .border-slate-950, .app-shell .border-slate-900, .app-shell .border-slate-800, .app-shell .border-slate-800\/60, .app-shell .border-slate-800\/80, .app-shell .border-slate-700 { border-color: rgba(0, 158, 146, 0.28) !important; }
+.app-shell .hover\:border-slate-700:hover, .app-shell .hover\:border-sky-500\/50:hover { border-color: rgba(0, 220, 165, 0.65) !important; }
+.app-shell .text-white { color: #ecf8f7 !important; }
+.app-shell .text-slate-100 { color: #dceceb !important; }
+.app-shell .text-slate-200 { color: #c3d7d9 !important; }
+.app-shell .text-slate-300 { color: #a8c0c5 !important; }
+.app-shell .text-slate-400 { color: #7f9ca5 !important; }
+.app-shell .text-slate-500, .app-shell .text-slate-600 { color: #58737e !important; }
+.app-shell .bg-blue-600, .app-shell .bg-sky-600, .app-shell .bg-cyan-600 { background-color: #008e78 !important; }
+.app-shell .hover\:bg-blue-500:hover, .app-shell .hover\:bg-sky-500:hover { background-color: #00ad90 !important; }
+.app-shell .bg-blue-500\/10, .app-shell .bg-blue-500\/20, .app-shell .bg-sky-500\/10, .app-shell .bg-cyan-500\/10 { background-color: rgba(0, 207, 160, 0.11) !important; }
+.app-shell .border-blue-500, .app-shell .border-blue-500\/20, .app-shell .border-blue-500\/30, .app-shell .border-sky-500\/40 { border-color: rgba(0, 207, 160, 0.42) !important; }
+.app-shell .text-blue-300, .app-shell .text-blue-400, .app-shell .text-blue-500, .app-shell .text-sky-400, .app-shell .text-cyan-400 { color: #16dcb0 !important; }
+.app-shell .hover\:text-blue-300:hover, .app-shell .hover\:text-cyan-300:hover, .app-shell .hover\:text-white:hover { color: #e8fffa !important; }
+.app-shell .focus\:ring-blue-500:focus { --tw-ring-color: rgba(0, 207, 160, 0.52) !important; }
+.app-shell .focus\:border-blue-500:focus { border-color: #00cfa0 !important; }
+.app-shell .bg-emerald-600, .app-shell .bg-emerald-500 { background-color: #008e78 !important; }
+.app-shell .text-emerald-300, .app-shell .text-emerald-400, .app-shell .text-emerald-500, .app-shell .text-teal-400 { color: #21dfb3 !important; }
+.app-shell .bg-emerald-500\/10, .app-shell .bg-emerald-500\/20 { background-color: rgba(0, 207, 160, 0.12) !important; }
+.app-shell .border-emerald-500\/30, .app-shell .border-emerald-500\/40 { border-color: rgba(0, 207, 160, 0.42) !important; }
+/* Red stays reserved for danger, like the confidentiality callout in Temporis. */
+.app-shell .bg-red-950\/20, .app-shell .bg-red-950\/30, .app-shell .bg-red-950\/40, .app-shell .bg-red-950\/50 { background-color: rgba(88, 11, 28, 0.42) !important; }
+.app-shell .border-red-500\/30, .app-shell .border-red-500\/40, .app-shell .border-red-800\/60 { border-color: rgba(244, 63, 94, 0.52) !important; }
+.app-shell .text-red-300, .app-shell .text-red-400 { color: #ff8196 !important; }
+.app-shell .shadow-blue-500\/20, .app-shell .shadow-blue-500\/25, .app-shell .shadow-blue-500\/30, .app-shell .shadow-emerald-900\/30 { --tw-shadow-color: transparent !important; }
+.app-shell input::placeholder, .app-shell textarea::placeholder { color: #55717b !important; }
+.app-shell .hero-heading, .app-shell h1, .app-shell h2, .app-shell h3 { letter-spacing: -0.035em; }
+.app-shell button { letter-spacing: 0.045em; }
+.app-shell footer { border-color: rgba(0, 158, 146, 0.28) !important; background: rgba(3, 10, 16, 0.72); }
+
+/* Purposeful, terminal-style selection controls instead of browser-default boxes. */
+.check-control {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  display: grid;
+  place-content: center;
+  background: #050f17;
+  border: 1px solid #43616b;
+  border-radius: 0 !important;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+.check-control::after {
+  content: "✓";
+  color: #e8fffa;
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1;
+  transform: scale(0);
+  transition: transform 120ms ease;
+}
+.check-control:checked::after { transform: scale(1); }
+.check-control--all:checked { background: #087d70; border-color: #1ce0b3; }
+.check-control--outdated { border-color: #148f7e; }
+.check-control--outdated:checked { background: #087d70; border-color: #25dfb4; }
+.check-control--major { border-color: #a16207; }
+.check-control--major:checked { background: #7c4a06; border-color: #f5b82e; }
+.check-control--patch { border-color: #267ca6; }
+.check-control--patch:checked { background: #176389; border-color: #50b9e9; }
+.check-control--security { border-color: #a91c4a; }
+.check-control--security:checked { background: #74132f; border-color: #f04a78; }
+
+
+@supports (-moz-appearance: none) {
+  .package-inspector-scroll {
+    scrollbar-width: thin;
+    padding-inline-end: 0.8rem;
+  }
+}
