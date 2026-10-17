@@ -98,6 +98,13 @@ export default function Home() {
       if (cachedResult) {
         setOwnerAnalysis(null);
         setResult(cachedResult);
+        setHistory(updateRepoHistoryItem(cachedResult.repoInfo.fullName, {
+          repoUrl: cachedResult.repoInfo.fullName,
+          score: cachedResult.healthScore.score,
+          grade: cachedResult.healthScore.grade,
+          totalPackages: cachedResult.totalPackages,
+          criticalCount: cachedResult.summaryCounts.critical,
+        }));
         setTableFilter('needs_attention');
         setIsScanOpen(false);
         return;
