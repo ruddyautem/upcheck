@@ -67,7 +67,7 @@ Upcheck/
 
 ### 🚀 Lancer le projet localement
 
-Prérequis : Node.js 20.9 ou plus récent et Bun, npm, pnpm ou Yarn.
+Prérequis : [Bun](https://bun.sh) 1.4 ou plus récent.
 
 ```bash
 git clone git@github.com:ruddyautem/upcheck.git
@@ -78,17 +78,10 @@ bun run dev
 
 Ouvrez ensuite [http://localhost:3000](http://localhost:3000).
 
-Avec npm :
-
-```bash
-npm install
-npm run dev
-```
-
 ### ✅ Vérifications
 
 ```bash
-npx tsc --noEmit
+bunx tsc --noEmit
 bun run build
 ```
 
