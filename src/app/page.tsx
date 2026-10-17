@@ -13,7 +13,7 @@ import { InfoModal } from '@/components/InfoModal';
 import { OwnerScanSummary } from '@/components/OwnerScanSummary';
 import { MultiRepoPromptModal } from '@/components/MultiRepoPromptModal';
 import { OwnerAnalysisResult, RepoAnalysisResult, RawPackageJson, PackageManager } from '@/types';
-import { getRepoHistory, saveRepoToHistory, HistoryItem } from '@/lib/history';
+import { getRepoHistory, saveRepoToHistory, updateRepoHistoryItem, HistoryItem } from '@/lib/history';
 import { getCachedAnalysis, getCachedOwnerAnalysis, saveAnalysisToCache, saveOwnerAnalysisToCache } from '@/lib/analysisCache';
 import { triggerCelebration } from '@/lib/confetti';
 import { useAppSettings } from '@/lib/settingsContext';
@@ -251,14 +251,34 @@ export default function Home() {
       }
 
       const refreshedResult = data.data as RepoAnalysisResult;
-      setResult(refreshedResult);
-      setOwnerAnalysis((current) => current ? {
-        ...current,
-        results: current.results.map((repository) =>
+      const refreshedOwnerAnalysis: OwnerAnalysisResult = {
+        ...ownerAnalysis,
+        analyzedAt: new Date().toISOString(),
+        results: ownerAnalysis.results.map((repository) =>
           repository.repoInfo.fullName === refreshedResult.repoInfo.fullName ? refreshedResult : repository
         ),
-      } : current);
+      };
+      setResult(refreshedResult);
+      setOwnerAnalysis(refreshedOwnerAnalysis);
       saveAnalysisToCache(refreshedResult);
+      const reportKey = saveOwnerAnalysisToCache(refreshedOwnerAnalysis);
+      const activeOwnerResult = refreshedOwnerAnalysis.results[0];
+      const historyAfterOwnerUpdate = updateRepoHistoryItem(ownerAnalysis.owner, {
+        analysisKey: reportKey || undefined,
+        score: activeOwnerResult?.healthScore.score,
+        grade: activeOwnerResult?.healthScore.grade,
+        totalPackages: refreshedOwnerAnalysis.results.reduce((total, repository) => total + repository.totalPackages, 0),
+        criticalCount: refreshedOwnerAnalysis.results.reduce((total, repository) => total + repository.summaryCounts.critical, 0),
+        repositoryCount: refreshedOwnerAnalysis.results.length,
+      }, true);
+      const historyAfterScoreUpdate = updateRepoHistoryItem(refreshedResult.repoInfo.fullName, {
+        repoUrl: refreshedResult.repoInfo.fullName,
+        score: refreshedResult.healthScore.score,
+        grade: refreshedResult.healthScore.grade,
+        totalPackages: refreshedResult.totalPackages,
+        criticalCount: refreshedResult.summaryCounts.critical,
+      });
+      setHistory(historyAfterScoreUpdate.length > 0 ? historyAfterScoreUpdate : historyAfterOwnerUpdate);
       setTableFilter('needs_attention');
     } catch (err: any) {
       setError(err.message || 'Error communicating with analysis server.');

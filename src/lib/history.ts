@@ -49,6 +49,26 @@ export function saveRepoToHistory(item: Omit<HistoryItem, 'timestamp'>): History
   }
 }
 
+export function updateRepoHistoryItem(
+  fullName: string,
+  updates: Partial<Omit<HistoryItem, 'fullName' | 'timestamp'>>,
+  isMultiScan = false,
+): HistoryItem[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const normalizedName = fullName.toLowerCase();
+    const updated = getRepoHistory().map((item) =>
+      item.fullName.toLowerCase() === normalizedName && Boolean(item.isMultiScan) === isMultiScan
+        ? { ...item, ...updates, timestamp: new Date().toISOString() }
+        : item,
+    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    return updated;
+  } catch {
+    return [];
+  }
+}
+
 export function removeRepoFromHistory(fullName: string): HistoryItem[] {
   if (typeof window === 'undefined') return [];
   try {
