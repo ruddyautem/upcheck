@@ -41,7 +41,8 @@ L'application permet d'analyser un dépôt, une sélection de dépôts ou tous l
 | --- | --- |
 | Framework | Next.js 16 (App Router) |
 | Interface | React 19, Tailwind CSS v4, Lucide React |
-| Langage | TypeScript |
+| Langage | TypeScript 6 |
+| Qualité | ESLint 9 + configuration Next.js |
 | Données | API GitHub, registre npm, OSV |
 | Gestionnaires pris en charge | Bun, npm, pnpm, Yarn |
 
@@ -82,6 +83,7 @@ Ouvrez ensuite [http://localhost:3000](http://localhost:3000).
 
 ```bash
 bunx tsc --noEmit
+bun run lint
 bun run build
 ```
 
@@ -122,7 +124,8 @@ You can analyse one repository, a selection of repositories, or every repository
 | --- | --- |
 | Framework | Next.js 16 (App Router) |
 | UI | React 19, Tailwind CSS v4, Lucide React |
-| Language | TypeScript |
+| Language | TypeScript 6 |
+| Code quality | ESLint 9 + Next.js configuration |
 | Data | GitHub API, npm registry, OSV |
 | Supported package managers | Bun, npm, pnpm, Yarn |
 
@@ -140,7 +143,8 @@ Then open [http://localhost:3000](http://localhost:3000).
 ### ✅ Checks
 
 ```bash
-npx tsc --noEmit
+bunx tsc --noEmit
+bun run lint
 bun run build
 ```
 
