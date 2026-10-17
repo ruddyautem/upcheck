@@ -15,6 +15,7 @@ interface GitHubScanFormProps {
   isLoading: boolean;
   onAnalyzeRepo: (repoUrl: string) => void;
   onAnalyzeRepos: (repoUrls: string[]) => void;
+  children?: React.ReactNode;
 }
 
 const ANONYMOUS_REPOSITORY_LIMIT = 10;
@@ -24,6 +25,7 @@ export function GitHubScanForm({
   isLoading,
   onAnalyzeRepo,
   onAnalyzeRepos,
+  children,
 }: GitHubScanFormProps) {
   const { t } = useAppSettings();
   const [mode, setMode] = useState<'single' | 'multiple'>('single');
@@ -165,6 +167,8 @@ export function GitHubScanForm({
       )}
 
       {error && <p className='text-xs text-red-300' role="alert">{error}</p>}
+
+      {children}
 
       <button
         type='submit'

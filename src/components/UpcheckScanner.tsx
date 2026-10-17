@@ -150,61 +150,60 @@ export function UpcheckScanner({
             {t("input.github_repo")}
           </h2>
           <div className='flex flex-1 flex-col gap-6 lg:min-h-0 lg:gap-[clamp(0.75rem,2vh,2rem)] lg:overflow-y-auto'>
-            {/* Already verified git repositories */}
-            {recentScans.length > 0 && (
-              <div className='home-recent-history space-y-3 lg:shrink-0'>
-                <div className='flex items-center justify-between gap-3 text-xs text-slate-400'>
-                  <span className='font-semibold flex items-center gap-1.5 text-slate-300'>
-                    <History className='w-3.5 h-3.5 text-blue-400' />
-                    {t("input.recent_group")}
-                  </span>
-                  <span className='text-[11px] text-slate-500 hidden sm:inline'>
-                    {t("input.recent_hint")}
-                  </span>
-                </div>
-
-                <div className='grid max-h-60 grid-cols-1 gap-2.5 overflow-y-auto pr-1 sm:grid-cols-2'>
-                  {recentScans.map((item) => (
-                    <button
-                      key={item.analysisKey || item.repoUrl}
-                      type='button'
-                      onClick={() => onSelectHistoryItem(item)}
-                      className='group flex min-h-16 min-w-0 items-center gap-3 border border-slate-800 bg-slate-950/70 p-3 text-left transition-colors hover:border-emerald-500/50 hover:bg-slate-900 lg:min-h-18 cursor-pointer'
-                    >
-                      {item.isMultiScan ? (
-                        <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-violet-500/40 bg-violet-500/15 text-violet-200'>
-                          <Layers className='h-4 w-4' />
-                        </div>
-                      ) : (
-                        <div className={`w-10 h-10 rounded-lg flex flex-col items-center justify-center shrink-0 ${getGradeBadgeClass(item.grade)}`}>
-                          <span className='font-black text-sm leading-none'>{item.grade}</span>
-                          <span className='text-[8px] font-bold uppercase tracking-wider leading-none mt-0.5 opacity-90'>{t("overview.grade")}</span>
-                        </div>
-                      )}
-
-                      {/* Repo Name and Package Count */}
-                      <div className='min-w-0 flex-1'>
-                        <div className='font-mono text-xs font-bold text-slate-200 group-hover:text-emerald-300 truncate transition-colors'>
-                          {item.isMultiScan ? `${t("input.multi_scan")} · ${item.fullName}` : item.fullName}
-                        </div>
-                        <div className='text-[10px] text-slate-500 mt-0.5'>
-                          {item.isMultiScan
-                            ? `${item.repositoryCount || 0} ${t("input.repositories")} · ${item.totalPackages} ${t("owner_scan.packages")}`
-                            : `${item.totalPackages} ${t("owner_scan.packages")}`}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             <GitHubScanForm
               githubToken={githubToken}
               isLoading={isLoading}
               onAnalyzeRepo={onAnalyzeRepo}
               onAnalyzeRepos={onAnalyzeRepos}
-            />
+            >
+              {/* Already verified git repositories */}
+              {recentScans.length > 0 && (
+                <div className='home-recent-history space-y-3 lg:shrink-0'>
+                  <div className='flex items-center justify-between gap-3 text-xs text-slate-400'>
+                    <span className='font-semibold flex items-center gap-1.5 text-slate-300'>
+                      <History className='w-3.5 h-3.5 text-blue-400' />
+                      {t("input.recent_group")}
+                    </span>
+                    <span className='text-[11px] text-slate-500 hidden sm:inline'>
+                      {t("input.recent_hint")}
+                    </span>
+                  </div>
+
+                  <div className='grid max-h-60 grid-cols-1 gap-2.5 overflow-y-auto pr-1 sm:grid-cols-2'>
+                    {recentScans.map((item) => (
+                      <button
+                        key={item.analysisKey || item.repoUrl}
+                        type='button'
+                        onClick={() => onSelectHistoryItem(item)}
+                        className='group flex min-h-16 min-w-0 items-center gap-3 border border-slate-800 bg-slate-950/70 p-3 text-left transition-colors hover:border-emerald-500/50 hover:bg-slate-900 lg:min-h-18 cursor-pointer'
+                      >
+                        {item.isMultiScan ? (
+                          <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-violet-500/40 bg-violet-500/15 text-violet-200'>
+                            <Layers className='h-4 w-4' />
+                          </div>
+                        ) : (
+                          <div className={`w-10 h-10 rounded-lg flex flex-col items-center justify-center shrink-0 ${getGradeBadgeClass(item.grade)}`}>
+                            <span className='font-black text-sm leading-none'>{item.grade}</span>
+                            <span className='text-[8px] font-bold uppercase tracking-wider leading-none mt-0.5 opacity-90'>{t("overview.grade")}</span>
+                          </div>
+                        )}
+
+                        <div className='min-w-0 flex-1'>
+                          <div className='font-mono text-xs font-bold text-slate-200 group-hover:text-emerald-300 truncate transition-colors'>
+                            {item.isMultiScan ? `${t("input.multi_scan")} · ${item.fullName}` : item.fullName}
+                          </div>
+                          <div className='text-[10px] text-slate-500 mt-0.5'>
+                            {item.isMultiScan
+                              ? `${item.repositoryCount || 0} ${t("input.repositories")} · ${item.totalPackages} ${t("owner_scan.packages")}`
+                              : `${item.totalPackages} ${t("owner_scan.packages")}`}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </GitHubScanForm>
           </div>
         </section>
         <section className='home-scanner-card flex min-w-0 flex-col gap-6 border border-slate-700/70 bg-slate-900/80 p-5 shadow-xl shadow-black/20 sm:p-6 lg:min-h-0 lg:gap-[clamp(0.75rem,2vh,2rem)] lg:overflow-hidden lg:p-[clamp(1rem,2vh,2rem)]'>
