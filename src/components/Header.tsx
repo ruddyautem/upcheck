@@ -38,9 +38,9 @@ export function Header({
 
   return (
     <header className="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-xl sticky top-0 z-30 transition-colors">
-      <div className="max-w-[1480px] mx-auto px-4 sm:px-7 lg:px-10 min-h-16 py-3 sm:py-0 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3">
+      <div className="max-w-[1480px] mx-auto px-3 sm:px-7 lg:px-10 min-h-16 py-3 sm:py-0 flex flex-nowrap items-center justify-between gap-2 sm:gap-3">
         {/* Logo and Name */}
-        <a href="/" aria-label="Upcheck home" className="flex items-center gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
+        <a href="/" aria-label="Upcheck home" className="flex shrink-0 items-center gap-2 sm:gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
           <img src="/icon.svg" alt="" aria-hidden="true" className="w-8 h-8 shrink-0" />
           <div>
             <span className="text-xl font-extrabold tracking-tight text-white font-sans">
@@ -53,14 +53,14 @@ export function Header({
         </a>
 
         {/* Action Buttons */}
-        <div className="flex w-full sm:w-auto items-center justify-between sm:justify-start gap-2 sm:gap-2.5">
-          <div className="flex items-center gap-1 border border-slate-800 bg-slate-900 p-1">
+        <div className="flex w-auto shrink-0 items-center justify-start gap-1.5 sm:gap-2.5">
+          <div className="flex h-10 items-center gap-0.5 border border-slate-800 bg-slate-900 p-0.5">
             <button
               type="button"
               onClick={() => setLanguage('fr')}
               aria-label="Français"
               aria-pressed={language === 'fr'}
-              className={`flex h-8 w-10 items-center justify-center border transition-colors cursor-pointer ${
+              className={`flex h-9 w-9 items-center justify-center border transition-colors cursor-pointer ${
                 language === 'fr'
                   ? 'border-emerald-400/70 bg-emerald-500/20'
                   : 'border-transparent hover:border-slate-600 hover:bg-slate-800'
@@ -74,7 +74,7 @@ export function Header({
               onClick={() => setLanguage('en')}
               aria-label="English"
               aria-pressed={language === 'en'}
-              className={`flex h-8 w-10 items-center justify-center border transition-colors cursor-pointer ${
+              className={`flex h-9 w-9 items-center justify-center border transition-colors cursor-pointer ${
                 language === 'en'
                   ? 'border-emerald-400/70 bg-emerald-500/20'
                   : 'border-transparent hover:border-slate-600 hover:bg-slate-800'
@@ -87,7 +87,7 @@ export function Header({
 
           <button
             onClick={onOpenInfoModal}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 transition-colors cursor-pointer"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 p-0 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white cursor-pointer sm:w-auto sm:px-3"
             title="How Upcheck detects vulnerabilities & announcements"
           >
             <Info className="w-3.5 h-3.5 text-slate-400" />
@@ -96,7 +96,7 @@ export function Header({
 
           <button
             onClick={onOpenTokenModal}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors cursor-pointer ${
+            className={`flex h-10 w-10 items-center justify-center rounded-xl border p-0 text-xs font-medium transition-colors cursor-pointer sm:w-auto sm:px-3 ${
               hasCustomToken
                 ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20'
                 : 'bg-slate-900 text-slate-300 hover:text-white border-slate-800 hover:bg-slate-800'
@@ -114,7 +114,7 @@ export function Header({
             href="https://github.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 transition-colors"
+            className="hidden h-10 items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900 px-3 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white sm:flex"
           >
             <GithubIcon className="w-3.5 h-3.5" />
             <span>GitHub</span>
