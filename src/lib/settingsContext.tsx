@@ -17,9 +17,25 @@ interface AppSettingsContextType {
 
 const AppSettingsContext = createContext<AppSettingsContextType | undefined>(undefined);
 
+const FRENCH_SPEAKING_REGIONS = new Set([
+  'BE', 'BF', 'BI', 'BJ', 'CA', 'CD', 'CF', 'CG', 'CH', 'CI', 'CM', 'DJ', 'FR',
+  'GA', 'GF', 'GN', 'GP', 'HT', 'KM', 'LU', 'MA', 'MC', 'MG', 'ML', 'MQ', 'NE',
+  'PF', 'RE', 'RW', 'SC', 'SN', 'TD', 'TG', 'VU', 'WF', 'YT',
+]);
+
+function getBrowserLanguage(): Language {
+  const locales = navigator.languages?.length ? navigator.languages : [navigator.language];
+  const hasFrenchLocale = locales.some((locale) => {
+    const [language, region] = locale.replace('_', '-').split('-');
+    return language.toLowerCase() === 'fr' || (region && FRENCH_SPEAKING_REGIONS.has(region.toUpperCase()));
+  });
+
+  return hasFrenchLocale ? 'fr' : 'en';
+}
+
 export function AppSettingsProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('dark');
-  const [language, setLanguageState] = useState<Language>('en');
+  const [language, setLanguageState] = useState<Language>('fr');
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -33,6 +49,8 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
     const savedLang = localStorage.getItem('upcheck_lang') as Language | null;
     if (savedLang === 'fr' || savedLang === 'en') {
       setLanguageState(savedLang);
+    } else {
+      setLanguageState(getBrowserLanguage());
     }
   }, []);
 

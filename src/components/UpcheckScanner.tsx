@@ -150,16 +150,9 @@ export function UpcheckScanner({
             {t("input.github_repo")}
           </h2>
           <div className='flex flex-1 flex-col gap-6 lg:min-h-0 lg:gap-[clamp(0.75rem,2vh,2rem)] lg:overflow-y-auto'>
-            <GitHubScanForm
-              githubToken={githubToken}
-              isLoading={isLoading}
-              onAnalyzeRepo={onAnalyzeRepo}
-              onAnalyzeRepos={onAnalyzeRepos}
-            />
-
             {/* Already verified git repositories */}
             {recentScans.length > 0 && (
-              <div className='home-recent-history space-y-3 border-t border-slate-800 pt-5 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:pt-7'>
+              <div className='home-recent-history space-y-3 lg:shrink-0'>
                 <div className='flex items-center justify-between gap-3 text-xs text-slate-400'>
                   <span className='font-semibold flex items-center gap-1.5 text-slate-300'>
                     <History className='w-3.5 h-3.5 text-blue-400' />
@@ -170,7 +163,7 @@ export function UpcheckScanner({
                   </span>
                 </div>
 
-                <div className='grid max-h-60 grid-cols-1 gap-2.5 overflow-y-auto pr-1 sm:grid-cols-2 lg:min-h-0 lg:max-h-none lg:flex-1 lg:content-start'>
+                <div className='grid max-h-60 grid-cols-1 gap-2.5 overflow-y-auto pr-1 sm:grid-cols-2'>
                   {recentScans.map((item) => (
                     <button
                       key={item.analysisKey || item.repoUrl}
@@ -205,6 +198,13 @@ export function UpcheckScanner({
                 </div>
               </div>
             )}
+
+            <GitHubScanForm
+              githubToken={githubToken}
+              isLoading={isLoading}
+              onAnalyzeRepo={onAnalyzeRepo}
+              onAnalyzeRepos={onAnalyzeRepos}
+            />
           </div>
         </section>
         <section className='home-scanner-card flex min-w-0 flex-col gap-6 border border-slate-700/70 bg-slate-900/80 p-5 shadow-xl shadow-black/20 sm:p-6 lg:min-h-0 lg:gap-[clamp(0.75rem,2vh,2rem)] lg:overflow-hidden lg:p-[clamp(1rem,2vh,2rem)]'>

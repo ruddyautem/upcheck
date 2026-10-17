@@ -57,20 +57,6 @@ export function Header({
           <div className="flex items-center gap-1 border border-slate-800 bg-slate-900 p-1">
             <button
               type="button"
-              onClick={() => setLanguage('en')}
-              aria-label="English"
-              aria-pressed={language === 'en'}
-              className={`flex h-8 w-10 items-center justify-center border transition-colors cursor-pointer ${
-                language === 'en'
-                  ? 'border-emerald-400/70 bg-emerald-500/20'
-                  : 'border-transparent hover:border-slate-600 hover:bg-slate-800'
-              }`}
-              title="English"
-            >
-              <FlagIcon country="en" />
-            </button>
-            <button
-              type="button"
               onClick={() => setLanguage('fr')}
               aria-label="Français"
               aria-pressed={language === 'fr'}
@@ -82,6 +68,20 @@ export function Header({
               title="Français"
             >
               <FlagIcon country="fr" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setLanguage('en')}
+              aria-label="English"
+              aria-pressed={language === 'en'}
+              className={`flex h-8 w-10 items-center justify-center border transition-colors cursor-pointer ${
+                language === 'en'
+                  ? 'border-emerald-400/70 bg-emerald-500/20'
+                  : 'border-transparent hover:border-slate-600 hover:bg-slate-800'
+              }`}
+              title="English"
+            >
+              <FlagIcon country="en" />
             </button>
           </div>
 

@@ -95,7 +95,7 @@ export function GitHubScanForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className='home-github-form flex flex-col gap-4 lg:gap-5'>
+    <form onSubmit={handleSubmit} className='home-github-form flex h-full flex-1 flex-col gap-4 lg:gap-5'>
       <div className='home-github-tabs grid w-full grid-cols-2 gap-1 border border-slate-800 bg-slate-950 p-1'>
         {(['single', 'multiple'] as const).map((option) => {
           const active = mode === option;
@@ -117,8 +117,7 @@ export function GitHubScanForm({
         })}
       </div>
 
-      <div className='flex flex-col gap-3.5 lg:gap-4'>
-        <div className='flex min-w-0 overflow-hidden border border-emerald-500/30 bg-emerald-950/30 focus-within:border-emerald-400 focus-within:ring-1 focus-within:ring-emerald-400/70 transition-all'>
+      <div className='flex min-w-0 overflow-hidden border border-emerald-500/30 bg-emerald-950/30 focus-within:border-emerald-400 focus-within:ring-1 focus-within:ring-emerald-400/70 transition-all'>
           <span className='flex items-center shrink-0 bg-emerald-500/20 px-3.5 text-xs sm:text-sm font-medium text-emerald-100 border-r border-emerald-500/30'>github.com</span>
           <span className='flex items-center shrink-0 pl-3.5 text-sm font-mono text-emerald-300 select-none'>/</span>
           <input
@@ -136,16 +135,6 @@ export function GitHubScanForm({
             className='min-w-0 flex-1 bg-transparent pr-3.5 py-3.5 text-xs sm:text-sm text-white placeholder:text-emerald-100/40 focus:outline-none font-mono lg:py-4'
             aria-label={t(mode === 'single' ? 'input.single_placeholder' : 'input.multiple_placeholder')}
           />
-        </div>
-
-        <button
-          type='submit'
-          disabled={isLoading || isDiscovering || !input.trim() || (mode === 'multiple' && repositories.length > 0 && selected.length === 0)}
-          className='flex w-full shrink-0 items-center justify-center gap-2 bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-40 lg:py-3.5 cursor-pointer whitespace-nowrap'
-        >
-          {isLoading || isDiscovering ? <Loader2 className='w-4 h-4 animate-spin' /> : mode === 'multiple' && repositories.length === 0 ? <Search className='w-4 h-4' /> : <ArrowRight className='w-4 h-4' />}
-          <span>{isLoading ? t('input.scanning') : isDiscovering ? t('input.finding_repos') : mode === 'multiple' && repositories.length === 0 ? t('input.find_repos') : t('input.scan_button')}</span>
-        </button>
       </div>
 
       {mode === 'multiple' && repositories.length > 0 && (
@@ -176,6 +165,15 @@ export function GitHubScanForm({
       )}
 
       {error && <p className='text-xs text-red-300' role="alert">{error}</p>}
+
+      <button
+        type='submit'
+        disabled={isLoading || isDiscovering || !input.trim() || (mode === 'multiple' && repositories.length > 0 && selected.length === 0)}
+        className='mt-auto flex w-full shrink-0 items-center justify-center gap-2 bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-40 lg:py-3.5 cursor-pointer whitespace-nowrap'
+      >
+        {isLoading || isDiscovering ? <Loader2 className='w-4 h-4 animate-spin' /> : mode === 'multiple' && repositories.length === 0 ? <Search className='w-4 h-4' /> : <ArrowRight className='w-4 h-4' />}
+        <span>{isLoading ? t('input.scanning') : isDiscovering ? t('input.finding_repos') : mode === 'multiple' && repositories.length === 0 ? t('input.find_repos') : t('input.scan_button')}</span>
+      </button>
     </form>
   );
 }

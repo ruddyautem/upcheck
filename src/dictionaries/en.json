@@ -118,7 +118,7 @@
     "packages": "packages",
     "updates": "updates",
     "skipped": "repositories skipped",
-    "ai_prompt_all": "AI Prompt for all repositories",
+    "ai_prompt_all": "Create an AI prompt for all repositories",
     "prompt_all_hint": "Choose an update plan to create one repository-by-repository prompt."
   },
   "welcome": {

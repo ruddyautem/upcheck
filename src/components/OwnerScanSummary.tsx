@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, CircleAlert, FolderGit2, Sparkles } from 'lucide-react';
+import { Bot, CheckCircle2, CircleAlert, FolderGit2 } from 'lucide-react';
 import { OwnerAnalysisResult } from '@/types';
 import { useAppSettings } from '@/lib/settingsContext';
 
@@ -38,7 +38,7 @@ export function OwnerScanSummary({
           </span>
           {analysis.results.length > 1 && (
             <button type="button" onClick={onOpenAiPrompt} className="inline-flex items-center gap-1.5 border border-violet-400/50 bg-violet-500/15 px-2.5 py-1 text-[11px] font-semibold text-violet-200 hover:bg-violet-500/25">
-              <Sparkles className="h-3.5 w-3.5" />
+              <Bot className="h-3.5 w-3.5" />
               {t('owner_scan.ai_prompt_all')}
             </button>
           )}

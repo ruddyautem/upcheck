@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Copy, Flame, Sparkles, X } from 'lucide-react';
+import { Bot, Check, Copy, Flame, X } from 'lucide-react';
 import { PackageManager, RepoAnalysisResult } from '@/types';
 import { buildMultiRepoAiUpdatePrompt, getUpdatePresetPackages, UpdatePreset } from '@/lib/updateCommands';
 import { useAppSettings } from '@/lib/settingsContext';
@@ -34,7 +34,7 @@ export function MultiRepoPromptModal({ repositories, packageManager, onChangePac
       <section className="flex max-h-[min(760px,calc(100vh-2rem))] w-full max-w-3xl flex-col border border-slate-700 bg-slate-900 shadow-2xl shadow-black/50">
         <header className="flex items-start justify-between gap-4 border-b border-slate-800 p-5">
           <div>
-            <h2 id="multi-repo-prompt-title" className="flex items-center gap-2 text-base font-bold text-white"><Sparkles className="h-4 w-4 text-violet-300" />{t('owner_scan.ai_prompt_all')}</h2>
+            <h2 id="multi-repo-prompt-title" className="flex items-center gap-2 text-base font-bold text-white"><Bot className="h-4 w-4 text-violet-300" />{t('owner_scan.ai_prompt_all')}</h2>
             <p className="mt-1 text-xs leading-relaxed text-slate-400">{t('owner_scan.prompt_all_hint')}</p>
           </div>
           <button type="button" onClick={onClose} className="text-slate-400 hover:text-white" aria-label="Close"><X className="h-5 w-5" /></button>

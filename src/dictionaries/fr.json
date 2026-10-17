@@ -118,7 +118,7 @@
     "packages": "paquets",
     "updates": "mises à jour",
     "skipped": "dépôts ignorés",
-    "ai_prompt_all": "Prompt IA pour tous les dépôts",
+    "ai_prompt_all": "Créer un prompt IA pour tous les dépôts",
     "prompt_all_hint": "Choisissez un plan de mise à jour pour créer un prompt dépôt par dépôt."
   },
   "welcome": {
