@@ -322,9 +322,9 @@ export default function Home() {
       />
 
       {/* Main Container */}
-      <main className={`flex-1 min-h-0 max-w-[1480px] w-full mx-auto px-4 sm:px-7 lg:px-10 ${result && !isScanOpen ? 'py-4 lg:overflow-hidden' : !result && !error ? 'py-8 lg:flex lg:flex-col lg:overflow-hidden lg:py-4' : 'py-8 lg:py-12'} space-y-8 lg:space-y-10`}>
+      <main className={`flex-1 min-h-0 max-w-[1480px] w-full mx-auto px-4 sm:px-7 lg:px-10 ${result && !isScanOpen ? 'py-4 lg:overflow-hidden' : !result && !error ? 'flex flex-col py-8 lg:overflow-hidden lg:py-4' : 'py-8 lg:py-12'} space-y-8 lg:space-y-10`}>
         {(!result || isScanOpen) && (
-          <section className={`w-full transition-all ${result ? 'p-4 sm:p-6 rounded-2xl bg-slate-900/60 border border-slate-800' : 'lg:min-h-0 lg:flex-1'}`}>
+          <section className={`w-full transition-all ${result ? 'p-4 sm:p-6 rounded-2xl bg-slate-900/60 border border-slate-800' : 'flex flex-1 flex-col lg:min-h-0'}`}>
             <UpcheckScanner
               onAnalyzeRepo={(repoUrl) => handleAnalyzeRepo(repoUrl)}
               onAnalyzeRepos={(repoUrls) => handleAnalyzeRepo(repoUrls)}
@@ -449,7 +449,7 @@ export default function Home() {
       </main>
 
       {!result && (
-        <footer className="mt-12 shrink-0 border-t border-slate-800/60 px-4 py-6 text-center text-xs text-slate-400 lg:mt-0 lg:py-3">
+        <footer className="mt-0 shrink-0 border-t border-slate-800/60 px-4 py-6 text-center text-xs text-slate-400 lg:py-3">
           <p>© {new Date().getFullYear()} upcheck.autem.dev — {t('footer.rights')}</p>
           <nav className="mt-2 flex justify-center gap-4" aria-label="Legal">
             <a href="/privacy" className="hover:text-emerald-300">Privacy</a>

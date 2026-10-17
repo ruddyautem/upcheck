@@ -124,7 +124,7 @@ export function UpcheckScanner({
 
   return (
     <div
-      className={`w-full max-w-6xl mx-auto flex flex-col items-center text-center ${compact ? "py-3" : "py-8 sm:py-12 lg:h-full lg:min-h-0 lg:py-0"}`}
+      className={`w-full max-w-6xl mx-auto flex flex-col items-center text-center ${compact ? "py-3" : "h-full flex-1 py-8 sm:py-12 lg:min-h-0 lg:py-0"}`}
     >
       {/* 1. Centered Upcheck Brand Header */}
       {!compact && (
@@ -234,7 +234,7 @@ export function UpcheckScanner({
                   <div className='text-xs font-semibold leading-relaxed text-slate-200'>
                     {t("input.upload_file")}
                   </div>
-                  <div className='mt-1 text-[11px] leading-relaxed text-slate-400'>
+                  <div className='mt-1 hidden text-[11px] leading-relaxed text-slate-400 sm:block'>
                     {t("input.drag_drop_hint")}
                   </div>
                 </div>
@@ -297,7 +297,7 @@ export function UpcheckScanner({
       </div>
 
       {/* The token shortcut stays visible; data-handling details live in the info dialog. */}
-      <div className='home-scanner-token mt-6 w-full max-w-6xl shrink-0 lg:mt-4'>
+      <div className='home-scanner-token mt-auto w-full max-w-6xl shrink-0 pt-6 lg:mt-4 lg:pt-0'>
         <button
           onClick={onOpenTokenModal}
           className='w-full border border-slate-800 bg-slate-900/60 p-3 text-xs text-slate-400 transition-colors hover:border-emerald-500/40 hover:bg-slate-900 hover:text-slate-200 flex items-center justify-center gap-2 cursor-pointer'

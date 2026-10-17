@@ -87,7 +87,7 @@ export function Header({
 
           <button
             onClick={onOpenInfoModal}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 p-0 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white cursor-pointer sm:w-auto sm:px-3"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 p-0 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white cursor-pointer sm:w-auto sm:gap-1.5 sm:px-3"
             title="How Upcheck detects vulnerabilities & announcements"
           >
             <Info className="w-3.5 h-3.5 text-slate-400" />
@@ -96,7 +96,7 @@ export function Header({
 
           <button
             onClick={onOpenTokenModal}
-            className={`flex h-10 w-10 items-center justify-center rounded-xl border p-0 text-xs font-medium transition-colors cursor-pointer sm:w-auto sm:px-3 ${
+            className={`flex h-10 w-10 items-center justify-center rounded-xl border p-0 text-xs font-medium transition-colors cursor-pointer sm:w-auto sm:gap-1.5 sm:px-3 ${
               hasCustomToken
                 ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20'
                 : 'bg-slate-900 text-slate-300 hover:text-white border-slate-800 hover:bg-slate-800'
