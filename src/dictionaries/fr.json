@@ -114,6 +114,7 @@
   "owner_scan": {
     "title": "Dépôts analysés pour",
     "scanned": "dépôts analysés",
+    "all": "tout",
     "choose_repo": "Choisissez un dépôt pour gérer ses mises à jour",
     "packages": "paquets",
     "updates": "mises à jour",

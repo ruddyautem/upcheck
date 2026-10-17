@@ -301,6 +301,11 @@ export default function Home() {
     setTableFilter('needs_attention');
   };
 
+  const handleRescanAll = () => {
+    if (!ownerAnalysis) return;
+    void handleAnalyzeRepo(ownerAnalysis.results.map((repository) => repository.repoInfo.fullName), true);
+  };
+
   const handleSelectUpdatePreset = (preset: UpdatePreset) => {
     const filters: Record<UpdatePreset, TableFilterTab> = {
       security: 'security',
@@ -348,6 +353,17 @@ export default function Home() {
               <p className="leading-relaxed">{error}</p>
             </div>
           </div>
+        )}
+
+        {ownerAnalysis && result && (
+          <OwnerScanSummary
+            analysis={ownerAnalysis}
+            activeRepository={result.repoInfo.fullName}
+            isLoading={isLoading}
+            onSelectRepository={handleSelectOwnerRepository}
+            onRescanAll={handleRescanAll}
+            onOpenAiPrompt={() => setShowMultiRepoPrompt(true)}
+          />
         )}
 
         {/* Scanned report */}
@@ -403,15 +419,6 @@ export default function Home() {
                 <div className="mt-1 flex items-end justify-between gap-2"><strong className="text-2xl text-emerald-400">{result.summaryCounts.up_to_date}</strong><Check className="mb-1 h-4 w-4 text-emerald-400" aria-hidden="true" /></div>
               </button>
             </section>
-
-            {ownerAnalysis && (
-              <OwnerScanSummary
-                analysis={ownerAnalysis}
-                activeRepository={result.repoInfo.fullName}
-                onSelectRepository={handleSelectOwnerRepository}
-                onOpenAiPrompt={() => setShowMultiRepoPrompt(true)}
-              />
-            )}
 
             <div className="min-h-0 flex-1 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_480px] lg:grid-rows-[minmax(0,1fr)] gap-4">
               <section className="h-full min-h-0 flex flex-col" aria-label="Package breakdown">

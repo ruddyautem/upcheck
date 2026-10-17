@@ -1,20 +1,24 @@
 'use client';
 
-import { Bot, CheckCircle2, CircleAlert, FolderGit2 } from 'lucide-react';
+import { Bot, CheckCircle2, CircleAlert, FolderGit2, RefreshCw } from 'lucide-react';
 import { OwnerAnalysisResult } from '@/types';
 import { useAppSettings } from '@/lib/settingsContext';
 
 interface OwnerScanSummaryProps {
   analysis: OwnerAnalysisResult;
   activeRepository: string;
+  isLoading: boolean;
   onSelectRepository: (fullName: string) => void;
+  onRescanAll: () => void;
   onOpenAiPrompt: () => void;
 }
 
 export function OwnerScanSummary({
   analysis,
   activeRepository,
+  isLoading,
   onSelectRepository,
+  onRescanAll,
   onOpenAiPrompt,
 }: OwnerScanSummaryProps) {
   const { t } = useAppSettings();
@@ -32,6 +36,10 @@ export function OwnerScanSummary({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 self-start">
+          <button type="button" onClick={onRescanAll} disabled={isLoading} className="inline-flex cursor-pointer items-center gap-1.5 border border-slate-700 bg-slate-950/50 px-2.5 py-1 text-[11px] font-semibold text-slate-200 hover:border-emerald-500/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-50">
+            <RefreshCw className={`h-3.5 w-3.5 text-emerald-400 ${isLoading ? 'animate-spin' : ''}`} />
+            {t('overview.rescan')} {t('owner_scan.all')}
+          </button>
           <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
             <CheckCircle2 className="w-3.5 h-3.5" />
             {t('owner_scan.choose_repo')}

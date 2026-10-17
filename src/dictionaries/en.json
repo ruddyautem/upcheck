@@ -114,6 +114,7 @@
   "owner_scan": {
     "title": "Repositories scanned for",
     "scanned": "repositories scanned",
+    "all": "all",
     "choose_repo": "Choose a repository to manage its updates",
     "packages": "packages",
     "updates": "updates",
