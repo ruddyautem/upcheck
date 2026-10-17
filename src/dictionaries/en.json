@@ -194,7 +194,7 @@
     "zero_cves": "0 Security Vulnerabilities",
     "deprecated": "Deprecated",
     "breaking_updates": "Major versions",
-    "grade": "Grade",
+    "grade": "Score",
     "github_link": "Open on GitHub",
     "rescan": "Rescan"
   },

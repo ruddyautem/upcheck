@@ -194,7 +194,7 @@
     "zero_cves": "0 vulnérabilité détectée",
     "deprecated": "Déprécié",
     "breaking_updates": "Versions majeures",
-    "grade": "Note",
+    "grade": "Score",
     "github_link": "Ouvrir sur GitHub",
     "rescan": "Rescanner"
   },
