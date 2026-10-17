@@ -15,6 +15,41 @@ interface MultiRepoPromptModalProps {
 
 const presets: UpdatePreset[] = ['security', 'major', 'safe', 'all'];
 
+function PromptPreview({ prompt }: { prompt: string }) {
+  const lines = prompt.split('\n');
+  let commandFollows = false;
+
+  return (
+    <div
+      aria-label="AI update prompt preview"
+      className="h-72 w-full overflow-y-auto border border-slate-800 bg-slate-950 p-3 font-mono text-[11px] leading-relaxed text-slate-300"
+    >
+      {lines.map((line, index) => {
+        const key = `${index}-${line}`;
+        if (line === '---') {
+          return <div key={key} className="my-3 border-t border-violet-500/35" />;
+        }
+        if (line.startsWith('## ')) {
+          commandFollows = false;
+          return <div key={key} className="mt-3 border-l-2 border-violet-400 bg-violet-500/10 px-3 py-1.5 text-xs font-bold text-violet-100 first:mt-0">{line.slice(3)}</div>;
+        }
+        if (line === 'Commande prévue :' || line === 'Intended command:') {
+          commandFollows = true;
+          return <div key={key} className="mt-3 text-[10px] font-bold uppercase tracking-wider text-emerald-400">{line}</div>;
+        }
+        if (commandFollows && line) {
+          commandFollows = false;
+          return <code key={key} className="mt-1 block whitespace-pre-wrap break-words border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-2 text-emerald-100">{line}</code>;
+        }
+        if (line === 'Paquets à mettre à jour :' || line === 'Packages to update:') {
+          return <div key={key} className="mt-3 text-[10px] font-bold uppercase tracking-wider text-sky-300">{line}</div>;
+        }
+        return <div key={key} className={line.startsWith('- ') ? 'whitespace-pre-wrap text-slate-200' : 'whitespace-pre-wrap'}>{line || '\u00a0'}</div>;
+      })}
+    </div>
+  );
+}
+
 export function MultiRepoPromptModal({ repositories, packageManager, onChangePackageManager, onClose }: MultiRepoPromptModalProps) {
   const { language, t } = useAppSettings();
   const [preset, setPreset] = useState<UpdatePreset>('all');
@@ -55,7 +90,7 @@ export function MultiRepoPromptModal({ repositories, packageManager, onChangePac
             <span className="flex items-center gap-2 font-semibold text-slate-100"><Flame className="h-4 w-4 text-amber-400" />{t('cart.force_update')}</span>
             <input type="checkbox" checked={force} onChange={(event) => { setForce(event.target.checked); setCopied(false); }} className="check-control check-control--major" />
           </label>
-          <textarea readOnly value={prompt || t('scripts.none')} aria-label={t('owner_scan.ai_prompt_all')} className="h-72 w-full resize-none border border-slate-800 bg-slate-950 p-3 font-mono text-[11px] leading-relaxed text-slate-200 outline-none" />
+          <PromptPreview prompt={prompt || t('scripts.none')} />
         </div>
         <footer className="flex justify-end border-t border-slate-800 p-4">
           <button type="button" disabled={!prompt} onClick={copyPrompt} className="inline-flex items-center gap-2 border border-emerald-500/40 bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-40">

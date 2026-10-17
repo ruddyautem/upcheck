@@ -37,7 +37,7 @@ export function OwnerScanSummary({
             {t('owner_scan.choose_repo')}
           </span>
           {analysis.results.length > 1 && (
-            <button type="button" onClick={onOpenAiPrompt} className="inline-flex items-center gap-1.5 border border-violet-400/50 bg-violet-500/15 px-2.5 py-1 text-[11px] font-semibold text-violet-200 hover:bg-violet-500/25">
+            <button type="button" onClick={onOpenAiPrompt} className="inline-flex cursor-pointer items-center gap-1.5 border border-violet-400/50 bg-violet-500/15 px-2.5 py-1 text-[11px] font-semibold text-violet-200 hover:bg-violet-500/25">
               <Bot className="h-3.5 w-3.5" />
               {t('owner_scan.ai_prompt_all')}
             </button>
