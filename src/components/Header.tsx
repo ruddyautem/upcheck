@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Activity, Key, Info, Terminal } from 'lucide-react';
+import { Key, Info } from 'lucide-react';
 import { GithubIcon } from '@/components/GithubIcon';
 import { useAppSettings } from '@/lib/settingsContext';
 
@@ -9,16 +9,30 @@ interface HeaderProps {
   onOpenTokenModal: () => void;
   hasCustomToken: boolean;
   onOpenInfoModal: () => void;
-  selectedCount: number;
-  onOpenRightPanel: () => void;
+}
+
+function FlagIcon({ country }: { country: 'en' | 'fr' }) {
+  return country === 'fr' ? (
+    <svg aria-hidden="true" viewBox="0 0 32 22" className="h-[18px] w-6 overflow-hidden rounded-[2px] shadow-sm shadow-black/40">
+      <path fill="#fff" d="M0 0h32v22H0z" />
+      <path fill="#002395" d="M0 0h10.67v22H0z" />
+      <path fill="#ED2939" d="M21.33 0H32v22H21.33z" />
+    </svg>
+  ) : (
+    <svg aria-hidden="true" viewBox="0 0 32 22" className="h-[18px] w-6 overflow-hidden rounded-[2px] shadow-sm shadow-black/40">
+      <path fill="#012169" d="M0 0h32v22H0z" />
+      <path stroke="#fff" strokeWidth="6" d="M0 0l32 22M32 0L0 22" />
+      <path stroke="#C8102E" strokeWidth="2" d="M0 0l32 22M32 0L0 22" />
+      <path stroke="#fff" strokeWidth="8" d="M16 0v22M0 11h32" />
+      <path stroke="#C8102E" strokeWidth="4" d="M16 0v22M0 11h32" />
+    </svg>
+  );
 }
 
 export function Header({
   onOpenTokenModal,
   hasCustomToken,
   onOpenInfoModal,
-  selectedCount,
-  onOpenRightPanel,
 }: HeaderProps) {
   const { language, setLanguage, t } = useAppSettings();
 
@@ -26,65 +40,50 @@ export function Header({
     <header className="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-xl sticky top-0 z-30 transition-colors">
       <div className="max-w-[1480px] mx-auto px-4 sm:px-7 lg:px-10 min-h-16 py-3 sm:py-0 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3">
         {/* Logo and Name */}
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-teal-600 to-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-            <Activity className="w-4 h-4 text-white" />
-          </div>
+        <a href="/" aria-label="Upcheck home" className="flex items-center gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
+          <img src="/icon.svg" alt="" aria-hidden="true" className="w-8 h-8 shrink-0" />
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-extrabold tracking-tight text-white font-sans">
-                upcheck<span className="text-blue-400">.</span>
-              </span>
-              <span className="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/20">
-                v1.2
-              </span>
-            </div>
+            <span className="text-xl font-extrabold tracking-tight text-white font-sans">
+              upcheck<span className="text-blue-400">.</span>
+            </span>
             <p className="text-xs text-slate-400 hidden sm:block">
               {t('header.subtitle')}
             </p>
           </div>
-        </div>
+        </a>
 
         {/* Action Buttons */}
         <div className="flex w-full sm:w-auto items-center justify-between sm:justify-start gap-2 sm:gap-2.5">
-          {/* Language Switcher Buttons (French flag / English flag) */}
-          <div className="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-0.5 text-xs">
+          <div className="flex items-center gap-1 border border-slate-800 bg-slate-900 p-1">
             <button
+              type="button"
               onClick={() => setLanguage('en')}
-              className={`flex items-center gap-1 px-2 py-1 rounded-lg transition-all cursor-pointer ${
+              aria-label="English"
+              aria-pressed={language === 'en'}
+              className={`flex h-8 w-10 items-center justify-center border transition-colors cursor-pointer ${
                 language === 'en'
-                  ? 'bg-blue-600 text-white font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'border-emerald-400/70 bg-emerald-500/20'
+                  : 'border-transparent hover:border-slate-600 hover:bg-slate-800'
               }`}
               title="English"
             >
-              <span className="text-sm leading-none" role="img" aria-label="English">🇬🇧</span>
-              <span className="text-[11px] font-medium hidden sm:inline">EN</span>
+              <FlagIcon country="en" />
             </button>
             <button
+              type="button"
               onClick={() => setLanguage('fr')}
-              className={`flex items-center gap-1 px-2 py-1 rounded-lg transition-all cursor-pointer ${
+              aria-label="Français"
+              aria-pressed={language === 'fr'}
+              className={`flex h-8 w-10 items-center justify-center border transition-colors cursor-pointer ${
                 language === 'fr'
-                  ? 'bg-blue-600 text-white font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'border-emerald-400/70 bg-emerald-500/20'
+                  : 'border-transparent hover:border-slate-600 hover:bg-slate-800'
               }`}
               title="Français"
             >
-              <span className="text-sm leading-none" role="img" aria-label="Français">🇫🇷</span>
-              <span className="text-[11px] font-medium hidden sm:inline">FR</span>
+              <FlagIcon country="fr" />
             </button>
           </div>
-
-          {/* Cart toggle pill if packages are selected */}
-          {selectedCount > 0 && (
-            <button
-              onClick={onOpenRightPanel}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/20 transition-all cursor-pointer animate-in fade-in"
-            >
-              <Terminal className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t('header.queue')} ({selectedCount})</span>
-            </button>
-          )}
 
           <button
             onClick={onOpenInfoModal}

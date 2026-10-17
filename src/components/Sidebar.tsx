@@ -11,7 +11,6 @@ import {
   ExternalLink, 
   Sparkles, 
   ArrowRight,
-  Activity,
   X
 } from 'lucide-react';
 
@@ -79,9 +78,7 @@ export function Sidebar({
       {/* Brand Logo */}
       <div className="flex items-center justify-between pb-6 pt-2 px-2 border-b border-slate-800/60">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/25">
-            <Activity className="w-4 h-4 text-white" />
-          </div>
+          <img src="/icon.svg" alt="" aria-hidden="true" className="w-8 h-8 shrink-0" />
           <div className="flex items-baseline">
             <span className="text-xl font-extrabold tracking-tight text-white font-sans">
               upcheck<span className="text-purple-400">.</span>

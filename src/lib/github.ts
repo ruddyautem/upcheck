@@ -7,6 +7,96 @@ export interface ParsedRepoTarget {
   branch?: string;
 }
 
+interface GitHubRepository {
+  name: string;
+  full_name: string;
+  default_branch?: string;
+}
+
+function createGitHubHeaders(customToken?: string): Record<string, string> {
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+    'User-Agent': 'Upcheck-Dependency-Scanner/1.0',
+  };
+
+  if (customToken) {
+    headers.Authorization = `Bearer ${customToken}`;
+  }
+
+  return headers;
+}
+
+// A bare GitHub handle is intentionally distinct from the owner/repo shorthand.
+export function parseGitHubOwner(input: string): string | null {
+  const trimmed = input.trim();
+  return /^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$/.test(trimmed)
+    ? trimmed
+    : null;
+}
+
+// Fetch every public repository owned by a GitHub user or organization.
+// Authenticated requests also benefit from the caller's higher GitHub rate limit.
+export async function fetchGitHubOwnerRepos(
+  owner: string,
+  customToken?: string
+): Promise<ParsedRepoTarget[]> {
+  const headers = createGitHubHeaders(customToken);
+  const repositories: GitHubRepository[] = [];
+  let endpoint = `https://api.github.com/users/${encodeURIComponent(owner)}/repos?type=owner`;
+  let requestHeaders = headers;
+
+  // When the supplied token belongs to the requested user, use the authenticated
+  // endpoint so private repositories are included as well.
+  if (customToken) {
+    const viewerResponse = await fetch('https://api.github.com/user', { headers });
+    if (viewerResponse.ok) {
+      const viewer = (await viewerResponse.json()) as { login?: string };
+      if (viewer.login?.toLowerCase() === owner.toLowerCase()) {
+        endpoint = 'https://api.github.com/user/repos?affiliation=owner&visibility=all';
+      }
+    } else {
+      // An expired or malformed saved token must not prevent scans of public
+      // repositories. Fall back to GitHub's unauthenticated public endpoint.
+      requestHeaders = createGitHubHeaders();
+    }
+  }
+
+  for (let page = 1; ; page++) {
+    const response = await fetch(
+      `${endpoint}&sort=updated&direction=desc&per_page=100&page=${page}`,
+      { headers: requestHeaders }
+    );
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error(`GitHub user or organization "${owner}" was not found.`);
+      }
+      if (response.status === 401 || response.status === 403 || response.status === 429) {
+        const remaining = response.headers.get('x-ratelimit-remaining');
+        const reset = response.headers.get('x-ratelimit-reset');
+        if (remaining === '0') {
+          const resetAt = reset ? new Date(Number(reset) * 1000).toLocaleTimeString() : undefined;
+          throw new Error(`GitHub's API rate limit has been reached${resetAt ? `; it resets around ${resetAt}.` : '.'} Add a valid token to continue.`);
+        }
+        const responseBody = (await response.json().catch(() => null)) as { message?: string } | null;
+        throw new Error(responseBody?.message || 'GitHub rejected the repository-list request. Check that your token has repository Metadata read access.');
+      }
+      throw new Error(`GitHub could not list repositories for "${owner}" (${response.status}).`);
+    }
+
+    const pageRepositories = (await response.json()) as GitHubRepository[];
+    repositories.push(...pageRepositories);
+    if (pageRepositories.length < 100) break;
+  }
+
+  return repositories.map((repository) => ({
+    owner,
+    repo: repository.name,
+    branch: repository.default_branch,
+  }));
+}
+
 // Parses arbitrary GitHub URL or "owner/repo" string
 export function parseGitHubUrl(input: string): ParsedRepoTarget | null {
   if (!input) return null;
@@ -59,14 +149,7 @@ export async function fetchGitHubRepoData(
   packageJson: RawPackageJson;
   repoMeta: RepoMeta;
 }> {
-  const headers: Record<string, string> = {
-    Accept: 'application/vnd.github.v3+json',
-    'User-Agent': 'Upcheck-Dependency-Scanner/1.0',
-  };
-
-  if (customToken) {
-    headers.Authorization = `Bearer ${customToken}`;
-  }
+  const headers = createGitHubHeaders(customToken);
 
   // 1. Fetch Repository Metadata
   let repoMeta: RepoMeta = {

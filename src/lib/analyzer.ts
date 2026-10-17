@@ -498,6 +498,10 @@ export async function analyzeDependencies(
 
     const config = CATEGORY_CONFIGS[category];
     const breakingWarning = getBreakingWarning(entry.name, currentVersion, latestVersion, updateDiff.majorDiff);
+    // TypeScript 7 is intentionally visible but held out of generated plans for now.
+    const isUpdateDeferred = entry.name === 'typescript'
+      && category === 'major'
+      && semver.major(latestVersion) >= 7;
 
     packages.push({
       name: entry.name,
@@ -518,6 +522,7 @@ export async function analyzeDependencies(
       advisories,
       hasBreakingChanges: updateDiff.majorDiff > 0,
       breakingWarning,
+      isUpdateDeferred,
       updateDiff,
     });
   }

@@ -37,6 +37,9 @@
     "banner_token": "Besoin de scanner des dépôts privés ou de débloquer 5 000 requêtes/h ?",
     "banner_token_link": "Gérer votre jeton GitHub."
   },
+  "footer": {
+    "rights": "Tous droits réservés."
+  },
   "report": {
     "kicker": "Rapport d’analyse",
     "title": "Votre rapport de dépendances",
@@ -74,16 +77,32 @@
     "major": "Majeure",
     "minor": "Mineure",
     "patch": "Correctif",
+    "deferred": "Mise à jour reportée",
     "up_to_date": "À jour"
   },
   "input": {
     "github_repo": "Dépôt GitHub",
+    "single_repo": "Scanner un dépôt",
+    "single_repo_hint": "Vérifiez un dépôt owner/repository précis.",
+    "multiple_repos": "Scanner plusieurs dépôts",
+    "multiple_repos_hint": "Choisissez les projets d’un compte GitHub.",
     "paste_json": "package.json",
     "select_repo_placeholder": "Choisir un dépôt ou exemple...",
-    "recent_group": "Dépôts récents",
-    "placeholder": "URL GitHub ou nom de dépôt (owner/repo)...",
-    "scan_button": "Analyser le dépôt",
-    "scanning": "Analyse du dépôt et des paquets...",
+    "recent_group": "Scans récents",
+    "multi_scan": "Scan multiple",
+    "repositories": "dépôts",
+    "recent_hint": "Ouvrir le dernier rapport",
+    "placeholder": "URL GitHub, owner/repo ou nom d’utilisateur...",
+    "single_placeholder": "owner/repository",
+    "single_repo_error": "Saisissez le propriétaire et le dépôt (par exemple : vercel/next.js).",
+    "multiple_placeholder": "owner",
+    "scan_button": "Analyser GitHub",
+    "scanning": "Analyse des dépôts et des paquets...",
+    "finding_repos": "Recherche des dépôts...",
+    "find_repos": "Voir les dépôts",
+    "select_repos": "Choisissez les dépôts à analyser",
+    "selected": "sélectionnés",
+    "no_token_limit": "limite de 10 dépôts sans jeton",
     "paste_placeholder": "Collez le contenu de votre package.json ici (dependencies, devDependencies)...",
     "analyze_custom": "Analyser les dépendances",
     "upload_file": "Importer un fichier package.json",
@@ -91,6 +110,16 @@
     "browse_files": "Parcourir",
     "err_no_deps": "Le JSON ne contient pas de clés \"dependencies\" ou \"devDependencies\".",
     "err_invalid_json": "Format JSON invalide. Veuillez vérifier la syntaxe de votre package.json."
+  },
+  "owner_scan": {
+    "title": "Dépôts analysés pour",
+    "scanned": "dépôts analysés",
+    "choose_repo": "Choisissez un dépôt pour gérer ses mises à jour",
+    "packages": "paquets",
+    "updates": "mises à jour",
+    "skipped": "dépôts ignorés",
+    "ai_prompt_all": "Prompt IA pour tous les dépôts",
+    "prompt_all_hint": "Choisissez un plan de mise à jour pour créer un prompt dépôt par dépôt."
   },
   "welcome": {
     "card1_title": "Sécurité Google OSV",
@@ -116,6 +145,7 @@
     "title": "Inventaire des paquets",
     "subtitle": "Cliquez sur une ligne pour voir le détail des alertes et compatibilités.",
     "filter_label": "Filtrer les paquets :",
+    "selection_hint": "Sélectionnez un ou plusieurs paquets pour préparer leur commande de mise à jour.",
     "all": "Tous les paquets",
     "needs_attention": "À traiter",
     "security": "Alertes de sécurité",
@@ -142,6 +172,7 @@
     "showing": "Affichage de",
     "to": "à",
     "of": "sur",
+    "package": "paquet",
     "packages": "paquets",
     "previous": "Précédent",
     "next": "Suivant",
@@ -153,6 +184,7 @@
     "badge": "Aperçu du dépôt",
     "title": "Score de santé et vue d’ensemble",
     "update_script": "Script de mise à jour",
+    "package_json": "package.json",
     "export": "Exporter",
     "manifest": "1 manifeste",
     "scanned": "Analysé le",
@@ -163,7 +195,8 @@
     "deprecated": "Déprécié",
     "breaking_updates": "Versions majeures",
     "grade": "Note",
-    "github_link": "Ouvrir sur GitHub"
+    "github_link": "Ouvrir sur GitHub",
+    "rescan": "Rescanner"
   },
   "inspector": {
     "title": "Inspecteur de paquet",
@@ -196,10 +229,25 @@
     "clear": "Vider",
     "remove_pkg": "Retirer de la file"
   },
+  "scripts": {
+    "title": "Scripts de mise à jour",
+    "select_plan": "Choisissez le type de mise à jour à préparer.",
+    "hint": "Choisissez un gestionnaire, puis copiez le scénario adapté à votre dépôt.",
+    "security": "Corriger les risques de sécurité",
+    "safe": "Mises à jour mineures et correctifs",
+    "major": "Versions majeures uniquement",
+    "all": "Tout mettre à jour",
+    "none": "Aucun paquet concerné.",
+    "ai_prompt": "Prompt IA",
+    "show_command": "Voir la commande",
+    "manual_install": "Installation manuelle",
+    "copy_prompt": "Copier le prompt"
+  },
   "error": {
     "analysis_title": "Erreur d’analyse"
   },
   "info": {
+    "privacy_title": "Données et confidentialité",
     "title": "Fonctionnement d’Upcheck",
     "subtitle": "Sources de données, détection des vulnérabilités et catégorisation",
     "sources_title": "Comment nous récupérons les versions et annonces",
@@ -229,7 +277,7 @@
     "title": "Jeton d’API GitHub",
     "subtitle": "Passe la limite de requêtes à 5 000 req/h",
     "label": "Jeton d’accès personnel (classic ou fine-grained)",
-    "local_storage_note": "Le jeton est stocké uniquement dans votre navigateur (localStorage).",
+    "local_storage_note": "Le jeton est conservé uniquement en mémoire pendant cette session et est effacé lorsque vous rechargez ou fermez la page.",
     "rate_limit_desc": "Les requêtes GitHub non authentifiées sont limitées à 60/h. Ajouter un jeton avec accès en lecture seule / public_repo débloque 5 000 requêtes par heure.",
     "generate_link": "Générer un jeton sur GitHub",
     "remove_btn": "Supprimer le jeton",

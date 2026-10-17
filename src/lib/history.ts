@@ -7,6 +7,10 @@ export interface HistoryItem {
   criticalCount: number;
   timestamp: string;
   isCustomJson?: boolean;
+  isMultiScan?: boolean;
+  analysisKey?: string;
+  repositoryTargets?: string[];
+  repositoryCount?: number;
 }
 
 const STORAGE_KEY = 'upcheck_recent_repos';

@@ -111,7 +111,7 @@ export function PackageResultsPanel({
       </div>
 
       {/* Scrollable Content (capped at table height, scrolls cleanly inside if tall) */}
-      <div className="package-inspector-scroll flex-1 min-h-0 overflow-y-auto space-y-4 pr-1 my-3">
+      <div className="package-inspector-scroll flex-1 min-h-0 overflow-y-scroll space-y-4 pr-1 my-3">
         {/* Version Comparison Row */}
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-0.5">

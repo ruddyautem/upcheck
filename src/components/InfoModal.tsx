@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, Sparkles, Database, HelpCircle } from 'lucide-react';
+import { X, Sparkles, Database, HelpCircle, ShieldCheck } from 'lucide-react';
 import { useAppSettings } from '@/lib/settingsContext';
 
 interface InfoModalProps {
@@ -54,6 +54,14 @@ export function InfoModal({ onClose }: InfoModalProps) {
                 <strong className="text-slate-200">{t('info.osv_title')}</strong>: {t('info.osv_desc')}
               </li>
             </ul>
+          </div>
+
+          <div className="border border-emerald-500/20 bg-emerald-950/20 p-4 space-y-2">
+            <div className="flex items-center gap-2 text-sm font-bold text-white">
+              <ShieldCheck className="h-4 w-4 text-emerald-400" />
+              <span>{t('info.privacy_title')}</span>
+            </div>
+            <p className="text-slate-300">{t('home.disclaimer_pre')}</p>
           </div>
 
           {/* Section 2: Color Coding Categories */}

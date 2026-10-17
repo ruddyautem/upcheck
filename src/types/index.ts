@@ -47,6 +47,8 @@ export interface PackageAnalysis {
   advisories: SecurityAdvisory[];
   hasBreakingChanges: boolean;
   breakingWarning?: string;
+  /** Temporarily excluded from generated update plans without hiding the available version. */
+  isUpdateDeferred?: boolean;
   updateDiff: SemverDiffInfo;
 }
 
@@ -96,5 +98,17 @@ export interface RepoAnalysisResult {
   };
   healthScore: HealthScore;
   packages: PackageAnalysis[];
+  analyzedAt: string;
+}
+
+export interface SkippedRepository {
+  fullName: string;
+  reason: string;
+}
+
+export interface OwnerAnalysisResult {
+  owner: string;
+  results: RepoAnalysisResult[];
+  skipped: SkippedRepository[];
   analyzedAt: string;
 }

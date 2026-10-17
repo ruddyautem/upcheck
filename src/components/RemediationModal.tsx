@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { RepoAnalysisResult } from '@/types';
 import { X, Copy, Check, Terminal, Download } from 'lucide-react';
 import { useAppSettings } from '@/lib/settingsContext';
+import { buildUpdateCommand, getUpdatePresetPackages } from '@/lib/updateCommands';
 
 interface RemediationModalProps {
   result: RepoAnalysisResult;
@@ -13,22 +14,18 @@ interface RemediationModalProps {
 export function RemediationModal({ result, onClose }: RemediationModalProps) {
   const { t } = useAppSettings();
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'scripts' | 'packageJson'>('scripts');
+  const [activeTab, setActiveTab] = useState<'scripts' | 'packageJson'>('packageJson');
 
   const { packages } = result;
 
   // 1. Critical/Security packages
-  const vulnerablePackages = packages.filter(
-    (p) => p.category === 'critical' || p.category === 'security'
-  );
+  const vulnerablePackages = getUpdatePresetPackages(packages, 'security');
 
   // 2. Safe packages (minor and patch)
-  const safePackages = packages.filter(
-    (p) => p.category === 'minor' || p.category === 'patch'
-  );
+  const safePackages = getUpdatePresetPackages(packages, 'safe');
 
   // 3. Outdated packages
-  const allOutdated = packages.filter((p) => p.category !== 'up_to_date');
+  const allOutdated = getUpdatePresetPackages(packages, 'all');
 
   const copyText = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
@@ -38,19 +35,15 @@ export function RemediationModal({ result, onClose }: RemediationModalProps) {
 
   // Build commands
   const bunVulnCmd = vulnerablePackages.length > 0
-    ? `bun add ${vulnerablePackages.map((p) => `${p.name}@latest`).join(' ')}`
+    ? buildUpdateCommand(vulnerablePackages, 'bun', false)
     : t('remediation.no_vulns');
 
   const bunSafeCmd = safePackages.length > 0
-    ? `bun add ${safePackages.map((p) => `${p.name}@^${p.latestVersion}`).join(' ')}`
+    ? buildUpdateCommand(safePackages, 'bun', false, 'compatible')
     : t('remediation.all_safe');
 
   const bunAllCmd = allOutdated.length > 0
-    ? `bun add ${allOutdated.filter(p => !p.isDevDependency).map((p) => `${p.name}@latest`).join(' ')}${
-        allOutdated.some(p => p.isDevDependency)
-          ? ` && bun add -d ${allOutdated.filter(p => p.isDevDependency).map((p) => `${p.name}@latest`).join(' ')}`
-          : ''
-      }`
+    ? buildUpdateCommand(allOutdated, 'bun', false)
     : t('remediation.all_up_to_date');
 
   // Build upgraded package.json

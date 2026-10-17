@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <title>Upcheck</title>
+  <rect width="128" height="128" fill="#00cfa0"/>
+  <path d="M27 17H82L103 38V111H27Z" fill="#052b32"/>
+  <path d="M82 17V38H103Z" fill="#168e80"/>
+  <path d="M43 52H66" stroke="#36e9bf" stroke-width="8" stroke-linecap="square"/>
+  <path d="M42 81L55 94L87 62" fill="none" stroke="#f5fffc" stroke-width="12" stroke-linecap="square" stroke-linejoin="miter"/>
+</svg>

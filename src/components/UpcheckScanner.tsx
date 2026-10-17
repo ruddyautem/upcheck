@@ -8,48 +8,47 @@ import {
   History,
   AlertCircle,
   Info,
-  Activity,
-  CheckCircle2,
+  Layers,
   Upload,
 } from "lucide-react";
 import { GithubIcon } from "@/components/GithubIcon";
+import { GitHubScanForm } from "@/components/GitHubScanForm";
 import { RawPackageJson } from "@/types";
 import { HistoryItem } from "@/lib/history";
 import { useAppSettings } from "@/lib/settingsContext";
 
 interface UpcheckScannerProps {
   onAnalyzeRepo: (repoUrl: string) => void;
+  onAnalyzeRepos: (repoUrls: string[]) => void;
   onAnalyzeCustomJson: (json: RawPackageJson, title: string) => void;
   isLoading: boolean;
+  githubToken?: string;
   history?: HistoryItem[];
   onSelectHistoryItem: (item: HistoryItem) => void;
   onOpenTokenModal: () => void;
-  onOpenInfoModal: () => void;
   compact?: boolean;
 }
 
 export function UpcheckScanner({
   onAnalyzeRepo,
+  onAnalyzeRepos,
   onAnalyzeCustomJson,
   isLoading,
+  githubToken,
   history = [],
   onSelectHistoryItem,
   onOpenTokenModal,
-  onOpenInfoModal,
   compact = false,
 }: UpcheckScannerProps) {
   const { t } = useAppSettings();
-  const [activeTab, setActiveTab] = useState<"url" | "paste">("url");
-  const [inputUrl, setInputUrl] = useState("");
   const [pasteContent, setPasteContent] = useState("");
   const [pasteError, setPasteError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  // Verified repositories from history
-  const verifiedRepos = history
+  const recentScans = history
     .filter(
       (item) =>
-        item.repoUrl &&
+        (item.repoUrl || item.isMultiScan) &&
         !item.isCustomJson &&
         !item.fullName.toLowerCase().includes("demo"),
     )
@@ -117,186 +116,88 @@ export function UpcheckScanner({
     if (file) handleFileUpload(file);
   };
 
-  const handleSubmitUrl = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputUrl.trim()) return;
-    onAnalyzeRepo(inputUrl.trim());
-  };
-
   const handlePasteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!pasteContent.trim()) return;
     processJsonString(pasteContent, "Custom package.json");
   };
 
-  const handleDropdownSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
-    if (!val) return;
-    const match = verifiedRepos.find((h) => h.repoUrl === val);
-    if (match) onSelectHistoryItem(match);
-    e.target.value = "";
-  };
-
   return (
     <div
-      className={`w-full max-w-4xl mx-auto flex flex-col items-center text-center ${compact ? "py-4" : "py-8 sm:py-14"}`}
+      className={`w-full max-w-6xl mx-auto flex flex-col items-center text-center ${compact ? "py-3" : "py-8 sm:py-12 lg:h-full lg:min-h-0 lg:py-0"}`}
     >
       {/* 1. Centered Upcheck Brand Header */}
       {!compact && (
-        <div className='flex flex-col items-center space-y-3 mb-8'>
+        <div className='home-scanner-hero mb-8 flex shrink-0 flex-col items-center gap-4 lg:mb-6 lg:gap-3'>
           <div className='flex items-center gap-3'>
-            <div className='w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-teal-500 via-emerald-500 to-blue-500 flex items-center justify-center shadow-xl shadow-blue-500/20'>
-              <Activity className='w-5 h-5 sm:w-6 sm:h-6 text-white' />
-            </div>
-            <div className='flex items-center gap-2'>
-              <h1 className='text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white font-sans'>
-                upcheck<span className='text-blue-500'>.</span>
-              </h1>
-              <span className='text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/20'>
-                v1.2
-              </span>
-            </div>
+            <img src='/icon.svg' alt='' aria-hidden='true' className='h-10 w-10 shrink-0 sm:h-12 sm:w-12' />
+            <h1 className='text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white font-sans'>
+              upcheck<span className='text-blue-500'>.</span>
+            </h1>
           </div>
 
-          <p className='text-xs sm:text-sm text-slate-400 max-w-xl mx-auto leading-relaxed px-4'>
+          <p className='text-sm text-slate-400 max-w-2xl mx-auto leading-relaxed px-4'>
             {t("hero.description")}
           </p>
         </div>
       )}
 
-      {/* 2. Main Centered Scanner Box */}
-      <div className='w-full max-w-3xl rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-xl p-4 sm:p-6 shadow-2xl shadow-black/60 space-y-5 text-left'>
-        {/* Top Controls Bar: 2 Tabs + Quick History Dropdown */}
-        <div className='flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3'>
-          {/* Toggle Buttons */}
-          <div className='flex items-center gap-1 p-1 bg-slate-950 rounded-xl border border-slate-800 self-start'>
-            <button
-              type='button'
-              onClick={() => setActiveTab("url")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                activeTab === "url"
-                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              <GithubIcon className='w-3.5 h-3.5' />
-              <span>{t("input.github_repo")}</span>
-            </button>
-            <button
-              type='button'
-              onClick={() => setActiveTab("paste")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                activeTab === "paste"
-                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              <FileCode className='w-3.5 h-3.5' />
-              <span>{t("input.paste_json")}</span>
-            </button>
-          </div>
-
-          {/* Quick select dropdown for verified repos */}
-          {verifiedRepos.length > 0 && (
-            <div className='flex items-center gap-2 min-w-0'>
-              <select
-                onChange={handleDropdownSelect}
-                defaultValue=''
-                disabled={isLoading}
-                aria-label={t("input.recent_group")}
-                className='w-full sm:w-auto min-w-[210px] px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer font-sans'
-              >
-                <option value='' disabled>
-                  {t("input.recent_group")} ({verifiedRepos.length})
-                </option>
-                {verifiedRepos.map((h) => (
-                  <option key={h.repoUrl} value={h.repoUrl}>
-                    {h.fullName}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-        </div>
-
-        {/* Input Form Body */}
-        {activeTab === "url" ? (
-          <form onSubmit={handleSubmitUrl} className='space-y-4'>
-            {/* Input & Button in clean flex row — NO OVERLAP */}
-            <div className='flex flex-col sm:flex-row gap-2.5'>
-              <div className='relative flex-1 min-w-0'>
-                <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
-                  <GithubIcon className='w-4 h-4' />
-                </div>
-                <input
-                  type='text'
-                  value={inputUrl}
-                  onChange={(e) => setInputUrl(e.target.value)}
-                  placeholder={t("input.placeholder")}
-                  disabled={isLoading}
-                  className='w-full pl-10 pr-4 py-3.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 font-mono transition-all'
-                />
-              </div>
-
-              <button
-                type='submit'
-                disabled={isLoading || !inputUrl.trim()}
-                className='px-6 py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold text-xs sm:text-sm rounded-xl transition-all shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 cursor-pointer shrink-0 whitespace-nowrap'
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className='w-4 h-4 animate-spin' />
-                    <span>{t("input.scanning")}</span>
-                  </>
-                ) : (
-                  <>
-                    <span>{t("input.scan_button")}</span>
-                    <ArrowRight className='w-4 h-4' />
-                  </>
-                )}
-              </button>
-            </div>
+      {/* Both scan methods stay visible, with each card sized by its content. */}
+      <div className='grid w-full grid-cols-1 items-stretch gap-5 text-left lg:min-h-0 lg:max-h-[760px] lg:flex-1 lg:grid-cols-2 lg:gap-6'>
+        <section className='home-scanner-card flex min-w-0 flex-col gap-6 border border-emerald-500/25 bg-slate-900/80 p-5 shadow-xl shadow-black/20 sm:p-6 lg:min-h-0 lg:gap-[clamp(0.75rem,2vh,2rem)] lg:overflow-hidden lg:p-[clamp(1rem,2vh,2rem)]'>
+          <h2 className='flex items-center gap-2 border-b border-slate-800 pb-4 text-base font-bold text-white lg:pb-5'>
+            <GithubIcon className='h-5 w-5 text-emerald-400' />
+            {t("input.github_repo")}
+          </h2>
+          <div className='flex flex-1 flex-col gap-6 lg:min-h-0 lg:gap-[clamp(0.75rem,2vh,2rem)] lg:overflow-y-auto'>
+            <GitHubScanForm
+              githubToken={githubToken}
+              isLoading={isLoading}
+              onAnalyzeRepo={onAnalyzeRepo}
+              onAnalyzeRepos={onAnalyzeRepos}
+            />
 
             {/* Already verified git repositories */}
-            {verifiedRepos.length > 0 && (
-              <div className='pt-3 border-t border-slate-800/80 space-y-2'>
-                <div className='flex items-center justify-between text-xs text-slate-400'>
+            {recentScans.length > 0 && (
+              <div className='home-recent-history space-y-3 border-t border-slate-800 pt-5 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:pt-7'>
+                <div className='flex items-center justify-between gap-3 text-xs text-slate-400'>
                   <span className='font-semibold flex items-center gap-1.5 text-slate-300'>
                     <History className='w-3.5 h-3.5 text-blue-400' />
                     {t("input.recent_group")}
                   </span>
                   <span className='text-[11px] text-slate-500 hidden sm:inline'>
-                    Cliquez pour réanalyser
+                    {t("input.recent_hint")}
                   </span>
                 </div>
 
-                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2'>
-                  {verifiedRepos.map((item) => (
+                <div className='grid max-h-60 grid-cols-1 gap-2.5 overflow-y-auto pr-1 sm:grid-cols-2 lg:min-h-0 lg:max-h-none lg:flex-1 lg:content-start'>
+                  {recentScans.map((item) => (
                     <button
-                      key={item.repoUrl}
+                      key={item.analysisKey || item.repoUrl}
                       type='button'
                       onClick={() => onSelectHistoryItem(item)}
-                      className='p-2.5 rounded-xl bg-slate-950/70 hover:bg-slate-950 border border-slate-800 hover:border-slate-700 transition-colors text-left flex items-center gap-3 group cursor-pointer'
+                      className='group flex min-h-16 min-w-0 items-center gap-3 border border-slate-800 bg-slate-950/70 p-3 text-left transition-colors hover:border-emerald-500/50 hover:bg-slate-900 lg:min-h-18 cursor-pointer'
                     >
-                      {/* Grade letter in colored box with "note" underneath */}
-                      <div
-                        className={`w-10 h-10 rounded-lg flex flex-col items-center justify-center shrink-0 ${getGradeBadgeClass(item.grade)}`}
-                      >
-                        <span className='font-black text-sm leading-none'>
-                          {item.grade}
-                        </span>
-                        <span className='text-[8px] font-bold uppercase tracking-wider leading-none mt-0.5 opacity-90'>
-                          {t("overview.grade")}
-                        </span>
-                      </div>
+                      {item.isMultiScan ? (
+                        <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-violet-500/40 bg-violet-500/15 text-violet-200'>
+                          <Layers className='h-4 w-4' />
+                        </div>
+                      ) : (
+                        <div className={`w-10 h-10 rounded-lg flex flex-col items-center justify-center shrink-0 ${getGradeBadgeClass(item.grade)}`}>
+                          <span className='font-black text-sm leading-none'>{item.grade}</span>
+                          <span className='text-[8px] font-bold uppercase tracking-wider leading-none mt-0.5 opacity-90'>{t("overview.grade")}</span>
+                        </div>
+                      )}
 
                       {/* Repo Name and Package Count */}
                       <div className='min-w-0 flex-1'>
-                        <div className='font-mono text-xs font-bold text-slate-200 group-hover:text-blue-400 truncate transition-colors'>
-                          {item.fullName}
+                        <div className='font-mono text-xs font-bold text-slate-200 group-hover:text-emerald-300 truncate transition-colors'>
+                          {item.isMultiScan ? `${t("input.multi_scan")} · ${item.fullName}` : item.fullName}
                         </div>
                         <div className='text-[10px] text-slate-500 mt-0.5'>
-                          {item.totalPackages} paquets
+                          {item.isMultiScan
+                            ? `${item.repositoryCount || 0} ${t("input.repositories")} · ${item.totalPackages} ${t("owner_scan.packages")}`
+                            : `${item.totalPackages} ${t("owner_scan.packages")}`}
                         </div>
                       </div>
                     </button>
@@ -304,9 +205,14 @@ export function UpcheckScanner({
                 </div>
               </div>
             )}
-          </form>
-        ) : (
-          <form onSubmit={handlePasteSubmit} className='space-y-4'>
+          </div>
+        </section>
+        <section className='home-scanner-card flex min-w-0 flex-col gap-6 border border-slate-700/70 bg-slate-900/80 p-5 shadow-xl shadow-black/20 sm:p-6 lg:min-h-0 lg:gap-[clamp(0.75rem,2vh,2rem)] lg:overflow-hidden lg:p-[clamp(1rem,2vh,2rem)]'>
+          <h2 className='flex items-center gap-2 border-b border-slate-800 pb-4 text-base font-bold text-white lg:pb-5'>
+            <FileCode className='h-5 w-5 text-emerald-400' />
+            {t("input.paste_json")}
+          </h2>
+          <form onSubmit={handlePasteSubmit} className='flex flex-1 flex-col gap-6 lg:min-h-0 lg:gap-[clamp(0.75rem,2vh,1.75rem)] lg:overflow-y-auto'>
             {/* File Upload Drop Zone - no transition animation on layout */}
             <div
               onDragOver={(e) => {
@@ -315,27 +221,27 @@ export function UpcheckScanner({
               }}
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
-              className={`p-4 rounded-xl border border-dashed flex flex-col sm:flex-row items-center justify-between gap-3 ${
+              className={`home-json-upload flex flex-col items-stretch justify-center gap-4 border border-dashed p-5 sm:min-h-28 sm:flex-row sm:items-center sm:justify-between lg:min-h-[clamp(5.5rem,12vh,8rem)] lg:shrink-0 ${
                 isDragging
-                  ? "border-blue-500 bg-blue-500/10"
-                  : "border-slate-800 bg-slate-950/50 hover:border-slate-700"
+                  ? "border-emerald-400 bg-emerald-500/10"
+                  : "border-slate-700 bg-slate-950/50 hover:border-emerald-500/50"
               }`}
             >
-              <div className='flex items-center gap-3'>
-                <div className='w-9 h-9 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0'>
+              <div className='flex flex-col items-center gap-3 text-center sm:flex-row sm:text-left'>
+                <div className='flex h-11 w-11 shrink-0 items-center justify-center border border-emerald-500/30 bg-emerald-500/10 text-emerald-400'>
                   <Upload className='w-4 h-4' />
                 </div>
                 <div>
-                  <div className='text-xs font-semibold text-slate-200'>
+                  <div className='text-xs font-semibold leading-relaxed text-slate-200'>
                     {t("input.upload_file")}
                   </div>
-                  <div className='text-[11px] text-slate-500'>
+                  <div className='mt-1 text-[11px] leading-relaxed text-slate-400'>
                     {t("input.drag_drop_hint")}
                   </div>
                 </div>
               </div>
 
-              <label className='px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium cursor-pointer transition-colors shrink-0'>
+              <label className='w-full shrink-0 cursor-pointer border border-slate-700 bg-slate-800 px-3.5 py-2.5 text-center text-xs font-medium text-slate-200 transition-colors hover:border-emerald-500/50 hover:bg-slate-700 sm:w-auto'>
                 <span>{t("input.browse_files")}</span>
                 <input
                   type='file'
@@ -347,32 +253,32 @@ export function UpcheckScanner({
             </div>
 
             {/* Direct JSON Pasting Textarea */}
-            <div>
-              <div className='text-[11px] text-slate-400 mb-1.5 font-medium'>
+            <div className='lg:flex lg:min-h-24 lg:flex-1 lg:flex-col'>
+              <div className='mb-2.5 text-xs font-medium leading-relaxed text-slate-300'>
                 {t("input.paste_placeholder")}
               </div>
               <textarea
-                rows={5}
+                rows={9}
                 value={pasteContent}
                 onChange={(e) => setPasteContent(e.target.value)}
                 placeholder={`{\n  "name": "my-project",\n  "dependencies": {\n    "next": "15.0.0",\n    "react": "19.0.0",\n    "lodash": "4.17.21"\n  }\n}`}
                 disabled={isLoading}
-                className='w-full p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono'
+                className='block min-h-52 w-full resize-y border border-slate-700 bg-slate-950/80 p-4 font-mono text-xs leading-relaxed text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 lg:h-full lg:min-h-16 lg:flex-1 lg:resize-none'
               />
             </div>
 
             {pasteError && (
-              <div className='flex items-center gap-2 text-xs text-red-300 bg-red-950/50 border border-red-800/60 p-2.5 rounded-lg text-left'>
+              <div className='flex items-center gap-2 text-xs text-red-300 bg-red-950/50 border border-red-800/60 p-2.5 rounded-lg text-left' role='alert'>
                 <AlertCircle className='w-4 h-4 shrink-0 text-red-400' />
                 <span>{pasteError}</span>
               </div>
             )}
 
-            <div className='flex justify-end'>
+            <div className='mt-auto pt-1 lg:shrink-0'>
               <button
                 type='submit'
                 disabled={isLoading || !pasteContent.trim()}
-                className='px-6 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold text-xs sm:text-sm rounded-xl transition-all shadow-md shadow-blue-500/20 flex items-center gap-2 cursor-pointer'
+                className='flex w-full items-center justify-center gap-2 bg-emerald-600 px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer'
               >
                 {isLoading ? (
                   <>
@@ -388,30 +294,19 @@ export function UpcheckScanner({
               </button>
             </div>
           </form>
-        )}
+        </section>
       </div>
 
-      {/* 3. Subtle Privacy / Disclaimer Notice */}
-      <div className='max-w-xl mx-auto mt-6 text-[11px] text-slate-500 leading-relaxed px-4'>
-        <span>{t("home.disclaimer_pre")} </span>
-        <button
-          onClick={onOpenInfoModal}
-          className='text-cyan-400 hover:text-cyan-300 font-medium underline cursor-pointer'
-        >
-          {t("home.learn_more")}
-        </button>
-      </div>
-
-      {/* 4. Bottom GitHub Token Banner */}
-      <div className='w-full max-w-3xl mt-5'>
+      {/* The token shortcut stays visible; data-handling details live in the info dialog. */}
+      <div className='home-scanner-token mt-6 w-full max-w-6xl shrink-0 lg:mt-4'>
         <button
           onClick={onOpenTokenModal}
-          className='w-full p-3 rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-slate-800 text-xs text-slate-400 hover:text-slate-200 transition-colors flex items-center justify-center gap-2 cursor-pointer'
+          className='w-full border border-slate-800 bg-slate-900/60 p-3 text-xs text-slate-400 transition-colors hover:border-emerald-500/40 hover:bg-slate-900 hover:text-slate-200 flex items-center justify-center gap-2 cursor-pointer'
         >
-          <Info className='w-3.5 h-3.5 text-blue-400 shrink-0' />
+          <Info className='w-3.5 h-3.5 text-emerald-400 shrink-0' />
           <span>
             {t("home.banner_token")}{" "}
-            <strong className='text-blue-400 underline font-semibold'>
+            <strong className='text-emerald-400 underline font-semibold'>
               {t("home.banner_token_link")}
             </strong>
           </span>

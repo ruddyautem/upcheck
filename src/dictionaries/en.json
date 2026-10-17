@@ -37,6 +37,9 @@
     "banner_token": "Want to scan private repositories or increase API rate limits to 5,000 req/hr?",
     "banner_token_link": "Access your GitHub Token."
   },
+  "footer": {
+    "rights": "All rights reserved."
+  },
   "report": {
     "kicker": "Scan report",
     "title": "Your dependency report",
@@ -74,16 +77,32 @@
     "major": "Major Update",
     "minor": "Minor Update",
     "patch": "Patch Update",
+    "deferred": "Temporarily deferred",
     "up_to_date": "Up to Date"
   },
   "input": {
     "github_repo": "GitHub Repository",
+    "single_repo": "Scan one repository",
+    "single_repo_hint": "Check a specific owner/repository.",
+    "multiple_repos": "Scan selected repositories",
+    "multiple_repos_hint": "Choose projects from a GitHub account.",
     "paste_json": "package.json",
     "select_repo_placeholder": "Select saved or sample repo...",
-    "recent_group": "Recent Repositories",
-    "placeholder": "GitHub URL or repository name (owner/repo)...",
-    "scan_button": "Scan repository",
-    "scanning": "Scanning repository & packages...",
+    "recent_group": "Recent scans",
+    "multi_scan": "Multi-repository scan",
+    "repositories": "repositories",
+    "recent_hint": "Open the latest report",
+    "placeholder": "GitHub URL, owner/repo, or username...",
+    "single_placeholder": "owner/repository",
+    "single_repo_error": "Enter both the owner and repository name (for example: vercel/next.js).",
+    "multiple_placeholder": "owner",
+    "scan_button": "Scan GitHub",
+    "scanning": "Scanning repositories & packages...",
+    "finding_repos": "Finding repositories...",
+    "find_repos": "View repositories",
+    "select_repos": "Choose repositories to scan",
+    "selected": "selected",
+    "no_token_limit": "10-repository limit without a token",
     "paste_placeholder": "Paste contents of package.json here (dependencies, devDependencies)...",
     "analyze_custom": "Analyze dependencies",
     "upload_file": "Upload a package.json file",
@@ -91,6 +110,16 @@
     "browse_files": "Browse",
     "err_no_deps": "JSON does not contain \"dependencies\" or \"devDependencies\" keys.",
     "err_invalid_json": "Invalid JSON format. Please verify your package.json syntax."
+  },
+  "owner_scan": {
+    "title": "Repositories scanned for",
+    "scanned": "repositories scanned",
+    "choose_repo": "Choose a repository to manage its updates",
+    "packages": "packages",
+    "updates": "updates",
+    "skipped": "repositories skipped",
+    "ai_prompt_all": "AI Prompt for all repositories",
+    "prompt_all_hint": "Choose an update plan to create one repository-by-repository prompt."
   },
   "welcome": {
     "card1_title": "Google OSV Security",
@@ -116,6 +145,7 @@
     "title": "Package Breakdown",
     "subtitle": "Click any row to inspect package details and vulnerability advisories.",
     "filter_label": "Filter packages:",
+    "selection_hint": "Select one or more package checkboxes to prepare their update command.",
     "all": "All packages",
     "needs_attention": "Needs attention",
     "security": "Security alerts",
@@ -142,6 +172,7 @@
     "showing": "Showing",
     "to": "to",
     "of": "of",
+    "package": "package",
     "packages": "packages",
     "previous": "Previous",
     "next": "Next",
@@ -153,6 +184,7 @@
     "badge": "Repository Overview",
     "title": "Health Score & Overview",
     "update_script": "Update Script",
+    "package_json": "package.json",
     "export": "Export",
     "manifest": "1 manifest",
     "scanned": "Scanned",
@@ -163,7 +195,8 @@
     "deprecated": "Deprecated",
     "breaking_updates": "Major versions",
     "grade": "Grade",
-    "github_link": "Open on GitHub"
+    "github_link": "Open on GitHub",
+    "rescan": "Rescan"
   },
   "inspector": {
     "title": "Package Inspector",
@@ -196,10 +229,25 @@
     "clear": "Clear",
     "remove_pkg": "Remove from queue"
   },
+  "scripts": {
+    "title": "Update scripts",
+    "select_plan": "Choose the update type to prepare.",
+    "hint": "Choose a package manager, then copy the update plan that fits your repository.",
+    "security": "Fix security risks",
+    "safe": "Minor and patch updates",
+    "major": "Major versions only",
+    "all": "Update everything",
+    "none": "No matching packages.",
+    "ai_prompt": "AI Prompt",
+    "show_command": "Show Command",
+    "manual_install": "Manual Install",
+    "copy_prompt": "Copy Prompt"
+  },
   "error": {
     "analysis_title": "Analysis Error"
   },
   "info": {
+    "privacy_title": "Data and privacy",
     "title": "How Upcheck Works",
     "subtitle": "Data sources, vulnerability detection, and categorization",
     "sources_title": "How We Fetch Latest Versions & Announcements",
@@ -229,7 +277,7 @@
     "title": "GitHub API Token",
     "subtitle": "Increase rate limits to 5,000 req/hr",
     "label": "Personal Access Token (classic or fine-grained)",
-    "local_storage_note": "Token is stored only in your browser (localStorage).",
+    "local_storage_note": "Token is kept only in memory for this session and is cleared when you refresh or close the page.",
     "rate_limit_desc": "Unauthenticated GitHub requests are capped at 60/hr. Adding a token with read-only / public_repo access unlocks 5,000 requests per hour.",
     "generate_link": "Generate token on GitHub",
     "remove_btn": "Remove Token",
