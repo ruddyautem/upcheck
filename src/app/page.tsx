@@ -20,7 +20,7 @@ import { useAppSettings } from '@/lib/settingsContext';
 import { AlertCircle, ArrowUpRight, Check, Download, RefreshCw, ScanSearch, ShieldAlert, Terminal } from 'lucide-react';
 
 export default function Home() {
-  const { t } = useAppSettings();
+  const { t, locale } = useAppSettings();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RepoAnalysisResult | null>(null);
@@ -377,8 +377,17 @@ export default function Home() {
                     <span className="mt-1.5 text-[9px] font-bold tracking-[0.14em] leading-none text-white">SCORE</span>
                   </span>
                   <div className="min-w-0">
-                    <div className="font-mono text-sm text-emerald-300 truncate">{result.repoInfo.fullName}</div>
-                    <div className="flex items-center gap-3 mt-2 text-sm text-slate-400">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <div className="min-w-0 truncate font-mono text-sm text-emerald-300">{result.repoInfo.fullName}</div>
+                      <span aria-hidden="true" className="h-3 border-l border-slate-700" />
+                      <time
+                        dateTime={result.analyzedAt}
+                        className="inline-flex shrink-0 items-center gap-1.5 text-[11px] text-slate-400 whitespace-nowrap"
+                      >
+                        <span>{t('overview.last_scan')} · {new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'short' }).format(new Date(result.analyzedAt))}</span>
+                      </time>
+                    </div>
+                    <div className="mt-0.5 text-sm text-slate-400">
                       <span><strong className={`${getScoreTextClass(result.healthScore.grade)} text-xl`}>{result.healthScore.score}</strong> / 100</span>
                     </div>
                   </div>

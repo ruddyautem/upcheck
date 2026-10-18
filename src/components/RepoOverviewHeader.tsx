@@ -17,17 +17,17 @@ export function RepoOverviewHeader({
   onOpenExport,
   onOpenRemediation,
 }: RepoOverviewHeaderProps) {
-  const { t, language } = useAppSettings();
+  const { t, locale } = useAppSettings();
   const { repoInfo, analyzedAt, healthScore, summaryCounts, totalPackages } = result;
   const breakingUpdates = result.packages.filter((pkg) => pkg.hasBreakingChanges).length;
 
-  const formattedDate = new Date(analyzedAt).toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', {
+  const formattedDate = new Intl.DateTimeFormat(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-  });
+  }).format(new Date(analyzedAt));
 
   const getGradeTheme = (grade: string) => {
     switch (grade) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { Bot, CheckCircle2, CircleAlert, FolderGit2, RefreshCw } from 'lucide-react';
+import { Bot, CheckCircle2, CircleAlert, Clock, FolderGit2, RefreshCw } from 'lucide-react';
 import { OwnerAnalysisResult } from '@/types';
 import { useAppSettings } from '@/lib/settingsContext';
 
@@ -21,7 +21,17 @@ export function OwnerScanSummary({
   onRescanAll,
   onOpenAiPrompt,
 }: OwnerScanSummaryProps) {
-  const { t } = useAppSettings();
+  const { t, locale } = useAppSettings();
+  const formatCheckedAt = (timestamp: string) => {
+    const checkedAt = new Date(timestamp);
+    return new Intl.DateTimeFormat(locale, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    }).format(checkedAt);
+  };
 
   return (
     <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-3 space-y-2.5 sm:p-4">
@@ -57,6 +67,7 @@ export function OwnerScanSummary({
         {analysis.results.map((repository) => {
           const isActive = repository.repoInfo.fullName === activeRepository;
           const updates = repository.packages.filter((pkg) => pkg.category !== 'up_to_date' && !pkg.isUpdateDeferred).length;
+          const checkedAt = formatCheckedAt(repository.analyzedAt);
           return (
             <button
               key={repository.repoInfo.fullName}
@@ -76,6 +87,14 @@ export function OwnerScanSummary({
                   {updates} {t('owner_scan.updates')}
                 </span>
               </div>
+              <time
+                dateTime={repository.analyzedAt}
+                className="mt-1.5 flex items-center gap-1 text-[10px] text-slate-500"
+                title={checkedAt}
+              >
+                <Clock className="h-3 w-3 shrink-0" aria-hidden="true" />
+                <span className="truncate">{checkedAt}</span>
+              </time>
             </button>
           );
         })}

@@ -9,6 +9,7 @@ export type Theme = 'dark' | 'light';
 interface AppSettingsContextType {
   theme: Theme;
   language: Language;
+  locale: string;
   toggleTheme: () => void;
   setTheme: (theme: Theme) => void;
   setLanguage: (lang: Language) => void;
@@ -37,6 +38,7 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
   const [theme, setThemeState] = useState<Theme>('dark');
   const [language, setLanguageState] = useState<Language>('fr');
   const [isMounted, setIsMounted] = useState(false);
+  const locale = language === 'fr' ? 'fr-FR' : 'en-US';
 
   useEffect(() => {
     setIsMounted(true);
@@ -78,6 +80,7 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
       value={{
         theme,
         language,
+        locale,
         toggleTheme,
         setTheme,
         setLanguage,

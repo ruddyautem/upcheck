@@ -25,7 +25,7 @@ L'application permet d'analyser un dépôt, une sélection de dépôts ou tous l
 - **Mises à jour classées** : risques de sécurité, mises à jour mineures et correctifs, mises à jour majeures, ou mise à jour complète.
 - **Conseils actionnables** : commandes générées pour Bun, npm, pnpm et Yarn, avec option de forçage.
 - **Prompts IA fiables** : tests requis, diagnostic et correction jusqu'à réussite, consultation de la documentation officielle lorsque nécessaire.
-- **Rapports réutilisables** : les scans récents, y compris les scans multiples, sont conservés dans le navigateur pour retrouver rapidement un rapport.
+- **Rapports réutilisables** : jusqu'à dix scans récents, y compris les scans multiples, sont conservés dans le navigateur pour retrouver rapidement un rapport. Les dates et heures suivent la langue de l'interface.
 - **Interface bilingue** : français et anglais, avec états de chargement, retours d'erreur et interface responsive.
 
 ### 🔒 Sécurité et confidentialité
@@ -108,7 +108,7 @@ You can analyse one repository, a selection of repositories, or every repository
 - **Classified updates**: security fixes, minor and patch updates, major updates, or all updates.
 - **Actionable guidance**: generated commands for Bun, npm, pnpm, and Yarn, with an optional force flag.
 - **Reliable AI prompts**: required tests, diagnosis and fixes until successful, and official documentation when needed.
-- **Reusable reports**: recent scans, including multi-repository scans, are retained in the browser for quick access.
+- **Reusable reports**: up to ten recent scans, including multi-repository scans, are retained in the browser for quick access. Dates and times follow the interface language.
 - **Bilingual interface** in French and English, with responsive layouts, loading states, and error feedback.
 
 ### 🔒 Security and privacy

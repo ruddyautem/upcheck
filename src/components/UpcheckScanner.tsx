@@ -6,6 +6,7 @@ import {
   ArrowRight,
   Loader2,
   History,
+  Clock,
   AlertCircle,
   Info,
   Layers,
@@ -40,7 +41,7 @@ export function UpcheckScanner({
   onOpenTokenModal,
   compact = false,
 }: UpcheckScannerProps) {
-  const { t } = useAppSettings();
+  const { t, locale } = useAppSettings();
   const [pasteContent, setPasteContent] = useState("");
   const [pasteError, setPasteError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -52,7 +53,18 @@ export function UpcheckScanner({
         !item.isCustomJson &&
         !item.fullName.toLowerCase().includes("demo"),
     )
-    .slice(0, 8);
+    .slice(0, 10);
+
+  const formatCheckedAt = (timestamp: string) => {
+    const checkedAt = new Date(timestamp);
+    return new Intl.DateTimeFormat(locale, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    }).format(checkedAt);
+  };
 
   const getGradeBadgeClass = (grade: string) => {
     switch (grade) {
@@ -149,7 +161,7 @@ export function UpcheckScanner({
             <GithubIcon className='h-5 w-5 text-emerald-400' />
             {t("input.github_repo")}
           </h2>
-          <div className='flex flex-1 flex-col gap-6 lg:min-h-0 lg:gap-[clamp(0.75rem,2vh,2rem)] lg:overflow-y-auto'>
+          <div className='flex flex-1 flex-col gap-6 lg:min-h-0 lg:gap-[clamp(0.75rem,2vh,2rem)]'>
             <GitHubScanForm
               githubToken={githubToken}
               isLoading={isLoading}
@@ -169,8 +181,11 @@ export function UpcheckScanner({
                     </span>
                   </div>
 
-                  <div className='grid max-h-60 grid-cols-1 gap-2.5 overflow-y-auto pr-1 sm:grid-cols-2'>
-                    {recentScans.map((item) => (
+                  <div className='grid min-h-60 grid-cols-1 gap-2.5 sm:grid-cols-2'>
+                    {recentScans.map((item) => {
+                      const checkedAt = formatCheckedAt(item.timestamp);
+
+                      return (
                       <button
                         key={item.analysisKey || item.repoUrl}
                         type='button'
@@ -190,16 +205,25 @@ export function UpcheckScanner({
 
                         <div className='min-w-0 flex-1'>
                           <div className='font-mono text-xs font-bold text-slate-200 group-hover:text-emerald-300 truncate transition-colors'>
-                            {item.isMultiScan ? `${t("input.multi_scan")} · ${item.fullName}` : item.fullName}
+                            {item.isMultiScan ? t("input.multi_scan") : item.fullName}
                           </div>
                           <div className='text-[10px] text-slate-500 mt-0.5'>
                             {item.isMultiScan
                               ? `${item.repositoryCount || 0} ${t("input.repositories")} · ${item.totalPackages} ${t("owner_scan.packages")}`
                               : `${item.totalPackages} ${t("owner_scan.packages")}`}
                           </div>
+                          <time
+                            dateTime={item.timestamp}
+                            className='mt-1 flex items-center gap-1 text-[10px] text-slate-500'
+                            title={checkedAt}
+                          >
+                            <Clock className='h-3 w-3 shrink-0 text-emerald-400' aria-hidden='true' />
+                            <span className='truncate'>{checkedAt}</span>
+                          </time>
                         </div>
                       </button>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
