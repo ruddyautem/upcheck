@@ -25,7 +25,7 @@ L'application permet d'analyser un dépôt, une sélection de dépôts ou tous l
 - **Mises à jour classées** : risques de sécurité, mises à jour mineures et correctifs, mises à jour majeures, ou mise à jour complète.
 - **Conseils actionnables** : commandes générées pour Bun, npm, pnpm et Yarn, avec option de forçage.
 - **Prompts IA fiables** : tests requis, diagnostic et correction jusqu'à réussite, consultation de la documentation officielle lorsque nécessaire.
-- **Rapports réutilisables** : jusqu'à dix scans récents, y compris les scans multiples, sont conservés dans le navigateur pour retrouver rapidement un rapport. Les dates et heures suivent la langue de l'interface.
+- **Rapports réutilisables** : jusqu'à dix scans récents, y compris les scans multiples, sont conservés dans le navigateur pour retrouver rapidement un rapport.
 - **Interface bilingue** : français et anglais, avec états de chargement, retours d'erreur et interface responsive.
 
 ### 🔒 Sécurité et confidentialité
@@ -37,14 +37,14 @@ L'application permet d'analyser un dépôt, une sélection de dépôts ou tous l
 
 ### 🛠 Stack technique
 
-| Catégorie | Technologies |
-| --- | --- |
-| Framework | Next.js 16 (App Router) |
-| Interface | React 19, Tailwind CSS v4, Lucide React |
-| Langage | TypeScript 6 |
-| Qualité | ESLint 9 + configuration Next.js |
-| Données | API GitHub, registre npm, OSV |
-| Gestionnaires pris en charge | Bun, npm, pnpm, Yarn |
+| Catégorie                    | Technologies                            |
+| ---------------------------- | --------------------------------------- |
+| Framework                    | Next.js 16 (App Router)                 |
+| Interface                    | React 19, Tailwind CSS v4, Lucide React |
+| Langage                      | TypeScript 6                            |
+| Qualité                      | ESLint 9 + configuration Next.js        |
+| Données                      | API GitHub, registre npm, OSV           |
+| Gestionnaires pris en charge | Bun, npm, pnpm, Yarn                    |
 
 ### 📁 Structure du projet
 
@@ -108,7 +108,7 @@ You can analyse one repository, a selection of repositories, or every repository
 - **Classified updates**: security fixes, minor and patch updates, major updates, or all updates.
 - **Actionable guidance**: generated commands for Bun, npm, pnpm, and Yarn, with an optional force flag.
 - **Reliable AI prompts**: required tests, diagnosis and fixes until successful, and official documentation when needed.
-- **Reusable reports**: up to ten recent scans, including multi-repository scans, are retained in the browser for quick access. Dates and times follow the interface language.
+- **Reusable reports**: up to ten recent scans, including multi-repository scans, are retained in the browser for quick access.
 - **Bilingual interface** in French and English, with responsive layouts, loading states, and error feedback.
 
 ### 🔒 Security and privacy
@@ -120,14 +120,14 @@ You can analyse one repository, a selection of repositories, or every repository
 
 ### 🛠 Tech stack
 
-| Category | Technologies |
-| --- | --- |
-| Framework | Next.js 16 (App Router) |
-| UI | React 19, Tailwind CSS v4, Lucide React |
-| Language | TypeScript 6 |
-| Code quality | ESLint 9 + Next.js configuration |
-| Data | GitHub API, npm registry, OSV |
-| Supported package managers | Bun, npm, pnpm, Yarn |
+| Category                   | Technologies                            |
+| -------------------------- | --------------------------------------- |
+| Framework                  | Next.js 16 (App Router)                 |
+| UI                         | React 19, Tailwind CSS v4, Lucide React |
+| Language                   | TypeScript 6                            |
+| Code quality               | ESLint 9 + Next.js configuration        |
+| Data                       | GitHub API, npm registry, OSV           |
+| Supported package managers | Bun, npm, pnpm, Yarn                    |
 
 ### 🚀 Run locally
 
