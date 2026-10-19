@@ -20,9 +20,12 @@ body {
   color: var(--text-main);
   font-family: "IBM Plex Mono", "Cascadia Code", "SFMono-Regular", Consolas, monospace;
   min-height: 100vh;
+  overflow-x: clip;
 }
 
 .app-shell {
+  min-width: 0;
+  overflow-x: clip;
   background-color: #050b12;
   background-image:
     linear-gradient(rgba(20, 79, 89, 0.09) 1px, transparent 1px),
@@ -30,6 +33,74 @@ body {
     radial-gradient(circle at 50% -8rem, rgba(0, 207, 160, 0.075), transparent 34rem),
     linear-gradient(180deg, #08131e 0%, #050b12 100%);
   background-size: 32px 32px, 32px 32px, auto, auto;
+}
+
+/* Strings such as repository names, localized labels, and advisories must not
+   create a horizontal page scroll on a narrow viewport. */
+.app-shell :where(p, h1, h2, h3, h4, li, dd) {
+  overflow-wrap: anywhere;
+}
+
+/* Sonner follows the same compact terminal surface as the application. */
+[data-sonner-toaster][data-x-position='center'] {
+  --normal-bg: #071721;
+  --normal-border: rgba(0, 207, 160, 0.48);
+  --normal-text: #e8fffa;
+  --success-bg: #071f1d;
+  --success-border: rgba(0, 220, 165, 0.62);
+  --success-text: #d9fff4;
+  --error-bg: #2a1018;
+  --error-border: rgba(244, 63, 94, 0.68);
+  --error-text: #ffe2e7;
+}
+
+[data-sonner-toast].upcheck-toast {
+  width: fit-content !important;
+  min-width: 0 !important;
+  max-width: calc(100vw - 2rem);
+  min-height: 0 !important;
+  padding: 0.65rem 0.8rem !important;
+  border-radius: 0;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+  font-family: "IBM Plex Mono", "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+}
+
+/* Accent the confirmation by its action without turning the toast into a
+   colored card: the terminal surface stays neutral and the colour is a slim
+   left rail with a restrained border. */
+[data-sonner-toast].upcheck-toast--teal,
+[data-sonner-toast].upcheck-toast--violet,
+[data-sonner-toast].upcheck-toast--blue,
+[data-sonner-toast].upcheck-toast--red {
+  background: #071721 !important;
+}
+
+[data-sonner-toast].upcheck-toast--teal {
+  border-color: rgba(0, 220, 165, 0.46) !important;
+  box-shadow: inset 3px 0 #00b894, 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+[data-sonner-toast].upcheck-toast--violet {
+  border-color: rgba(167, 139, 250, 0.46) !important;
+  box-shadow: inset 3px 0 #a78bfa, 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+[data-sonner-toast].upcheck-toast--blue {
+  border-color: rgba(56, 189, 248, 0.46) !important;
+  box-shadow: inset 3px 0 #38bdf8, 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+[data-sonner-toast].upcheck-toast--red {
+  border-color: rgba(251, 113, 133, 0.46) !important;
+  box-shadow: inset 3px 0 #fb7185, 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+/* Filtering packages replaces a large portion of the list. Keep browsers from
+   compensating by moving the document's scroll position on small screens. */
+.package-breakdown,
+.package-breakdown-viewport,
+.package-breakdown-content {
+  overflow-anchor: none;
 }
 
 @media (min-width: 1024px) and (max-height: 780px) {

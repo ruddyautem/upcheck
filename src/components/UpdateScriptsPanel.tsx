@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Check, Copy, Flame, Sparkles, Terminal } from 'lucide-react';
+import { toast } from 'sonner';
 import { PackageAnalysis, PackageManager } from '@/types';
 import { buildAiUpdatePrompt, buildUpdateCommand, getUpdatePresetPackages, UpdatePreset } from '@/lib/updateCommands';
 import { useAppSettings } from '@/lib/settingsContext';
@@ -24,7 +25,6 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
   const { language, t } = useAppSettings();
   const [activePreset, setActivePreset] = useState<UpdatePreset>('all');
   const [force, setForce] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [showAiPrompt, setShowAiPrompt] = useState(false);
   const selected = getUpdatePresetPackages(packages, activePreset);
   const command = buildUpdateCommand(selected, packageManager, force, activePreset === 'safe' ? 'compatible' : 'latest');
@@ -33,9 +33,12 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
 
   const copyCommand = async () => {
     if (!displayedContent) return;
-    await navigator.clipboard.writeText(displayedContent);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(displayedContent);
+      toast.success(t('cart.copied'), { className: showAiPrompt ? 'upcheck-toast--violet' : 'upcheck-toast--teal' });
+    } catch {
+      toast.error(t('error.analysis_title'));
+    }
   };
 
   return (
@@ -45,7 +48,7 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
           <button
             key={manager}
             type="button"
-            onClick={() => { onChangePackageManager(manager); setCopied(false); }}
+            onClick={() => onChangePackageManager(manager)}
             aria-pressed={packageManager === manager}
             className={`flex-1 min-w-14 px-2 py-1.5 text-xs font-mono font-semibold transition-colors cursor-pointer ${packageManager === manager ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
           >
@@ -58,7 +61,7 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
           <span className="flex items-center gap-2 font-bold text-slate-100"><Flame className="w-4 h-4 text-amber-400" />{t('cart.force_update')}</span>
           <span className="block mt-1 text-[10px] leading-tight text-slate-300">{t('cart.force_desc')}</span>
         </span>
-        <input type="checkbox" checked={force} onChange={(event) => { setForce(event.target.checked); setCopied(false); }} className="peer sr-only" />
+        <input type="checkbox" checked={force} onChange={(event) => setForce(event.target.checked)} className="peer sr-only" />
         <span aria-hidden="true" className={`relative h-5 w-9 shrink-0 rounded-full transition-colors peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-amber-400 ${force ? 'bg-amber-500' : 'bg-slate-700'}`}>
           <span className={`absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${force ? 'translate-x-4' : ''}`} />
         </span>
@@ -73,12 +76,12 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
           <button
             key={id}
             type="button"
-            onClick={() => { setActivePreset(id); onSelectPreset(id); setCopied(false); }}
+            onClick={() => { setActivePreset(id); onSelectPreset(id); }}
             aria-pressed={activePreset === id}
-            className={`min-h-[54px] flex items-center justify-between gap-3 border px-3 py-1 text-left font-sans transition-colors cursor-pointer ring-1 ring-inset sm:min-h-[58px] sm:px-4 ${color} ${ring} ${hover} ${active}`}
+            className={`h-[58px] flex items-center justify-between gap-2 border px-3 py-1 text-left font-sans transition-colors cursor-pointer ring-1 ring-inset sm:h-auto sm:min-h-[58px] sm:px-4 ${color} ${ring} ${hover} ${active}`}
           >
-            <span className="flex min-w-0 items-center gap-2 text-sm font-semibold leading-snug">
-              {t(`scripts.${id}`)}
+            <span className="flex min-w-0 items-center gap-1.5 text-xs font-semibold leading-snug sm:gap-2 sm:text-sm">
+              <span className="truncate">{t(`scripts.${id}`)}</span>
               {activePreset === id && <Check className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
             </span>
             <span className={`flex h-11 w-11 shrink-0 flex-col items-center justify-center border sm:h-12 sm:w-12 ${badge}`}>
@@ -100,7 +103,7 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
         <button
           type="button"
           disabled={!command}
-          onClick={() => { setShowAiPrompt((showing) => !showing); setCopied(false); }}
+          onClick={() => setShowAiPrompt((showing) => !showing)}
           aria-pressed={showAiPrompt}
           className={`flex items-center justify-center gap-2 border px-3 py-2 text-xs font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${showAiPrompt ? 'border-violet-300 bg-violet-500/30 text-violet-100' : 'border-violet-500/40 bg-violet-500/15 text-violet-200 hover:bg-violet-500/25'}`}
         >
@@ -113,8 +116,8 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
           onClick={copyCommand}
           className="flex items-center justify-center gap-2 border border-emerald-500/40 bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
         >
-          {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-          {copied ? t('cart.copied') : showAiPrompt ? t('scripts.copy_prompt') : t('remediation.copy_cmd')}
+          <Copy className="w-3.5 h-3.5" />
+          {showAiPrompt ? t('scripts.copy_prompt') : t('remediation.copy_cmd')}
         </button>
       </div>
     </div>

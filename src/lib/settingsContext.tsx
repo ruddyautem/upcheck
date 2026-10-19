@@ -1,9 +1,11 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getDictionary, translateKey, Locale } from '@/dictionaries';
+import React, { createContext, useContext } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { usePathname, useRouter } from '@/i18n/navigation';
+import type { AppLocale } from '@/i18n/routing';
 
-export type Language = Locale;
+export type Language = AppLocale;
 export type Theme = 'dark' | 'light';
 
 interface AppSettingsContextType {
@@ -18,62 +20,24 @@ interface AppSettingsContextType {
 
 const AppSettingsContext = createContext<AppSettingsContextType | undefined>(undefined);
 
-const FRENCH_SPEAKING_REGIONS = new Set([
-  'BE', 'BF', 'BI', 'BJ', 'CA', 'CD', 'CF', 'CG', 'CH', 'CI', 'CM', 'DJ', 'FR',
-  'GA', 'GF', 'GN', 'GP', 'HT', 'KM', 'LU', 'MA', 'MC', 'MG', 'ML', 'MQ', 'NE',
-  'PF', 'RE', 'RW', 'SC', 'SN', 'TD', 'TG', 'VU', 'WF', 'YT',
-]);
-
-function getBrowserLanguage(): Language {
-  const locales = navigator.languages?.length ? navigator.languages : [navigator.language];
-  const hasFrenchLocale = locales.some((locale) => {
-    const [language, region] = locale.replace('_', '-').split('-');
-    return language.toLowerCase() === 'fr' || (region && FRENCH_SPEAKING_REGIONS.has(region.toUpperCase()));
-  });
-
-  return hasFrenchLocale ? 'fr' : 'en';
-}
-
 export function AppSettingsProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('dark');
-  const [language, setLanguageState] = useState<Language>('fr');
-  const [isMounted, setIsMounted] = useState(false);
+  const language = useLocale() as Language;
+  const translate = useTranslations();
+  const pathname = usePathname();
+  const router = useRouter();
+  const theme: Theme = 'dark';
   const locale = language === 'fr' ? 'fr-FR' : 'en-US';
-
-  useEffect(() => {
-    setIsMounted(true);
-    if (typeof document !== 'undefined') {
-      document.documentElement.classList.remove('light');
-      document.documentElement.classList.add('dark');
-      localStorage.removeItem('upcheck_theme');
-    }
-
-    const savedLang = localStorage.getItem('upcheck_lang') as Language | null;
-    if (savedLang === 'fr' || savedLang === 'en') {
-      setLanguageState(savedLang);
-    } else {
-      setLanguageState(getBrowserLanguage());
-    }
-  }, []);
 
   const setTheme = (_t: Theme) => {};
   const toggleTheme = () => {};
 
   const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
-    localStorage.setItem('upcheck_lang', lang);
+    if (lang !== language) {
+      router.replace(pathname, { locale: lang });
+    }
   };
 
-  const t = (key: string): string => {
-    const dict = getDictionary(language);
-    const translation = translateKey(dict, key);
-    if (translation !== key) {
-      return translation;
-    }
-    // Fallback to English dictionary
-    const fallbackDict = getDictionary('en');
-    return translateKey(fallbackDict, key);
-  };
+  const t = (key: string): string => translate(key as never);
 
   return (
     <AppSettingsContext.Provider

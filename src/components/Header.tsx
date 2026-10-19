@@ -4,6 +4,7 @@ import React from 'react';
 import { Key, Info } from 'lucide-react';
 import { GithubIcon } from '@/components/GithubIcon';
 import { useAppSettings } from '@/lib/settingsContext';
+import { Link } from '@/i18n/navigation';
 
 interface HeaderProps {
   onOpenTokenModal: () => void;
@@ -40,7 +41,7 @@ export function Header({
     <header className="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-xl sticky top-0 z-30 transition-colors">
       <div className="max-w-[1480px] mx-auto px-3 sm:px-7 lg:px-10 min-h-16 py-3 sm:py-0 flex flex-nowrap items-center justify-between gap-2 sm:gap-3">
         {/* Logo and Name */}
-        <a href="/" aria-label="Upcheck home" className="flex shrink-0 items-center gap-2 sm:gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
+        <Link href="/" aria-label="Upcheck home" className="flex shrink-0 items-center gap-2 sm:gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
           <img src="/icon.svg" alt="" aria-hidden="true" className="w-8 h-8 shrink-0" />
           <div>
             <span className="text-xl font-extrabold tracking-tight text-white font-sans">
@@ -50,7 +51,7 @@ export function Header({
               {t('header.subtitle')}
             </p>
           </div>
-        </a>
+        </Link>
 
         {/* Action Buttons */}
         <div className="flex w-auto shrink-0 items-center justify-start gap-1.5 sm:gap-2.5">

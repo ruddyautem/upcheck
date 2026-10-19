@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { RepoAnalysisResult } from '@/types';
-import { X, Copy, Check, Download, FileText } from 'lucide-react';
+import { X, Copy, Download, FileText } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAppSettings } from '@/lib/settingsContext';
 
 interface ExportModalProps {
@@ -12,7 +13,6 @@ interface ExportModalProps {
 
 export function ExportModal({ result, onClose }: ExportModalProps) {
   const { t } = useAppSettings();
-  const [copied, setCopied] = useState(false);
 
   // Generate Markdown report
   const generateMarkdownReport = () => {
@@ -51,10 +51,9 @@ export function ExportModal({ result, onClose }: ExportModalProps) {
 
   const markdownContent = generateMarkdownReport();
 
-  const handleCopyMarkdown = () => {
-    navigator.clipboard.writeText(markdownContent);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopyMarkdown = async () => {
+    await navigator.clipboard.writeText(markdownContent);
+    toast.success(t('export.copied'), { className: 'upcheck-toast--blue' });
   };
 
   const handleDownloadMarkdown = () => {
@@ -110,8 +109,8 @@ export function ExportModal({ result, onClose }: ExportModalProps) {
                 onClick={handleCopyMarkdown}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono transition-colors cursor-pointer"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? t('export.copied') : t('export.copy_md')}</span>
+                <Copy className="w-3.5 h-3.5" />
+                <span>{t('export.copy_md')}</span>
               </button>
               <button
                 onClick={handleDownloadMarkdown}

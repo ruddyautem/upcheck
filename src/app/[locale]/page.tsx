@@ -13,14 +13,17 @@ import { InfoModal } from '@/components/InfoModal';
 import { OwnerScanSummary } from '@/components/OwnerScanSummary';
 import { MultiRepoPromptModal } from '@/components/MultiRepoPromptModal';
 import { OwnerAnalysisResult, RepoAnalysisResult, RawPackageJson, PackageManager } from '@/types';
-import { getRepoHistory, saveRepoToHistory, updateRepoHistoryItem, HistoryItem } from '@/lib/history';
-import { getCachedAnalysis, getCachedOwnerAnalysis, saveAnalysisToCache, saveOwnerAnalysisToCache } from '@/lib/analysisCache';
+import { clearRepoHistory, getRepoHistory, saveRepoToHistory, updateRepoHistoryItem, HistoryItem } from '@/lib/history';
+import { clearAnalysisCache, getCachedAnalysis, saveAnalysisToCache } from '@/lib/analysisCache';
+import { clearLocalReports, getLocalReport, saveLocalReport } from '@/lib/localReports';
 import { triggerCelebration } from '@/lib/confetti';
 import { useAppSettings } from '@/lib/settingsContext';
+import { Link, useRouter } from '@/i18n/navigation';
 import { AlertCircle, ArrowUpRight, Check, Download, RefreshCw, ScanSearch, ShieldAlert, Terminal } from 'lucide-react';
 
-export default function Home() {
+export default function Home({ reportId }: { reportId?: string }) {
   const { t, locale } = useAppSettings();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RepoAnalysisResult | null>(null);
@@ -49,6 +52,17 @@ export default function Home() {
   // GitHub token
   const [githubToken, setgithubToken] = useState('');
 
+  const openReport = (
+    nextResult: RepoAnalysisResult,
+    nextOwnerAnalysis: OwnerAnalysisResult | null,
+    existingReportId?: string | null,
+  ) => {
+    const nextReportId = existingReportId ?? saveLocalReport({ result: nextResult, ownerAnalysis: nextOwnerAnalysis });
+    if (nextReportId) {
+      router.push(`/report/${nextReportId}`);
+    }
+  };
+
   const getGradeBadgeClass = (grade: string) => {
     if (grade === 'A+' || grade === 'A') return 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300';
     if (grade === 'B') return 'bg-sky-500/20 border-sky-500/50 text-sky-300';
@@ -68,7 +82,19 @@ export default function Home() {
     // Tokens used by older versions are removed rather than kept in persistent storage.
     localStorage.removeItem('upcheck_github_token');
     setHistory(getRepoHistory());
-  }, []);
+    if (!reportId) return;
+
+    const storedReport = getLocalReport(reportId);
+    if (!storedReport) {
+      setError(t('report.expired'));
+      return;
+    }
+
+    setResult(storedReport.result);
+    setOwnerAnalysis(storedReport.ownerAnalysis);
+    setTableFilter('needs_attention');
+    setIsScanOpen(false);
+  }, [reportId]);
 
   useEffect(() => {
     if (!result || !inventoryViewportRef.current || !inventoryContentRef.current) return;
@@ -96,17 +122,16 @@ export default function Home() {
     if (!forceRefresh && !Array.isArray(target)) {
       const cachedResult = getCachedAnalysis(target);
       if (cachedResult) {
-        setOwnerAnalysis(null);
-        setResult(cachedResult);
+        const cachedReportId = saveLocalReport({ result: cachedResult, ownerAnalysis: null });
         setHistory(updateRepoHistoryItem(cachedResult.repoInfo.fullName, {
           repoUrl: cachedResult.repoInfo.fullName,
           score: cachedResult.healthScore.score,
           grade: cachedResult.healthScore.grade,
           totalPackages: cachedResult.totalPackages,
           criticalCount: cachedResult.summaryCounts.critical,
+          analysisKey: cachedReportId || undefined,
         }));
-        setTableFilter('needs_attention');
-        setIsScanOpen(false);
+        openReport(cachedResult, null, cachedReportId);
         return;
       }
     }
@@ -151,7 +176,7 @@ export default function Home() {
         ? (data.data as OwnerAnalysisResult).results[0]
         : data.data as RepoAnalysisResult;
       const batch = data.mode === 'owner' ? data.data as OwnerAnalysisResult : null;
-      const reportKey = batch ? saveOwnerAnalysisToCache(batch) : null;
+      const reportKey = saveLocalReport({ result: activeResult, ownerAnalysis: batch });
       const updatedHistory = saveRepoToHistory(batch ? {
         fullName: batch.owner,
         repoUrl: '',
@@ -170,8 +195,11 @@ export default function Home() {
         grade: activeResult.healthScore.grade,
         totalPackages: activeResult.totalPackages,
         criticalCount: activeResult.summaryCounts.critical,
+        analysisKey: reportKey || undefined,
       });
       setHistory(updatedHistory);
+
+      openReport(activeResult, batch, reportKey);
 
       if (activeResult.healthScore.score >= 85) {
         triggerCelebration();
@@ -202,10 +230,20 @@ export default function Home() {
         throw new Error(data.error || 'Failed to analyze package.json dependencies.');
       }
 
-      setResult(data.data);
-      setOwnerAnalysis(null);
-      setTableFilter('needs_attention');
-      setIsScanOpen(false);
+      const reportResult = data.data as RepoAnalysisResult;
+      saveAnalysisToCache(reportResult);
+      const reportKey = saveLocalReport({ result: reportResult, ownerAnalysis: null });
+      setHistory(saveRepoToHistory({
+        fullName: title,
+        repoUrl: '',
+        score: reportResult.healthScore.score,
+        grade: reportResult.healthScore.grade,
+        totalPackages: reportResult.totalPackages,
+        criticalCount: reportResult.summaryCounts.critical,
+        isCustomJson: true,
+        analysisKey: reportKey || undefined,
+      }));
+      openReport(reportResult, null, reportKey);
 
       if (data.data.healthScore.score >= 85) {
         triggerCelebration();
@@ -218,15 +256,11 @@ export default function Home() {
   };
 
   const handleSelectHistoryItem = (item: HistoryItem) => {
+    if (item.analysisKey) {
+      router.push(`/report/${item.analysisKey}`);
+      return;
+    }
     if (item.isMultiScan) {
-      const cachedReport = item.analysisKey ? getCachedOwnerAnalysis(item.analysisKey) : null;
-      if (cachedReport?.results.length) {
-        setOwnerAnalysis(cachedReport);
-        setResult(cachedReport.results[0]);
-        setTableFilter('needs_attention');
-        setIsScanOpen(false);
-        return;
-      }
       if (item.repositoryTargets?.length) {
         void handleAnalyzeRepo(item.repositoryTargets, true);
       }
@@ -268,7 +302,9 @@ export default function Home() {
       setResult(refreshedResult);
       setOwnerAnalysis(refreshedOwnerAnalysis);
       saveAnalysisToCache(refreshedResult);
-      const reportKey = saveOwnerAnalysisToCache(refreshedOwnerAnalysis);
+      const reportKey = reportId
+        ? saveLocalReport({ result: refreshedResult, ownerAnalysis: refreshedOwnerAnalysis }, reportId)
+        : saveLocalReport({ result: refreshedResult, ownerAnalysis: refreshedOwnerAnalysis });
       const activeOwnerResult = refreshedOwnerAnalysis.results[0];
       const historyAfterOwnerUpdate = updateRepoHistoryItem(ownerAnalysis.owner, {
         analysisKey: reportKey || undefined,
@@ -306,6 +342,13 @@ export default function Home() {
     void handleAnalyzeRepo(ownerAnalysis.results.map((repository) => repository.repoInfo.fullName), true);
   };
 
+  const handleClearLocalReports = () => {
+    clearLocalReports();
+    clearRepoHistory();
+    clearAnalysisCache();
+    setHistory([]);
+  };
+
   const handleSelectUpdatePreset = (preset: UpdatePreset) => {
     const filters: Record<UpdatePreset, TableFilterTab> = {
       security: 'security',
@@ -338,6 +381,7 @@ export default function Home() {
               githubToken={githubToken}
               history={history}
               onSelectHistoryItem={handleSelectHistoryItem}
+              onClearHistory={handleClearLocalReports}
               onOpenTokenModal={() => setShowTokenModal(true)}
               compact={Boolean(result)}
             />
@@ -369,22 +413,28 @@ export default function Home() {
         {/* Scanned report */}
         {result && (
           <div className="h-full min-h-0 flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-3 duration-300">
-            <section className="shrink-0 border border-slate-800 bg-slate-900/80 px-5 py-4 flex flex-col lg:flex-row lg:items-center gap-4">
+            <section className="shrink-0 border border-slate-800 bg-slate-900/80 px-4 py-4 sm:px-5 flex flex-col lg:flex-row lg:items-center gap-4">
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-4 min-w-0">
+                <div className="flex items-start gap-3 sm:items-center sm:gap-4 min-w-0">
                   <span className={`shrink-0 inline-flex flex-col items-center justify-center w-16 h-16 border ${getGradeBadgeClass(result.healthScore.grade)}`}>
                     <span className="text-3xl font-black leading-none">{result.healthScore.grade}</span>
                     <span className="mt-1.5 text-[9px] font-bold tracking-[0.14em] leading-none text-white">SCORE</span>
                   </span>
                   <div className="min-w-0">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <div className="min-w-0 truncate font-mono text-sm text-emerald-300">{result.repoInfo.fullName}</div>
-                      <span aria-hidden="true" className="h-3 border-l border-slate-700" />
+                    <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                      <div className="min-w-0 break-all font-mono text-xs text-emerald-300 sm:text-sm">{result.repoInfo.fullName}</div>
+                      <span aria-hidden="true" className="hidden h-3 border-l border-slate-700 sm:block" />
                       <time
                         dateTime={result.analyzedAt}
-                        className="inline-flex shrink-0 items-center gap-1.5 text-[11px] text-slate-400 whitespace-nowrap"
+                        className="inline-flex min-w-0 items-center text-[9px] text-slate-400 whitespace-nowrap sm:text-[11px]"
+                        title={`${t('overview.last_scan')} · ${new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'short' }).format(new Date(result.analyzedAt))}`}
                       >
-                        <span>{t('overview.last_scan')} · {new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'short' }).format(new Date(result.analyzedAt))}</span>
+                        <span className="sm:hidden">
+                          {new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(result.analyzedAt))}
+                        </span>
+                        <span className="hidden sm:inline">
+                          {t('overview.last_scan')} · {new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'short' }).format(new Date(result.analyzedAt))}
+                        </span>
                       </time>
                     </div>
                     <div className="mt-0.5 text-sm text-slate-400">
@@ -410,33 +460,33 @@ export default function Home() {
               </div>
             </section>
 
-            <section className="shrink-0 grid grid-cols-2 lg:grid-cols-4 gap-3" aria-label="Report metrics">
-              <button type="button" onClick={() => setTableFilter('all')} className="text-left border border-slate-800 bg-slate-900/60 px-3 py-2.5 hover:border-emerald-500/50 transition-colors cursor-pointer">
-                <div className="text-[10px] uppercase tracking-wider text-slate-400">{t('metrics.packages_checked')}</div>
+            <section className="shrink-0 grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3" aria-label="Report metrics">
+              <button type="button" onClick={() => setTableFilter('all')} className="min-w-0 min-h-[5rem] text-left border border-slate-800 bg-slate-900/60 px-2.5 py-2 sm:px-3 sm:py-2.5 hover:border-emerald-500/50 transition-colors cursor-pointer">
+                <div className="break-words text-[9px] uppercase tracking-wide text-slate-400 sm:text-[10px] sm:tracking-wider">{t('metrics.packages_checked')}</div>
                 <div className="mt-1 flex items-end justify-between gap-2"><strong className="text-2xl text-white">{result.totalPackages}</strong><span className="text-[11px] text-slate-500">{result.dependenciesCount} deps</span></div>
               </button>
-              <button type="button" onClick={() => setTableFilter('security')} className="text-left border border-slate-800 bg-slate-900/60 px-3 py-2.5 hover:border-red-500/50 transition-colors cursor-pointer">
-                <div className="text-[10px] uppercase tracking-wider text-slate-400">{t('metrics.security_alerts')}</div>
+              <button type="button" onClick={() => setTableFilter('security')} className="min-w-0 min-h-[5rem] text-left border border-slate-800 bg-slate-900/60 px-2.5 py-2 sm:px-3 sm:py-2.5 hover:border-red-500/50 transition-colors cursor-pointer">
+                <div className="break-words text-[9px] uppercase tracking-wide text-slate-400 sm:text-[10px] sm:tracking-wider">{t('metrics.security_alerts')}</div>
                 <div className="mt-1 flex items-end justify-between gap-2"><strong className="text-2xl text-red-400">{result.summaryCounts.critical + result.summaryCounts.security}</strong><ShieldAlert className="w-4 h-4 text-red-400" /></div>
               </button>
-              <button type="button" onClick={() => setTableFilter('needs_attention')} className="text-left border border-slate-800 bg-slate-900/60 px-3 py-2.5 hover:border-amber-500/50 transition-colors cursor-pointer">
-                <div className="text-[10px] uppercase tracking-wider text-slate-400">{t('metrics.need_update')}</div>
+              <button type="button" onClick={() => setTableFilter('needs_attention')} className="min-w-0 min-h-[5rem] text-left border border-slate-800 bg-slate-900/60 px-2.5 py-2 sm:px-3 sm:py-2.5 hover:border-amber-500/50 transition-colors cursor-pointer">
+                <div className="break-words text-[9px] uppercase tracking-wide text-slate-400 sm:text-[10px] sm:tracking-wider">{t('metrics.need_update')}</div>
                 <div className="mt-1 flex items-end justify-between gap-2"><strong className="text-2xl text-amber-300">{result.packages.filter((pkg) => pkg.category !== 'up_to_date' && !pkg.isUpdateDeferred).length}</strong><ArrowUpRight className="w-4 h-4 text-amber-400" /></div>
               </button>
-              <button type="button" onClick={() => setTableFilter('up_to_date')} className="text-left border border-slate-800 bg-slate-900/60 px-3 py-2.5 hover:border-emerald-500/50 transition-colors cursor-pointer">
-                <div className="text-[10px] uppercase tracking-wider text-slate-400">{t('metrics.up_to_date')}</div>
+              <button type="button" onClick={() => setTableFilter('up_to_date')} className="min-w-0 min-h-[5rem] text-left border border-slate-800 bg-slate-900/60 px-2.5 py-2 sm:px-3 sm:py-2.5 hover:border-emerald-500/50 transition-colors cursor-pointer">
+                <div className="break-words text-[9px] uppercase tracking-wide text-slate-400 sm:text-[10px] sm:tracking-wider">{t('metrics.up_to_date')}</div>
                 <div className="mt-1 flex items-end justify-between gap-2"><strong className="text-2xl text-emerald-400">{result.summaryCounts.up_to_date}</strong><Check className="mb-1 h-4 w-4 text-emerald-400" aria-hidden="true" /></div>
               </button>
             </section>
 
             <div className="min-h-0 flex-1 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_480px] lg:grid-rows-[minmax(0,1fr)] gap-4">
-              <section className="h-full min-h-0 flex flex-col" aria-label="Package breakdown">
+              <section className="package-breakdown h-[clamp(24rem,58dvh,36rem)] min-h-0 flex flex-col lg:h-full" aria-label="Package breakdown">
                 <div className="shrink-0 flex items-center justify-between gap-3 pb-3">
                   <h3 className="text-sm font-bold text-white">{t('table.title')}</h3>
                   <span className="text-xs font-mono text-slate-400">{result.packages.length}</span>
                 </div>
-                <div ref={inventoryViewportRef} className="min-h-0 flex-1 overflow-y-auto pr-1">
-                  <div ref={inventoryContentRef}>
+                <div ref={inventoryViewportRef} className="package-breakdown-viewport min-h-0 flex-1 overflow-y-auto pr-1">
+                  <div ref={inventoryContentRef} className="package-breakdown-content">
                     <PackageTable
                       packages={result.packages}
                       externalTab={tableFilter}
@@ -468,8 +518,8 @@ export default function Home() {
         <footer className="mt-0 shrink-0 border-t border-slate-800/60 px-4 py-6 text-center text-xs text-slate-400 lg:py-3">
           <p>© {new Date().getFullYear()} upcheck.autem.dev — {t('footer.rights')}</p>
           <nav className="mt-2 flex justify-center gap-4" aria-label="Legal">
-            <a href="/privacy" className="hover:text-emerald-300">Privacy</a>
-            <a href="/terms" className="hover:text-emerald-300">Terms</a>
+            <Link href="/privacy" className="hover:text-emerald-300">{t('footer.privacy')}</Link>
+            <Link href="/terms" className="hover:text-emerald-300">{t('footer.terms')}</Link>
           </nav>
         </footer>
       )}

@@ -38,7 +38,9 @@
     "banner_token_link": "Gérer votre jeton GitHub."
   },
   "footer": {
-    "rights": "Tous droits réservés."
+    "rights": "Tous droits réservés.",
+    "privacy": "Confidentialité",
+    "terms": "Conditions"
   },
   "report": {
     "kicker": "Rapport d’analyse",
@@ -46,7 +48,8 @@
     "complete": "Analyse terminée",
     "open_scan": "Analyser un autre dépôt",
     "close_scan": "Masquer l’analyseur",
-    "inventory": "Inventaire des paquets"
+    "inventory": "Inventaire des paquets",
+    "expired": "Ce rapport temporaire n’est plus disponible. Lancez une nouvelle analyse pour créer un autre lien de rapport."
   },
   "alerts": {
     "priority": "Points prioritaires",
@@ -92,6 +95,7 @@
     "multi_scan": "Scan multiple",
     "repositories": "dépôts",
     "recent_hint": "Ouvrir le dernier rapport",
+    "clear_recent": "Effacer les rapports locaux",
     "placeholder": "URL GitHub, owner/repo ou nom d’utilisateur...",
     "single_placeholder": "owner/repository",
     "single_repo_error": "Saisissez le propriétaire et le dépôt (par exemple : vercel/next.js).",
@@ -301,6 +305,41 @@
     "latest_note": "Toutes les dépendances définies à la dernière version",
     "copy_json": "Copier le JSON",
     "download_json": "Télécharger"
+  },
+  "cookie": {
+    "message": "Upcheck n’utilise aucun cookie publicitaire ou analytique. Il conserve uniquement l’historique et le cache des analyses dans ce navigateur ; un jeton GitHub facultatif reste en mémoire pendant la session.",
+    "learn_more": "En savoir plus",
+    "dismiss": "Compris"
+  },
+  "legal": {
+    "back": "← Retour à Upcheck",
+    "updated": "Dernière mise à jour : 16 octobre 2026",
+    "privacy": {
+      "title": "Avis de confidentialité",
+      "description": "Comment Upcheck traite les manifestes de dépôt, le stockage du navigateur et les jetons GitHub facultatifs.",
+      "processing_title": "Ce qu’Upcheck traite",
+      "processing_text": "Upcheck reçoit l’identifiant du dépôt ou le contenu du fichier package.json que vous soumettez afin de récupérer les métadonnées des paquets auprès de GitHub et npm, puis de vérifier les vulnérabilités connues avec OSV. Votre code source n’est pas nécessaire pour effectuer une analyse.",
+      "storage_title": "Stockage local du navigateur",
+      "storage_text": "Votre préférence de langue, la liste des analyses récentes et les résultats mis en cache sont stockés dans le stockage local de votre navigateur. Ils ne sont pas enregistrés dans une base de données Upcheck. Vous pouvez les supprimer depuis les paramètres de votre navigateur.",
+      "token_title": "Jeton GitHub",
+      "token_text": "Si vous ajoutez un jeton, il reste uniquement dans la mémoire de la page et est effacé lorsque vous actualisez ou fermez celle-ci. Le navigateur l’envoie seulement avec la requête d’analyse afin qu’Upcheck puisse appeler GitHub pour vous. Utilisez un jeton en lecture seule avec le périmètre minimal et ne le partagez jamais sur un appareil partagé.",
+      "services_title": "Services tiers",
+      "services_text": "L’analyse interroge GitHub, le registre npm et la base de vulnérabilités OSV. Ces services traitent les requêtes selon leurs propres politiques. Les fournisseurs d’infrastructure peuvent conserver des journaux techniques de sécurité nécessaires au fonctionnement du service.",
+      "cookies_title": "Cookies",
+      "cookies_text": "Upcheck n’utilise aucun cookie publicitaire ou analytique. La fermeture de l’avis de confidentialité et les préférences de l’application sont stockées localement dans le navigateur."
+    },
+    "terms": {
+      "title": "Conditions d’utilisation",
+      "description": "Conditions régissant l’utilisation du service d’analyse des dépendances Upcheck.",
+      "purpose_title": "Objet du service",
+      "purpose_text": "Upcheck vous aide à examiner les manifestes de dépendances JavaScript afin d’identifier les versions disponibles, les dépréciations et les vulnérabilités connues. Il s’agit d’un outil d’information, sans garantie qu’un projet sera sécurisé ou compatible après une mise à jour.",
+      "responsibilities_title": "Vos responsabilités",
+      "responsibilities_text": "Ne soumettez que des dépôts et manifestes que vous êtes autorisé à analyser. Consultez les journaux de modifications, les lockfiles et les résultats des tests avant d’appliquer des commandes ou recommandations générées. Gardez tout jeton GitHub confidentiel et utilisez le périmètre minimal requis.",
+      "data_title": "Données tierces",
+      "data_text": "Les résultats dépendent des données de GitHub, npm et OSV, qui peuvent être incomplètes, retardées ou inexactes. Upcheck n’est pas responsable des changements apportés à ces services ni des décisions prises à partir de leurs données.",
+      "availability_title": "Disponibilité et modifications",
+      "availability_text": "Le service peut être modifié, suspendu ou interrompu. Les fonctionnalités sont fournies telles quelles, sans garantie de disponibilité ininterrompue ni d’adéquation à un usage particulier."
+    }
   },
   "export": {
     "title": "Exporter l’audit des dépendances",

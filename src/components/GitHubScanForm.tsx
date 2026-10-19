@@ -106,13 +106,13 @@ export function GitHubScanForm({
               key={option}
               type='button'
               onClick={() => switchMode(option)}
-              className={`inline-flex min-w-0 items-center justify-center gap-2 px-2 py-3 text-xs font-semibold transition-colors lg:py-3.5 cursor-pointer ${
+              className={`inline-flex h-12 min-w-0 items-center justify-center gap-1 px-1 py-1 text-center text-[10px] font-semibold leading-tight transition-colors sm:h-auto sm:gap-2 sm:px-2 sm:py-3 sm:text-xs lg:py-3.5 cursor-pointer ${
                 active
                   ? 'bg-slate-100 text-slate-950'
                   : 'text-slate-400 hover:text-slate-100'
               }`}
             >
-              {option === 'single' ? <GithubIcon className='w-3.5 h-3.5' /> : <Layers className='w-3.5 h-3.5' />}
+              {option === 'single' ? <GithubIcon className='hidden w-3.5 h-3.5 sm:block' /> : <Layers className='hidden w-3.5 h-3.5 sm:block' />}
               {t(`input.${option === 'single' ? 'single_repo' : 'multiple_repos'}`)}
             </button>
           );

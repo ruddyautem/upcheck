@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { RepoAnalysisResult } from '@/types';
-import { X, Copy, Check, Terminal, Download } from 'lucide-react';
+import { X, Copy, Terminal, Download } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAppSettings } from '@/lib/settingsContext';
 import { buildUpdateCommand, getUpdatePresetPackages } from '@/lib/updateCommands';
 
@@ -13,7 +14,6 @@ interface RemediationModalProps {
 
 export function RemediationModal({ result, onClose }: RemediationModalProps) {
   const { t } = useAppSettings();
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'scripts' | 'packageJson'>('packageJson');
 
   const { packages } = result;
@@ -27,10 +27,9 @@ export function RemediationModal({ result, onClose }: RemediationModalProps) {
   // 3. Outdated packages
   const allOutdated = getUpdatePresetPackages(packages, 'all');
 
-  const copyText = (text: string, key: string) => {
+  const copyText = async (text: string, tone: 'red' | 'blue' | 'teal' = 'teal') => {
     navigator.clipboard.writeText(text);
-    setCopiedKey(key);
-    setTimeout(() => setCopiedKey(null), 2000);
+    toast.success(t('cart.copied'), { className: `upcheck-toast--${tone}` });
   };
 
   // Build commands
@@ -140,10 +139,10 @@ export function RemediationModal({ result, onClose }: RemediationModalProps) {
                     </span>
                   </div>
                   <button
-                    onClick={() => copyText(bunVulnCmd, 'vuln')}
+                    onClick={() => copyText(bunVulnCmd, 'red')}
                     className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 text-xs font-mono transition-colors cursor-pointer"
                   >
-                    {copiedKey === 'vuln' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    <Copy className="w-3.5 h-3.5" />
                     <span>{t('remediation.copy_cmd')}</span>
                   </button>
                 </div>
@@ -162,10 +161,10 @@ export function RemediationModal({ result, onClose }: RemediationModalProps) {
                     </span>
                   </div>
                   <button
-                    onClick={() => copyText(bunSafeCmd, 'safe')}
+                    onClick={() => copyText(bunSafeCmd, 'blue')}
                     className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 text-xs font-mono transition-colors cursor-pointer"
                   >
-                    {copiedKey === 'safe' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    <Copy className="w-3.5 h-3.5" />
                     <span>{t('remediation.copy_cmd')}</span>
                   </button>
                 </div>
@@ -184,10 +183,10 @@ export function RemediationModal({ result, onClose }: RemediationModalProps) {
                     </span>
                   </div>
                   <button
-                    onClick={() => copyText(bunAllCmd, 'all')}
+                    onClick={() => copyText(bunAllCmd, 'teal')}
                     className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-xs font-mono transition-colors cursor-pointer"
                   >
-                    {copiedKey === 'all' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    <Copy className="w-3.5 h-3.5" />
                     <span>{t('remediation.copy_cmd')}</span>
                   </button>
                 </div>
@@ -204,10 +203,10 @@ export function RemediationModal({ result, onClose }: RemediationModalProps) {
                 </span>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => copyText(jsonString, 'json')}
+                    onClick={() => copyText(jsonString, 'blue')}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono transition-colors cursor-pointer"
                   >
-                    {copiedKey === 'json' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <Copy className="w-3.5 h-3.5" />
                     <span>{t('remediation.copy_json')}</span>
                   </button>
                   <button

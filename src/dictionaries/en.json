@@ -38,7 +38,9 @@
     "banner_token_link": "Access your GitHub Token."
   },
   "footer": {
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "privacy": "Privacy",
+    "terms": "Terms"
   },
   "report": {
     "kicker": "Scan report",
@@ -46,7 +48,8 @@
     "complete": "Analysis complete",
     "open_scan": "Scan another repository",
     "close_scan": "Hide scanner",
-    "inventory": "Package inventory"
+    "inventory": "Package inventory",
+    "expired": "This temporary report is no longer available. Run a new scan to create another report link."
   },
   "alerts": {
     "priority": "Priority findings",
@@ -92,6 +95,7 @@
     "multi_scan": "Multiple scan",
     "repositories": "repos",
     "recent_hint": "Open the latest report",
+    "clear_recent": "Clear local reports",
     "placeholder": "GitHub URL, owner/repo, or username...",
     "single_placeholder": "owner/repository",
     "single_repo_error": "Enter both the owner and repository name (for example: vercel/next.js).",
@@ -301,6 +305,41 @@
     "latest_note": "All dependencies set to latest version",
     "copy_json": "Copy JSON",
     "download_json": "Download"
+  },
+  "cookie": {
+    "message": "Upcheck does not use advertising or analytics cookies. It stores your scan history and cache only in this browser; an optional GitHub token stays in memory for the current session.",
+    "learn_more": "Learn more",
+    "dismiss": "Got it"
+  },
+  "legal": {
+    "back": "← Back to Upcheck",
+    "updated": "Last updated: October 16, 2026",
+    "privacy": {
+      "title": "Privacy notice",
+      "description": "How Upcheck processes repository manifests, browser storage and optional GitHub tokens.",
+      "processing_title": "What Upcheck processes",
+      "processing_text": "Upcheck receives the repository identifier or package.json content you submit in order to retrieve package metadata from GitHub and npm and check known vulnerabilities with OSV. It does not need your source code to perform an analysis.",
+      "storage_title": "Local browser storage",
+      "storage_text": "Your language preference, recent scan list and cached analysis results are stored in your browser’s local storage. They are not written to an Upcheck application database. You can remove them through your browser settings.",
+      "token_title": "GitHub token",
+      "token_text": "If you add a token, it remains only in the page’s memory and is cleared when you refresh or close it. The browser sends it only with the analysis request so Upcheck can call GitHub on your behalf. Use a read-only token with the smallest scope necessary and never share it on a shared device.",
+      "services_title": "Third-party services",
+      "services_text": "Analysis queries GitHub, the npm registry and the OSV vulnerability database. Those services process requests according to their own policies. Infrastructure providers may retain technical security logs as required to operate the service.",
+      "cookies_title": "Cookies",
+      "cookies_text": "Upcheck does not use advertising or analytics cookies. The privacy notice dismissal and app preferences are stored locally in the browser."
+    },
+    "terms": {
+      "title": "Terms of use",
+      "description": "Terms governing use of the Upcheck dependency analysis service.",
+      "purpose_title": "Service purpose",
+      "purpose_text": "Upcheck helps you inspect JavaScript dependency manifests for available releases, deprecations and known vulnerability records. It is an informational tool, not a guarantee that a project is secure or compatible after an update.",
+      "responsibilities_title": "Your responsibilities",
+      "responsibilities_text": "Only submit repositories and manifests you are authorized to analyze. Review changelogs, lockfiles and test results before applying generated commands or recommendations. Keep any GitHub token confidential and use the minimum required scope.",
+      "data_title": "Third-party data",
+      "data_text": "Results depend on GitHub, npm and OSV data, which may be incomplete, delayed or inaccurate. Upcheck is not responsible for changes to those services or for decisions made from their data.",
+      "availability_title": "Availability and changes",
+      "availability_text": "The service may be changed, suspended or discontinued. Features are provided as available without a warranty of uninterrupted operation or fitness for a specific purpose."
+    }
   },
   "export": {
     "title": "Export Dependency Audit",

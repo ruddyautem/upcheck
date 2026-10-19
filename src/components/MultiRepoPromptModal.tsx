@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Bot, Check, Copy, Flame, X } from 'lucide-react';
+import { Bot, Copy, Flame, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { PackageManager, RepoAnalysisResult } from '@/types';
 import { buildMultiRepoAiUpdatePrompt, getUpdatePresetPackages, UpdatePreset } from '@/lib/updateCommands';
 import { useAppSettings } from '@/lib/settingsContext';
@@ -54,14 +55,12 @@ export function MultiRepoPromptModal({ repositories, packageManager, onChangePac
   const { language, t } = useAppSettings();
   const [preset, setPreset] = useState<UpdatePreset>('all');
   const [force, setForce] = useState(false);
-  const [copied, setCopied] = useState(false);
   const prompt = buildMultiRepoAiUpdatePrompt(repositories, preset, packageManager, force, language);
 
   const copyPrompt = async () => {
     if (!prompt) return;
     await navigator.clipboard.writeText(prompt);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 2000);
+    toast.success(t('cart.copied'), { className: 'upcheck-toast--violet' });
   };
 
   return (
@@ -77,24 +76,24 @@ export function MultiRepoPromptModal({ repositories, packageManager, onChangePac
 
         <div className="min-h-0 space-y-4 overflow-y-auto p-5">
           <div className="flex flex-wrap gap-1 border border-slate-800 bg-slate-950/60 p-1" aria-label={t('cart.cli_tool')}>
-            {(['bun', 'pnpm', 'npm', 'yarn'] as PackageManager[]).map((manager) => <button key={manager} type="button" onClick={() => { onChangePackageManager(manager); setCopied(false); }} aria-pressed={packageManager === manager} className={`flex-1 min-w-16 px-2 py-1.5 text-xs font-mono font-semibold ${packageManager === manager ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>{manager}</button>)}
+            {(['bun', 'pnpm', 'npm', 'yarn'] as PackageManager[]).map((manager) => <button key={manager} type="button" onClick={() => onChangePackageManager(manager)} aria-pressed={packageManager === manager} className={`flex-1 min-w-16 px-2 py-1.5 text-xs font-mono font-semibold ${packageManager === manager ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>{manager}</button>)}
           </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {presets.map((item) => {
               const count = repositories.reduce((total, repository) => total + getUpdatePresetPackages(repository.packages, item).length, 0);
               const repositoryCount = repositories.filter((repository) => getUpdatePresetPackages(repository.packages, item).length > 0).length;
-              return <button key={item} type="button" onClick={() => { setPreset(item); setCopied(false); }} aria-pressed={preset === item} className={`border px-3 py-2 text-left text-xs font-semibold transition-colors ${preset === item ? 'border-violet-300 bg-violet-500/25 text-violet-100' : 'border-slate-700 bg-slate-950/50 text-slate-300 hover:border-violet-400/60'}`}><span className="block leading-snug">{t(`scripts.${item}`)}</span><span className="mt-1 block font-mono text-[10px] text-slate-400">{count} · {repositoryCount} {t('owner_scan.scanned')}</span></button>;
+              return <button key={item} type="button" onClick={() => setPreset(item)} aria-pressed={preset === item} className={`border px-3 py-2 text-left text-xs font-semibold transition-colors ${preset === item ? 'border-violet-300 bg-violet-500/25 text-violet-100' : 'border-slate-700 bg-slate-950/50 text-slate-300 hover:border-violet-400/60'}`}><span className="block leading-snug">{t(`scripts.${item}`)}</span><span className="mt-1 block font-mono text-[10px] text-slate-400">{count} · {repositoryCount} {t('owner_scan.scanned')}</span></button>;
             })}
           </div>
           <label className={`flex cursor-pointer items-center justify-between gap-3 border p-3 text-xs ${force ? 'border-amber-500/70 bg-amber-500/15' : 'border-amber-500/30 bg-amber-950/15'}`}>
             <span className="flex items-center gap-2 font-semibold text-slate-100"><Flame className="h-4 w-4 text-amber-400" />{t('cart.force_update')}</span>
-            <input type="checkbox" checked={force} onChange={(event) => { setForce(event.target.checked); setCopied(false); }} className="check-control check-control--major" />
+            <input type="checkbox" checked={force} onChange={(event) => setForce(event.target.checked)} className="check-control check-control--major" />
           </label>
           <PromptPreview prompt={prompt || t('scripts.none')} />
         </div>
         <footer className="flex justify-end border-t border-slate-800 p-4">
           <button type="button" disabled={!prompt} onClick={copyPrompt} className="inline-flex items-center gap-2 border border-emerald-500/40 bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-40">
-            {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}{copied ? t('cart.copied') : t('scripts.copy_prompt')}
+            <Copy className="h-3.5 w-3.5" />{t('scripts.copy_prompt')}
           </button>
         </footer>
       </section>

@@ -26,6 +26,7 @@ interface UpcheckScannerProps {
   githubToken?: string;
   history?: HistoryItem[];
   onSelectHistoryItem: (item: HistoryItem) => void;
+  onClearHistory: () => void;
   onOpenTokenModal: () => void;
   compact?: boolean;
 }
@@ -38,6 +39,7 @@ export function UpcheckScanner({
   githubToken,
   history = [],
   onSelectHistoryItem,
+  onClearHistory,
   onOpenTokenModal,
   compact = false,
 }: UpcheckScannerProps) {
@@ -49,8 +51,7 @@ export function UpcheckScanner({
   const recentScans = history
     .filter(
       (item) =>
-        (item.repoUrl || item.isMultiScan) &&
-        !item.isCustomJson &&
+        item.analysisKey &&
         !item.fullName.toLowerCase().includes("demo"),
     )
     .slice(0, 10);
@@ -176,12 +177,12 @@ export function UpcheckScanner({
                       <History className='w-3.5 h-3.5 text-blue-400' />
                       {t("input.recent_group")}
                     </span>
-                    <span className='text-[11px] text-slate-500 hidden sm:inline'>
-                      {t("input.recent_hint")}
-                    </span>
+                    <button type='button' onClick={onClearHistory} className='text-[11px] text-slate-500 hover:text-emerald-300 cursor-pointer'>
+                      {t("input.clear_recent")}
+                    </button>
                   </div>
 
-                  <div className='grid min-h-60 grid-cols-1 gap-2.5 sm:grid-cols-2'>
+                  <div className='grid grid-cols-1 gap-2.5 sm:grid-cols-2'>
                     {recentScans.map((item) => {
                       const checkedAt = formatCheckedAt(item.timestamp);
 
@@ -214,11 +215,11 @@ export function UpcheckScanner({
                           </div>
                           <time
                             dateTime={item.timestamp}
-                            className='mt-1 flex items-center gap-1 text-[10px] text-slate-500'
+                            className='mt-1 flex min-w-0 items-center gap-1 whitespace-nowrap text-[9px] text-slate-500 sm:text-[10px]'
                             title={checkedAt}
                           >
                             <Clock className='h-3 w-3 shrink-0 text-emerald-400' aria-hidden='true' />
-                            <span className='truncate'>{checkedAt}</span>
+                            <span className='min-w-0 truncate'>{checkedAt}</span>
                           </time>
                         </div>
                       </button>
