@@ -76,7 +76,7 @@ export function MultiRepoPromptModal({ repositories, packageManager, onChangePac
 
         <div className="min-h-0 space-y-4 overflow-y-auto p-5">
           <div className="flex flex-wrap gap-1 border border-slate-800 bg-slate-950/60 p-1" aria-label={t('cart.cli_tool')}>
-            {(['bun', 'pnpm', 'npm', 'yarn'] as PackageManager[]).map((manager) => <button key={manager} type="button" onClick={() => onChangePackageManager(manager)} aria-pressed={packageManager === manager} className={`flex-1 min-w-16 px-2 py-1.5 text-xs font-mono font-semibold ${packageManager === manager ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>{manager}</button>)}
+            {(['bun', 'pnpm', 'npm', 'yarn'] as PackageManager[]).map((manager) => <button key={manager} type="button" onClick={() => onChangePackageManager(manager)} aria-pressed={packageManager === manager} className={`grid flex-1 min-w-16 place-items-center px-2 py-1.5 text-center text-xs font-mono font-semibold ${packageManager === manager ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>{manager}</button>)}
           </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {presets.map((item) => {
@@ -92,7 +92,7 @@ export function MultiRepoPromptModal({ repositories, packageManager, onChangePac
           <PromptPreview prompt={prompt || t('scripts.none')} />
         </div>
         <footer className="flex justify-end border-t border-slate-800 p-4">
-          <button type="button" disabled={!prompt} onClick={copyPrompt} className="inline-flex items-center gap-2 border border-emerald-500/40 bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-40">
+          <button type="button" disabled={!prompt} onClick={copyPrompt} className="inline-flex items-center justify-center gap-2 border border-emerald-500/40 bg-emerald-600 px-4 py-2 text-center text-xs font-bold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-40">
             <Copy className="h-3.5 w-3.5" />{t('scripts.copy_prompt')}
           </button>
         </footer>

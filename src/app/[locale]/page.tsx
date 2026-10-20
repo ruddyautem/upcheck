@@ -39,8 +39,6 @@ export default function Home({ reportId }: { reportId?: string }) {
   // Script package manager
   const [packageManager, setPackageManager] = useState<PackageManager>('bun');
   const inventoryViewportRef = useRef<HTMLDivElement>(null);
-  const inventoryContentRef = useRef<HTMLDivElement>(null);
-  const [inventoryHeight, setInventoryHeight] = useState<number | null>(null);
 
   // Modals
   const [showRemediation, setShowRemediation] = useState(false);
@@ -95,24 +93,6 @@ export default function Home({ reportId }: { reportId?: string }) {
     setTableFilter('needs_attention');
     setIsScanOpen(false);
   }, [reportId]);
-
-  useEffect(() => {
-    if (!result || !inventoryViewportRef.current || !inventoryContentRef.current) return;
-    const viewport = inventoryViewportRef.current;
-    const content = inventoryContentRef.current;
-    const updateHeight = () => {
-      const table = content.querySelector('table.package-table');
-      const rowSpacing = table ? Number.parseFloat(getComputedStyle(table).borderSpacing.split(' ')[1] || '0') : 0;
-      const expandedHeight = Array.from(content.querySelectorAll<HTMLElement>('[data-package-details-row]'))
-        .reduce((height, row) => height + row.getBoundingClientRect().height + rowSpacing, 0);
-      setInventoryHeight(Math.min(viewport.clientHeight, content.getBoundingClientRect().height - expandedHeight));
-    };
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(viewport);
-    observer.observe(content);
-    updateHeight();
-    return () => observer.disconnect();
-  }, [result]);
 
   const handleSaveToken = (token: string) => {
     setgithubToken(token);
@@ -361,7 +341,7 @@ export default function Home({ reportId }: { reportId?: string }) {
   };
 
   return (
-    <div className={`app-shell text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white antialiased ${result && !isScanOpen ? 'min-h-screen lg:h-screen lg:overflow-hidden' : !result && !error ? 'min-h-screen lg:h-dvh lg:overflow-hidden' : 'min-h-screen'}`}>
+    <div className={`app-shell text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white antialiased ${!result && !error ? 'min-h-screen lg:h-dvh lg:overflow-hidden' : 'min-h-screen'}`}>
       {/* Top Header */}
       <Header
         onOpenTokenModal={() => setShowTokenModal(true)}
@@ -370,7 +350,7 @@ export default function Home({ reportId }: { reportId?: string }) {
       />
 
       {/* Main Container */}
-      <main className={`flex-1 min-h-0 max-w-[1480px] w-full mx-auto px-4 sm:px-7 lg:px-10 ${result && !isScanOpen ? 'py-4 lg:overflow-hidden' : !result && !error ? 'flex flex-col py-8 lg:overflow-hidden lg:py-4' : 'py-8 lg:py-12'} space-y-8 lg:space-y-10`}>
+      <main className={`flex-1 min-h-0 max-w-[1480px] w-full mx-auto px-4 sm:px-7 lg:px-10 ${!result && !error ? 'flex flex-col py-8 lg:overflow-hidden lg:py-4' : 'py-8 lg:py-12'} space-y-8 lg:space-y-10`}>
         {(!result || isScanOpen) && (
           <section className={`w-full transition-all ${result ? 'p-4 sm:p-6 rounded-2xl bg-slate-900/60 border border-slate-800' : 'flex flex-1 flex-col lg:min-h-0'}`}>
             <UpcheckScanner
@@ -413,20 +393,20 @@ export default function Home({ reportId }: { reportId?: string }) {
         {/* Scanned report */}
         {result && (
           <div className="h-full min-h-0 flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-3 duration-300">
-            <section className="shrink-0 border border-slate-800 bg-slate-900/80 px-4 py-4 sm:px-5 flex flex-col lg:flex-row lg:items-center gap-4">
+            <section className="shrink-0 border border-slate-800 bg-slate-900/80 px-4 py-4 sm:px-5 flex flex-col xl:flex-row xl:items-center gap-4">
               <div className="min-w-0 flex-1">
                 <div className="flex items-start gap-3 sm:items-center sm:gap-4 min-w-0">
                   <span className={`shrink-0 inline-flex flex-col items-center justify-center w-16 h-16 border ${getGradeBadgeClass(result.healthScore.grade)}`}>
                     <span className="text-3xl font-black leading-none">{result.healthScore.grade}</span>
                     <span className="mt-1.5 text-[9px] font-bold tracking-[0.14em] leading-none text-white">SCORE</span>
                   </span>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                       <div className="min-w-0 break-all font-mono text-xs text-emerald-300 sm:text-sm">{result.repoInfo.fullName}</div>
                       <span aria-hidden="true" className="hidden h-3 border-l border-slate-700 sm:block" />
                       <time
                         dateTime={result.analyzedAt}
-                        className="inline-flex min-w-0 items-center text-[9px] text-slate-400 whitespace-nowrap sm:text-[11px]"
+                        className="inline-flex min-w-0 max-w-full items-center text-[9px] text-slate-400 whitespace-normal sm:text-[11px]"
                         title={`${t('overview.last_scan')} · ${new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'short' }).format(new Date(result.analyzedAt))}`}
                       >
                         <span className="sm:hidden">
@@ -443,19 +423,19 @@ export default function Home({ reportId }: { reportId?: string }) {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                 <button type="button" onClick={handleRescan} disabled={isLoading} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border border-slate-700 text-slate-200 hover:text-white hover:border-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+              <div className="flex flex-wrap items-center gap-2 max-[480px]:grid max-[480px]:grid-cols-2">
+                 <button type="button" onClick={handleRescan} disabled={isLoading} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border border-slate-700 text-slate-200 hover:text-white hover:border-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer max-[480px]:w-full max-[480px]:justify-center">
                    <RefreshCw className={`w-3.5 h-3.5 text-emerald-400 ${isLoading ? 'animate-spin' : ''}`} />
                    {t('overview.rescan')}
                  </button>
-                <button type="button" onClick={() => setShowRemediation(true)} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border border-slate-700 text-slate-200 hover:text-white hover:border-emerald-500/50 cursor-pointer">
+                <button type="button" onClick={() => setShowRemediation(true)} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border border-slate-700 text-slate-200 hover:text-white hover:border-emerald-500/50 cursor-pointer max-[480px]:w-full max-[480px]:justify-center">
                   <Terminal className="w-3.5 h-3.5 text-emerald-400" /> {t('overview.package_json')}
                 </button>
-                <button type="button" onClick={() => setShowExport(true)} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border border-slate-700 text-slate-200 hover:text-white hover:border-emerald-500/50 cursor-pointer">
+                <button type="button" onClick={() => setShowExport(true)} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border border-slate-700 text-slate-200 hover:text-white hover:border-emerald-500/50 cursor-pointer max-[480px]:w-full max-[480px]:justify-center">
                   <Download className="w-3.5 h-3.5 text-emerald-400" /> {t('overview.export')}
                 </button>
-                <button type="button" onClick={() => setIsScanOpen((open) => !open)} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-500 cursor-pointer" aria-expanded={isScanOpen}>
-                  <ScanSearch className="w-3.5 h-3.5" /> {isScanOpen ? t('report.close_scan') : t('report.open_scan')}
+                <button type="button" onClick={() => setIsScanOpen((open) => !open)} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-500 cursor-pointer max-[480px]:w-full max-[480px]:justify-center" aria-expanded={isScanOpen}>
+                  <ScanSearch className="w-3.5 h-3.5" /> {isScanOpen ? t('report.close_scan') : <><span className="max-[480px]:hidden">{t('report.open_scan')}</span><span className="hidden max-[480px]:inline">{t('report.open_scan_short')}</span></>}
                 </button>
               </div>
             </section>
@@ -479,14 +459,21 @@ export default function Home({ reportId }: { reportId?: string }) {
               </button>
             </section>
 
-            <div className="min-h-0 flex-1 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_480px] lg:grid-rows-[minmax(0,1fr)] gap-4">
-              <section className="package-breakdown h-[clamp(24rem,58dvh,36rem)] min-h-0 flex flex-col lg:h-full" aria-label="Package breakdown">
+            <div className="content-start min-h-0 grid flex-1 grid-cols-1 gap-4 xl:[--report-panel-height:clamp(24rem,48dvh,32rem)] 2xl:[--report-panel-height:clamp(34rem,76dvh,48rem)] xl:grid-cols-[minmax(0,1fr)_clamp(13rem,24vw,22rem)] xl:grid-rows-[3.25rem_var(--report-panel-height)]">
+              <UpdateScriptsPanel
+                key={result.repoInfo.fullName}
+                packages={result.packages}
+                packageManager={packageManager}
+                onChangePackageManager={setPackageManager}
+                onSelectPreset={handleSelectUpdatePreset}
+              />
+              <section className="package-breakdown order-2 min-h-0 flex flex-col xl:col-start-1 xl:row-start-2 xl:order-none xl:h-[var(--report-panel-height)]" aria-label="Package breakdown">
                 <div className="shrink-0 flex items-center justify-between gap-3 pb-3">
                   <h3 className="text-sm font-bold text-white">{t('table.title')}</h3>
                   <span className="text-xs font-mono text-slate-400">{result.packages.length}</span>
                 </div>
-                <div ref={inventoryViewportRef} className="package-breakdown-viewport min-h-0 flex-1 overflow-y-auto pr-1">
-                  <div ref={inventoryContentRef} className="package-breakdown-content">
+                <div ref={inventoryViewportRef} className="package-breakdown-viewport min-h-0 flex-1 overflow-y-auto">
+                  <div className="package-breakdown-content xl:h-full">
                     <PackageTable
                       packages={result.packages}
                       externalTab={tableFilter}
@@ -495,20 +482,6 @@ export default function Home({ reportId }: { reportId?: string }) {
                 </div>
               </section>
 
-              <aside className="min-h-0 flex flex-col self-start" aria-label={t('scripts.title')}>
-                <div className="shrink-0 flex items-center gap-2 pb-3">
-                  <h3 className="text-sm font-bold text-white">{t('scripts.title')}</h3>
-                </div>
-                <div className="min-h-0 max-lg:h-auto!" style={inventoryHeight === null ? undefined : { height: inventoryHeight }}>
-                  <UpdateScriptsPanel
-                    key={result.repoInfo.fullName}
-                    packages={result.packages}
-                    packageManager={packageManager}
-                    onChangePackageManager={setPackageManager}
-                    onSelectPreset={handleSelectUpdatePreset}
-                  />
-                </div>
-              </aside>
             </div>
           </div>
         )}

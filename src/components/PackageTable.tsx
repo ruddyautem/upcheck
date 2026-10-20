@@ -26,6 +26,16 @@ interface PackageTableProps {
 
 export type TableFilterTab = 'all' | 'needs_attention' | 'security' | 'major' | 'minor_patch' | 'up_to_date';
 
+function getResponsivePageSize() {
+  if (typeof window === 'undefined') return 10;
+
+  const { innerWidth, innerHeight } = window;
+  if (innerWidth < 1280) return 0;
+  if (innerHeight < 820) return 4;
+  if (innerWidth < 1536 || innerHeight < 1024) return 5;
+  return 10;
+}
+
 export function PackageTable({
   packages,
   externalTab,
@@ -35,7 +45,18 @@ export function PackageTable({
   const [expandedPackage, setExpandedPackage] = useState<string | null>(null);
   const [closingPackage, setClosingPackage] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
+
+  React.useEffect(() => {
+    const updatePageSize = () => setPageSize(getResponsivePageSize());
+    updatePageSize();
+    window.addEventListener('resize', updatePageSize);
+    return () => window.removeEventListener('resize', updatePageSize);
+  }, []);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [pageSize]);
 
   // Sync external tab filter if changed
   React.useEffect(() => {
@@ -70,8 +91,9 @@ export function PackageTable({
   }, [activeTab]);
 
   // Pagination
-  const totalPages = Math.max(1, Math.ceil(filteredPackages.length / pageSize));
+  const totalPages = pageSize === 0 ? 1 : Math.max(1, Math.ceil(filteredPackages.length / pageSize));
   const paginatedPackages = useMemo(() => {
+    if (pageSize === 0) return filteredPackages;
     const start = (currentPage - 1) * pageSize;
     return filteredPackages.slice(start, start + pageSize);
   }, [filteredPackages, currentPage, pageSize]);
@@ -92,20 +114,21 @@ export function PackageTable({
     return colors[Math.abs(hash) % colors.length];
   };
 
-  const emptyRowCount = Math.max(0, pageSize - Math.max(paginatedPackages.length, 1));
+  const emptyRowCount = pageSize === 0 ? 0 : Math.max(0, pageSize - Math.max(paginatedPackages.length, 1));
+  const compactTable = pageSize > 0 && pageSize < 10;
 
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 w-full xl:flex xl:h-full xl:min-h-0 xl:flex-col">
       {/* Table Container */}
-      <div className="report-surface bg-slate-800/90 backdrop-blur-xl border border-slate-700 rounded-2xl overflow-hidden shadow-xl">
-        <div className="min-w-0 overflow-x-auto">
+      <div className="report-surface w-full bg-slate-800/90 backdrop-blur-xl border border-slate-700 rounded-2xl overflow-hidden shadow-xl xl:flex xl:min-h-0 xl:flex-1 xl:flex-col">
+        <div className="min-w-0 overflow-x-auto sm:px-1.5 xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
           <table className="package-table w-full text-left border-separate border-spacing-y-1">
             <thead>
               <tr className="border-b border-slate-700 bg-slate-900 text-[11px] font-extrabold tracking-wider text-slate-300 uppercase">
-                <th className="py-3 px-4">{t('table.col_package')}</th>
-                <th className="py-3 px-4">{t('table.col_current')}</th>
-                <th className="py-3 px-4">{t('table.col_latest')}</th>
-                <th className="package-status-header py-3 pl-0 pr-4 text-right"><span className="inline-block w-40 text-left">{t('table.col_status')}</span></th>
+                <th className={compactTable ? 'px-3 py-2' : 'px-4 py-3'}>{t('table.col_package')}</th>
+                <th className={compactTable ? 'px-3 py-2' : 'px-4 py-3'}>{t('table.col_current')}</th>
+                <th className={compactTable ? 'px-3 py-2' : 'px-4 py-3'}>{t('table.col_latest')}</th>
+                <th className={`package-status-header pl-0 text-right ${compactTable ? 'py-2 pr-3' : 'py-3 pr-4'}`}><span className="inline-block w-40 text-left">{t('table.col_status')}</span></th>
               </tr>
             </thead>
             <tbody className="text-xs">
@@ -136,7 +159,10 @@ export function PackageTable({
                       {pkg.category === 'up_to_date' && <CheckCircle2 className="w-3 h-3 text-emerald-400" />}
                       <span>
                         {pkg.isUpdateDeferred
-                          ? t('category.deferred')
+                          ? <>
+                              <span className="sm:hidden">{t('category.deferred_short')}</span>
+                              <span className="hidden sm:inline">{t('category.deferred')}</span>
+                            </>
                           : pkg.category === 'critical'
                           ? (pkg.advisories.some((advisory) => advisory.severity === 'CRITICAL') ? t('category.critical') : t('category.high_risk'))
                           : t(`category.${pkg.category}`)}
@@ -154,11 +180,11 @@ export function PackageTable({
                         className={`package-row group text-xs transition-colors ${hasDetails ? 'cursor-pointer' : ''} ${pkg.category === 'critical' ? 'package-row--critical' : ''} ${pkg.isUpdateDeferred ? 'opacity-65' : ''}`}
                       >
                         {/* Package Name & Type */}
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-3">
+                        <td className={compactTable ? 'px-3 py-2' : 'px-4 py-3'}>
+                          <div className={compactTable ? 'flex items-center gap-2' : 'flex items-center gap-3'}>
                             {/* Avatar initial */}
                             <div
-                              className={`w-7 h-7 shrink-0 rounded-lg flex items-center justify-center font-bold text-xs uppercase font-mono border ${getAvatarColor(
+                              className={`${compactTable ? 'h-6 w-6 text-[10px]' : 'h-7 w-7 text-xs'} shrink-0 rounded-lg flex items-center justify-center font-bold uppercase font-mono border ${getAvatarColor(
                                 pkg.name
                               )}`}
                             >
@@ -182,7 +208,7 @@ export function PackageTable({
                         </td>
 
                         {/* Current Version */}
-                        <td className="package-version-cell package-version-cell--current py-3 px-4 font-mono text-slate-300">
+                        <td className={`package-version-cell package-version-cell--current font-mono text-slate-300 ${compactTable ? 'px-3 py-2' : 'px-4 py-3'}`}>
                           <span className="hidden sm:inline">{pkg.currentVersion}</span>
                           <span className="package-version-pair sm:hidden">
                             <span className="sr-only">{t('table.col_current')}: {pkg.currentVersion}. {t('table.col_latest')}: {pkg.latestVersion}</span>
@@ -193,7 +219,7 @@ export function PackageTable({
                         </td>
 
                         {/* Latest Version */}
-                        <td className="package-version-cell package-version-cell--latest py-3 px-4 font-mono" aria-label={`${t('table.col_latest')}: ${pkg.latestVersion}`}>
+                        <td className={`package-version-cell package-version-cell--latest font-mono ${compactTable ? 'px-3 py-2' : 'px-4 py-3'}`} aria-label={`${t('table.col_latest')}: ${pkg.latestVersion}`}>
                           <span className="sr-only sm:hidden">{t('table.col_latest')}</span>
                           <span className={latestVersionClass}>
                             {pkg.latestVersion}
@@ -201,7 +227,7 @@ export function PackageTable({
                         </td>
 
                         {/* Status Badge */}
-                        <td className="package-status-cell py-3 pl-0 pr-4 text-right">
+                        <td className={`package-status-cell pl-0 text-right ${compactTable ? 'py-2 pr-3' : 'py-3 pr-4'}`}>
                           {hasDetails ? <button
                             type="button"
                             onClick={(event) => {
@@ -211,13 +237,13 @@ export function PackageTable({
                             }}
                             aria-expanded={isExpanded}
                             aria-label={isExpanded ? `Close advisories for ${pkg.name}` : `Show advisories for ${pkg.name}`}
-                            className={`group/status inline-flex h-8 w-40 shrink-0 items-stretch overflow-hidden rounded border text-[10px] leading-none font-semibold whitespace-nowrap transition-colors cursor-pointer ${pkg.isUpdateDeferred ? 'border-slate-600 bg-slate-800/60 text-slate-400' : config.badgeClass}`}
+                            className={`group/status inline-flex w-40 shrink-0 items-stretch overflow-hidden rounded border text-[10px] leading-none font-semibold whitespace-nowrap transition-colors cursor-pointer ${compactTable ? 'h-7' : 'h-8'} ${pkg.isUpdateDeferred ? 'border-slate-600 bg-slate-800/60 text-slate-400' : config.badgeClass}`}
                           >
                             {statusContent}
                             <span className="flex w-8 items-center justify-center border-l border-current/20 bg-slate-950/25 transition-colors group-hover/status:bg-slate-950/45">
                               <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ease-out ${isExpanded ? 'rotate-180' : ''}`} />
                             </span>
-                          </button> : <span className={`inline-flex h-8 w-40 items-stretch justify-center rounded border text-[10px] leading-none font-semibold whitespace-nowrap ${pkg.isUpdateDeferred ? 'border-slate-600 bg-slate-800/60 text-slate-400' : config.badgeClass}`}>
+                          </button> : <span className={`inline-flex w-40 items-stretch justify-center rounded border text-[10px] leading-none font-semibold whitespace-nowrap ${compactTable ? 'h-7' : 'h-8'} ${pkg.isUpdateDeferred ? 'border-slate-600 bg-slate-800/60 text-slate-400' : config.badgeClass}`}>
                             {statusContent}
                           </span>}
                         </td>
@@ -332,7 +358,7 @@ export function PackageTable({
                 })}
                 {Array.from({ length: emptyRowCount }).map((_, index) => (
                   <tr key={`empty-row-${index}`} aria-hidden="true">
-                    <td colSpan={4} className="h-14 py-3 px-4">&nbsp;</td>
+                    <td colSpan={4} className="h-14 select-none" />
                   </tr>
                 ))}
                 </>
@@ -345,7 +371,7 @@ export function PackageTable({
                   </tr>
                   {Array.from({ length: emptyRowCount }).map((_, index) => (
                     <tr key={`empty-row-${index}`} aria-hidden="true">
-                      <td colSpan={4} className="h-14 py-3 px-4">&nbsp;</td>
+                      <td colSpan={4} className="h-14 select-none" />
                     </tr>
                   ))}
                 </>
@@ -355,7 +381,7 @@ export function PackageTable({
         </div>
 
         {/* Pagination Footer */}
-        <div className="p-4 border-t border-slate-800 bg-slate-950/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+        {pageSize > 0 && <div className={`${compactTable ? 'p-3' : 'p-4'} shrink-0 border-t border-slate-800 bg-slate-950/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400`}>
             <div>
               {t('table.showing')}{' '}
               <strong className="text-slate-200">
@@ -391,7 +417,7 @@ export function PackageTable({
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
-          </div>
+          </div>}
       </div>
     </div>
   );

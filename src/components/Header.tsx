@@ -39,22 +39,23 @@ export function Header({
 
   return (
     <header className="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-xl sticky top-0 z-30 transition-colors">
-      <div className="max-w-[1480px] mx-auto px-3 sm:px-7 lg:px-10 min-h-16 py-3 sm:py-0 flex flex-nowrap items-center justify-between gap-2 sm:gap-3">
+      <div className="max-w-[1480px] mx-auto px-3 sm:px-7 lg:px-10 min-h-16 py-3 sm:py-0 flex flex-wrap items-center justify-between gap-2 sm:gap-3">
         {/* Logo and Name */}
-        <Link href="/" aria-label="Upcheck home" className="flex shrink-0 items-center gap-2 sm:gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
+        <Link href="/" aria-label="Upcheck home" className="flex min-w-32 flex-1 items-center gap-2 sm:gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
           <img src="/icon.svg" alt="" aria-hidden="true" className="w-8 h-8 shrink-0" />
-          <div>
+          <div className="min-w-0">
             <span className="text-xl font-extrabold tracking-tight text-white font-sans">
               upcheck<span className="text-blue-400">.</span>
             </span>
-            <p className="text-xs text-slate-400 hidden sm:block">
-              {t('header.subtitle')}
+            <p className="hidden text-[10px] leading-snug text-slate-400 sm:block xl:text-[11px]">
+              <span className="xl:hidden">{t('header.subtitle_short')}</span>
+              <span className="hidden xl:inline">{t('header.subtitle')}</span>
             </p>
           </div>
         </Link>
 
         {/* Action Buttons */}
-        <div className="flex w-auto shrink-0 items-center justify-start gap-1.5 sm:gap-2.5">
+        <div className="ml-auto flex w-auto shrink-0 items-center justify-end gap-1.5 sm:gap-2.5">
           <div className="flex h-10 items-center gap-0.5 border border-slate-800 bg-slate-900 p-0.5">
             <button
               type="button"
@@ -88,7 +89,8 @@ export function Header({
 
           <button
             onClick={onOpenInfoModal}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 p-0 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white cursor-pointer sm:w-auto sm:gap-1.5 sm:px-3"
+            aria-label={t('header.how_it_works')}
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 p-0 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white cursor-pointer lg:w-auto lg:gap-1.5 lg:px-3"
             title="How Upcheck detects vulnerabilities & announcements"
           >
             <Info className="w-3.5 h-3.5 text-slate-400" />
@@ -97,7 +99,8 @@ export function Header({
 
           <button
             onClick={onOpenTokenModal}
-            className={`flex h-10 w-10 items-center justify-center rounded-xl border p-0 text-xs font-medium transition-colors cursor-pointer sm:w-auto sm:gap-1.5 sm:px-3 ${
+            aria-label={t('header.token')}
+            className={`flex h-10 w-10 items-center justify-center rounded-xl border p-0 text-xs font-medium transition-colors cursor-pointer lg:w-auto lg:gap-1.5 lg:px-3 ${
               hasCustomToken
                 ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20'
                 : 'bg-slate-900 text-slate-300 hover:text-white border-slate-800 hover:bg-slate-800'
@@ -105,7 +108,7 @@ export function Header({
             title="Configure GitHub Personal Access Token"
           >
             <Key className={`w-3.5 h-3.5 ${hasCustomToken ? 'text-emerald-400' : 'text-slate-400'}`} />
-            <span className="hidden sm:inline">{t('header.token')}</span>
+            <span className="hidden lg:inline">{t('header.token')}</span>
             {hasCustomToken && (
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
             )}
@@ -115,10 +118,12 @@ export function Header({
             href="https://github.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden h-10 items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900 px-3 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white sm:flex"
+            aria-label="GitHub"
+            title="GitHub"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white lg:w-auto lg:gap-1.5 lg:px-3"
           >
             <GithubIcon className="w-3.5 h-3.5" />
-            <span>GitHub</span>
+            <span className="hidden lg:inline">GitHub</span>
           </a>
         </div>
       </div>

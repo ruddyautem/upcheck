@@ -1,6 +1,7 @@
 {
   "header": {
     "subtitle": "Inspecteur intelligent de dépendances et sécurité GitHub",
+    "subtitle_short": "Inspecteur de dépendances et sécurité GitHub",
     "system_ok": "Système opérationnel",
     "queue": "File",
     "how_it_works": "Fonctionnement",
@@ -47,6 +48,7 @@
     "title": "Votre rapport de dépendances",
     "complete": "Analyse terminée",
     "open_scan": "Analyser un autre dépôt",
+    "open_scan_short": "Nouveau scan",
     "close_scan": "Masquer l’analyseur",
     "inventory": "Inventaire des paquets",
     "expired": "Ce rapport temporaire n’est plus disponible. Lancez une nouvelle analyse pour créer un autre lien de rapport."
@@ -81,6 +83,7 @@
     "minor": "Mineure",
     "patch": "Correctif",
     "deferred": "Mise à jour reportée",
+    "deferred_short": "Reportée",
     "up_to_date": "À jour"
   },
   "input": {
@@ -119,11 +122,11 @@
     "title": "Dépôts analysés pour",
     "scanned": "dépôts analysés",
     "all": "tout",
-    "choose_repo": "Choisissez un dépôt pour gérer ses mises à jour",
     "packages": "paquets",
     "updates": "mises à jour",
     "skipped": "dépôts ignorés",
     "ai_prompt_all": "Créer un prompt IA pour tous les dépôts",
+    "ai_prompt_all_short": "Prompt IA pour tous les dépôts",
     "prompt_all_hint": "Choisissez un plan de mise à jour pour créer un prompt dépôt par dépôt."
   },
   "welcome": {
@@ -228,7 +231,7 @@
     "queue_all_outdated": "Ajouter obsolètes",
     "empty_hint": "Cochez des paquets dans le tableau pour préparer la commande de mise à jour.",
     "cli_tool": "Gestionnaire :",
-    "force_update": "Forcer la mise à jour",
+    "force_update": "Forcer MAJ",
     "force_desc": "Ignore les conflits de lockfile et le cache (ajoute --force).",
     "copy_command": "Copier la commande",
     "copied": "Copié dans le presse-papiers !",
@@ -237,6 +240,10 @@
   },
   "scripts": {
     "title": "Scripts de mise à jour",
+    "security_short": "Sécurité",
+    "major_short": "Majeures",
+    "safe_short": "Mineures",
+    "all_short": "Tout",
     "select_plan": "Choisissez le type de mise à jour à préparer.",
     "hint": "Choisissez un gestionnaire, puis copiez le scénario adapté à votre dépôt.",
     "security": "Corriger les risques de sécurité",

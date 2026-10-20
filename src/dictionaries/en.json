@@ -1,6 +1,7 @@
 {
   "header": {
     "subtitle": "Intelligent GitHub Dependency & Security Inspector",
+    "subtitle_short": "GitHub dependency & security inspector",
     "system_ok": "System operational",
     "queue": "Queue",
     "how_it_works": "How It Works",
@@ -47,6 +48,7 @@
     "title": "Your dependency report",
     "complete": "Analysis complete",
     "open_scan": "Scan another repository",
+    "open_scan_short": "New scan",
     "close_scan": "Hide scanner",
     "inventory": "Package inventory",
     "expired": "This temporary report is no longer available. Run a new scan to create another report link."
@@ -81,6 +83,7 @@
     "minor": "Minor Update",
     "patch": "Patch Update",
     "deferred": "Temporarily deferred",
+    "deferred_short": "Deferred",
     "up_to_date": "Up to Date"
   },
   "input": {
@@ -119,11 +122,11 @@
     "title": "Repositories scanned for",
     "scanned": "repositories scanned",
     "all": "all",
-    "choose_repo": "Choose a repository to manage its updates",
     "packages": "packages",
     "updates": "updates",
     "skipped": "repositories skipped",
     "ai_prompt_all": "Create an AI prompt for all repositories",
+    "ai_prompt_all_short": "AI prompt for all repositories",
     "prompt_all_hint": "Choose an update plan to create one repository-by-repository prompt."
   },
   "welcome": {
@@ -237,6 +240,10 @@
   },
   "scripts": {
     "title": "Update scripts",
+    "security_short": "Security",
+    "major_short": "Major",
+    "safe_short": "Minor",
+    "all_short": "All",
     "select_plan": "Choose the update type to prepare.",
     "hint": "Choose a package manager, then copy the update plan that fits your repository.",
     "security": "Fix security risks",

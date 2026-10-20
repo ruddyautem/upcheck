@@ -1,6 +1,6 @@
 'use client';
 
-import { Bot, CheckCircle2, CircleAlert, Clock, FolderGit2, RefreshCw } from 'lucide-react';
+import { Bot, CircleAlert, Clock, FolderGit2, RefreshCw } from 'lucide-react';
 import { OwnerAnalysisResult } from '@/types';
 import { useAppSettings } from '@/lib/settingsContext';
 
@@ -45,25 +45,22 @@ export function OwnerScanSummary({
             <p className="text-xs text-slate-400">{analysis.results.length} {t('owner_scan.scanned')}</p>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2 self-start">
-          <button type="button" onClick={onRescanAll} disabled={isLoading} className="inline-flex cursor-pointer items-center gap-1.5 border border-slate-700 bg-slate-950/50 px-2.5 py-1 text-[11px] font-semibold text-slate-200 hover:border-emerald-500/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-50">
+        <div className="grid w-full grid-cols-1 gap-2 self-start sm:flex sm:w-auto sm:flex-wrap sm:items-center">
+          <button type="button" onClick={onRescanAll} disabled={isLoading} className="inline-flex w-full cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap border border-slate-700 bg-slate-950/50 px-2.5 py-1.5 text-[11px] font-semibold text-slate-200 hover:border-emerald-500/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:py-1">
             <RefreshCw className={`h-3.5 w-3.5 text-emerald-400 ${isLoading ? 'animate-spin' : ''}`} />
             {t('overview.rescan')} {t('owner_scan.all')}
           </button>
-          <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            {t('owner_scan.choose_repo')}
-          </span>
           {analysis.results.length > 1 && (
-            <button type="button" onClick={onOpenAiPrompt} className="inline-flex cursor-pointer items-center gap-1.5 border border-violet-400/50 bg-violet-500/15 px-2.5 py-1 text-[11px] font-semibold text-violet-200 hover:bg-violet-500/25">
-              <Bot className="h-3.5 w-3.5" />
-              {t('owner_scan.ai_prompt_all')}
+            <button type="button" onClick={onOpenAiPrompt} aria-label={t('owner_scan.ai_prompt_all')} className="inline-flex w-full cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap border border-violet-400/50 bg-violet-500/15 px-2.5 py-2 text-[10px] font-semibold text-violet-200 hover:bg-violet-500/25 sm:w-auto sm:py-1 sm:text-[11px]">
+              <Bot className="h-3.5 w-3.5 shrink-0" />
+              <span className="sm:hidden">{t('owner_scan.ai_prompt_all_short')}</span>
+              <span className="hidden sm:inline">{t('owner_scan.ai_prompt_all')}</span>
             </button>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-2 min-[480px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
         {analysis.results.map((repository) => {
           const isActive = repository.repoInfo.fullName === activeRepository;
           const updates = repository.packages.filter((pkg) => pkg.category !== 'up_to_date' && !pkg.isUpdateDeferred).length;
@@ -80,16 +77,16 @@ export function OwnerScanSummary({
               }`}
               aria-pressed={isActive}
             >
-              <div className="font-mono text-xs font-bold text-slate-100 [overflow-wrap:anywhere]">{repository.repoInfo.repo}</div>
-              <div className="mt-1 flex items-center justify-between gap-2 text-[10px]">
-                <span className="text-slate-400">{repository.totalPackages} {t('owner_scan.packages')}</span>
-                <span className={updates > 0 ? 'text-amber-300' : 'text-emerald-300'}>
+              <div className="truncate font-mono text-xs font-bold text-slate-100" title={repository.repoInfo.repo}>{repository.repoInfo.repo}</div>
+              <div className="mt-1 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-[10px]">
+                <span className="whitespace-nowrap text-slate-400">{repository.totalPackages} {t('owner_scan.packages')}</span>
+                <span className={`whitespace-nowrap ${updates > 0 ? 'text-amber-300' : 'text-emerald-300'}`}>
                   {updates} {t('owner_scan.updates')}
                 </span>
               </div>
               <time
                 dateTime={repository.analyzedAt}
-                className="mt-1.5 flex items-center gap-1 text-[10px] text-slate-500"
+                className="mt-1.5 flex min-w-0 items-center gap-1 whitespace-nowrap text-[10px] text-slate-500"
                 title={checkedAt}
               >
                 <Clock className="h-3 w-3 shrink-0" aria-hidden="true" />

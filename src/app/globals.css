@@ -628,6 +628,7 @@ html.light .app-shell .metric-card {
 .app-shell .bg-emerald-600, .app-shell .bg-emerald-500 { background-color: #008e78 !important; }
 .app-shell .text-emerald-300, .app-shell .text-emerald-400, .app-shell .text-emerald-500, .app-shell .text-teal-400 { color: #21dfb3 !important; }
 .app-shell .bg-emerald-500\/10, .app-shell .bg-emerald-500\/20 { background-color: rgba(0, 207, 160, 0.12) !important; }
+.app-shell .hover\:bg-emerald-400\/70:hover { background-color: rgba(0, 207, 160, 0.22) !important; }
 .app-shell .border-emerald-500\/30, .app-shell .border-emerald-500\/40 { border-color: rgba(0, 207, 160, 0.42) !important; }
 /* Red stays reserved for danger, like the confidentiality callout in Temporis. */
 .app-shell .bg-red-950\/20, .app-shell .bg-red-950\/30, .app-shell .bg-red-950\/40, .app-shell .bg-red-950\/50 { background-color: rgba(88, 11, 28, 0.42) !important; }

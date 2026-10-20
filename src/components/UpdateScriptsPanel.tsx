@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Copy, Flame, Sparkles, Terminal } from 'lucide-react';
+import { Bot, Copy, Flame, Terminal } from 'lucide-react';
 import { toast } from 'sonner';
 import { PackageAnalysis, PackageManager } from '@/types';
 import { buildAiUpdatePrompt, buildUpdateCommand, getUpdatePresetPackages, UpdatePreset } from '@/lib/updateCommands';
@@ -42,84 +42,93 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
   };
 
   return (
-    <div className="h-auto min-h-0 flex flex-col gap-2 border border-slate-800 bg-slate-900/80 p-3 lg:h-full">
-      <div className="flex flex-wrap gap-1 border border-slate-800 bg-slate-950/60 p-1 shrink-0" aria-label={t('cart.cli_tool')}>
-        {(['bun', 'pnpm', 'npm', 'yarn'] as PackageManager[]).map((manager) => (
-          <button
-            key={manager}
-            type="button"
-            onClick={() => onChangePackageManager(manager)}
-            aria-pressed={packageManager === manager}
-            className={`flex-1 min-w-14 px-2 py-1.5 text-xs font-mono font-semibold transition-colors cursor-pointer ${packageManager === manager ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
-          >
-            {manager}
-          </button>
-        ))}
-      </div>
-      <label className={`flex items-center justify-between gap-3 border p-2.5 text-xs cursor-pointer shrink-0 transition-colors ${force ? 'border-amber-500/70 bg-amber-500/15' : 'border-amber-500/30 bg-amber-950/15 hover:border-amber-500/60'}`}>
-        <span className="min-w-0">
-          <span className="flex items-center gap-2 font-bold text-slate-100"><Flame className="w-4 h-4 text-amber-400" />{t('cart.force_update')}</span>
-          <span className="block mt-1 text-[10px] leading-tight text-slate-300">{t('cart.force_desc')}</span>
-        </span>
-        <input type="checkbox" checked={force} onChange={(event) => setForce(event.target.checked)} className="peer sr-only" />
-        <span aria-hidden="true" className={`relative h-5 w-9 shrink-0 rounded-full transition-colors peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-amber-400 ${force ? 'bg-amber-500' : 'bg-slate-700'}`}>
-          <span className={`absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${force ? 'translate-x-4' : ''}`} />
-        </span>
-      </label>
-
-      <div className="min-h-0 flex-1 flex flex-col gap-2 overflow-visible pr-0 lg:overflow-y-auto lg:pr-1">
-        <p className="shrink-0 text-[11px] leading-relaxed text-slate-400">{t('scripts.select_plan')}</p>
-        <div className="grid shrink-0 grid-cols-1 gap-2 sm:min-h-[248px] sm:flex-1 sm:grid-rows-4" aria-label={t('scripts.title')}>
-        {presets.map(({ id, color, ring, hover, active, badge }) => {
-          const count = getUpdatePresetPackages(packages, id).length;
-          return (
-          <button
-            key={id}
-            type="button"
-            onClick={() => { setActivePreset(id); onSelectPreset(id); }}
-            aria-pressed={activePreset === id}
-            className={`h-[58px] flex items-center justify-between gap-2 border px-3 py-1 text-left font-sans transition-colors cursor-pointer ring-1 ring-inset sm:h-auto sm:min-h-[58px] sm:px-4 ${color} ${ring} ${hover} ${active}`}
-          >
-            <span className="flex min-w-0 items-center gap-1.5 text-xs font-semibold leading-snug sm:gap-2 sm:text-sm">
-              <span className="truncate">{t(`scripts.${id}`)}</span>
-              {activePreset === id && <Check className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
-            </span>
-            <span className={`flex h-11 w-11 shrink-0 flex-col items-center justify-center border sm:h-12 sm:w-12 ${badge}`}>
-              <span className="text-xl font-medium leading-none sm:text-2xl sm:font-semibold">{count}</span>
-              <span className="mt-1 text-[7px] font-bold uppercase leading-none tracking-wide text-white sm:text-[8px]">{t(count === 1 ? 'table.package' : 'table.packages')}</span>
-            </span>
-          </button>
-        ); })}
+    <>
+    <section className="self-start border border-slate-800 bg-slate-900/80 p-2.5 xl:col-start-1 xl:h-[3.25rem]" aria-label={t('scripts.title')}>
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto">
+          <div className="grid h-8 w-full grid-cols-4 border border-slate-800 bg-slate-950/60 p-0.5 sm:w-auto" aria-label={t('cart.cli_tool')}>
+            {(['bun', 'pnpm', 'npm', 'yarn'] as PackageManager[]).map((manager) => (
+              <button
+                key={manager}
+                type="button"
+                onClick={() => onChangePackageManager(manager)}
+                aria-pressed={packageManager === manager}
+                className={`grid h-full min-w-12 place-items-center px-2 text-center text-[10px] leading-none font-mono font-semibold transition-colors cursor-pointer ${packageManager === manager ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
+              >
+                {manager}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <textarea
-          readOnly
-          aria-label={showAiPrompt ? t('scripts.ai_prompt') : t(`scripts.${activePreset}`)}
-          value={displayedContent || t('scripts.none')}
-          className="h-36 shrink-0 resize-none overflow-auto whitespace-pre-wrap break-words border border-slate-800 bg-slate-950 p-3 text-[11px] leading-relaxed font-mono text-slate-200 outline-none selection:bg-emerald-500/40"
-        />
+        <div className="grid min-w-0 flex-1 grid-cols-2 gap-1 sm:min-w-[18rem] sm:grid-cols-4" aria-label={t('scripts.select_plan')}>
+          {presets.map(({ id, color, ring, hover, active, badge }) => {
+            const count = getUpdatePresetPackages(packages, id).length;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => { setActivePreset(id); onSelectPreset(id); }}
+                aria-pressed={activePreset === id}
+                title={t(`scripts.${id}`)}
+                className={`flex h-8 min-w-0 items-center justify-between gap-1 border px-2 text-left font-sans text-[11px] font-semibold transition-colors cursor-pointer ring-1 ring-inset ${color} ${ring} ${hover} ${active}`}
+              >
+                <span className="flex h-4 items-center whitespace-nowrap leading-none">{t(`scripts.${id}_short`)}</span>
+                <span className={`grid h-4 min-w-4 shrink-0 place-items-center border px-0.5 text-[9px] leading-none ${badge}`}>{count}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
-      <div className="shrink-0 grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          disabled={!command}
-          onClick={() => setShowAiPrompt((showing) => !showing)}
-          aria-pressed={showAiPrompt}
-          className={`flex items-center justify-center gap-2 border px-3 py-2 text-xs font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${showAiPrompt ? 'border-violet-300 bg-violet-500/30 text-violet-100' : 'border-violet-500/40 bg-violet-500/15 text-violet-200 hover:bg-violet-500/25'}`}
-        >
-          {showAiPrompt ? <Terminal className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
-          {showAiPrompt ? t('scripts.manual_install') : t('scripts.ai_prompt')}
-        </button>
-        <button
-          type="button"
-          disabled={!command}
-          onClick={copyCommand}
-          className="flex items-center justify-center gap-2 border border-emerald-500/40 bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
-        >
-          <Copy className="w-3.5 h-3.5" />
-          {showAiPrompt ? t('scripts.copy_prompt') : t('remediation.copy_cmd')}
-        </button>
-      </div>
-    </div>
+
+    </section>
+
+      <aside className="order-3 h-72 min-h-0 flex flex-col sm:h-80 xl:col-start-2 xl:row-start-1 xl:row-span-2 xl:order-none xl:h-auto xl:self-stretch" aria-label={showAiPrompt ? t('scripts.ai_prompt') : t(`scripts.${activePreset}`)}>
+        <div className="min-h-0 flex flex-1 flex-col border border-slate-700 bg-slate-950 xl:h-full">
+          <div className="flex h-8 shrink-0 items-center bg-slate-900/60">
+            <button
+              type="button"
+              onClick={() => setForce((enabled) => !enabled)}
+              aria-pressed={force}
+              className={`flex h-full items-center gap-1.5 px-2 text-[10px] font-semibold leading-none cursor-pointer transition-colors ${force ? 'bg-amber-500/15 text-amber-100' : 'text-slate-300 hover:bg-amber-500/10'}`}
+              title={t('cart.force_desc')}
+            >
+              <Flame className="h-3.5 w-3.5 shrink-0 text-amber-400" aria-hidden="true" />
+              <span className="relative top-px flex h-4 items-center whitespace-nowrap leading-none">{t('cart.force_update')}</span>
+              <span aria-hidden="true" className={`relative h-4 w-7 shrink-0 rounded-full transition-colors ${force ? 'bg-amber-500' : 'bg-slate-700'}`}>
+                <span className={`absolute left-0.5 top-0.5 h-3 w-3 rounded-full bg-white transition-transform ${force ? 'translate-x-3' : ''}`} />
+              </span>
+            </button>
+            <button
+              type="button"
+              disabled={!command}
+              onClick={() => setShowAiPrompt((showing) => !showing)}
+              aria-pressed={showAiPrompt}
+              aria-label={showAiPrompt ? t('scripts.manual_install') : t('scripts.ai_prompt')}
+              title={showAiPrompt ? t('scripts.manual_install') : t('scripts.ai_prompt')}
+              className={`ml-auto grid h-full w-9 place-items-center bg-violet-500/25 text-violet-100 transition-colors hover:bg-violet-500/35 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer ${showAiPrompt ? 'ring-1 ring-inset ring-violet-300/60' : ''}`}
+            >
+              {showAiPrompt ? <Terminal className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+            </button>
+            <button
+              type="button"
+              disabled={!command}
+              onClick={copyCommand}
+              aria-label={showAiPrompt ? t('scripts.copy_prompt') : t('remediation.copy_cmd')}
+              title={showAiPrompt ? t('scripts.copy_prompt') : t('remediation.copy_cmd')}
+              className="grid h-full w-9 place-items-center bg-emerald-500/20 text-emerald-100 transition-colors hover:bg-emerald-400/70 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+            >
+              <Copy className="h-4 w-4" />
+            </button>
+          </div>
+          <textarea
+            readOnly
+            aria-label={showAiPrompt ? t('scripts.ai_prompt') : t(`scripts.${activePreset}`)}
+            value={displayedContent || t('scripts.none')}
+            className="min-h-0 flex-1 w-full resize-none overflow-auto whitespace-pre-wrap break-words bg-transparent p-3 text-[11px] leading-relaxed font-mono text-slate-100 outline-none selection:bg-emerald-500/40"
+          />
+        </div>
+      </aside>
+    </>
   );
 }
