@@ -97,8 +97,8 @@ export function GitHubScanForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className='home-github-form flex h-full flex-1 flex-col gap-4 lg:gap-5'>
-      <div className='home-github-tabs grid w-full grid-cols-2 gap-1 border border-slate-800 bg-slate-950 p-1'>
+    <form onSubmit={handleSubmit} className='home-github-form flex h-full flex-1 flex-col gap-4 lg:min-h-0 lg:gap-5 lg:overflow-y-auto'>
+      <div className='home-github-tabs grid w-full shrink-0 grid-cols-2 gap-1 border border-slate-800 bg-slate-950 p-1'>
         {(['single', 'multiple'] as const).map((option) => {
           const active = mode === option;
           return (
@@ -119,7 +119,7 @@ export function GitHubScanForm({
         })}
       </div>
 
-      <div className='flex min-w-0 overflow-hidden border border-emerald-500/30 bg-emerald-950/30 focus-within:border-emerald-400 focus-within:ring-1 focus-within:ring-emerald-400/70 transition-all'>
+      <div className='flex min-w-0 shrink-0 overflow-hidden border border-emerald-500/30 bg-emerald-950/30 focus-within:border-emerald-400 focus-within:ring-1 focus-within:ring-emerald-400/70 transition-all'>
           <span className='flex items-center shrink-0 bg-emerald-500/20 px-3.5 text-xs sm:text-sm font-medium text-emerald-100 border-r border-emerald-500/30'>github.com</span>
           <span className='flex items-center shrink-0 pl-3.5 text-sm font-mono text-emerald-300 select-none'>/</span>
           <input
@@ -140,15 +140,15 @@ export function GitHubScanForm({
       </div>
 
       {mode === 'multiple' && repositories.length > 0 && (
-        <div className='rounded-xl border border-slate-800 bg-slate-950/50 overflow-hidden text-left'>
-          <div className='p-3 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5'>
+        <div className='flex min-h-0 flex-col rounded-xl border border-slate-800 bg-slate-950/50 overflow-hidden text-left'>
+          <div className='shrink-0 p-3 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5'>
             <div className='text-xs font-semibold text-slate-200'>{t('input.select_repos')}</div>
             <div className='text-[11px] text-slate-400'>
               {selected.length}{Number.isFinite(selectionLimit) ? ` / ${selectionLimit}` : ''} {t('input.selected')}
               {!hasToken && <span className='text-amber-300'> · {t('input.no_token_limit')}</span>}
             </div>
           </div>
-          <div className='max-h-64 overflow-y-auto divide-y divide-slate-800/80'>
+          <div className='min-h-0 max-h-64 overflow-y-auto divide-y divide-slate-800/80'>
             {repositories.map((repository) => {
               const isSelected = selected.includes(repository.fullName);
               const isDisabled = !isSelected && selected.length >= selectionLimit;
