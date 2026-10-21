@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Bot, Copy, Flame, Terminal } from 'lucide-react';
+import { ArrowUp, Bot, ChevronsUp, Flame, Layers, ShieldCheck, Terminal } from 'lucide-react';
 import { toast } from 'sonner';
 import { PackageAnalysis, PackageManager } from '@/types';
 import { buildAiUpdatePrompt, buildUpdateCommand, getUpdatePresetPackages, UpdatePreset } from '@/lib/updateCommands';
@@ -31,14 +31,36 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
   const aiPrompt = buildAiUpdatePrompt(selected, activePreset, packageManager, force, language);
   const displayedContent = showAiPrompt ? aiPrompt : command;
 
-  const copyCommand = async () => {
-    if (!displayedContent) return;
+  const copyContent = async (content: string, isAiPrompt = false, preset = activePreset) => {
+    if (!content) return;
     try {
-      await navigator.clipboard.writeText(displayedContent);
-      toast.success(t('cart.copied'), { className: showAiPrompt ? 'upcheck-toast--violet' : 'upcheck-toast--teal' });
+      await navigator.clipboard.writeText(content);
+      const tone = isAiPrompt ? 'violet' : { security: 'red', major: 'amber', safe: 'cyan', all: 'teal' }[preset];
+      const Icon = isAiPrompt ? Bot : { security: ShieldCheck, major: ChevronsUp, safe: ArrowUp, all: Layers }[preset];
+      toast.success(t('scripts.command_copied'), {
+        className: `upcheck-toast--${tone}`,
+        icon: <Icon className="h-4 w-4" aria-hidden="true" />,
+      });
     } catch {
-      toast.error(t('error.analysis_title'));
+      toast.error(t('scripts.copy_failed'));
     }
+  };
+
+  const selectPreset = (preset: UpdatePreset) => {
+    setActivePreset(preset);
+    setShowAiPrompt(false);
+    onSelectPreset(preset);
+    const nextCommand = buildUpdateCommand(
+      getUpdatePresetPackages(packages, preset),
+      packageManager,
+      force,
+      preset === 'safe' ? 'compatible' : 'latest',
+    );
+    if (!nextCommand) {
+      toast.info(t('scripts.none'));
+      return;
+    }
+    void copyContent(nextCommand, false, preset);
   };
 
   return (
@@ -68,7 +90,7 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
               <button
                 key={id}
                 type="button"
-                onClick={() => { setActivePreset(id); onSelectPreset(id); }}
+                onClick={() => selectPreset(id)}
                 aria-pressed={activePreset === id}
                 title={t(`scripts.${id}`)}
                 className={`flex h-8 min-w-0 items-center justify-between gap-1 border px-2 text-left font-sans text-[11px] font-semibold transition-colors cursor-pointer ring-1 ring-inset ${color} ${ring} ${hover} ${active}`}
@@ -85,41 +107,53 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
 
       <aside className="order-3 h-72 min-h-0 flex flex-col sm:h-80 xl:col-start-2 xl:row-start-1 xl:row-span-2 xl:order-none xl:h-auto xl:self-stretch" aria-label={showAiPrompt ? t('scripts.ai_prompt') : t(`scripts.${activePreset}`)}>
         <div className="min-h-0 flex flex-1 flex-col border border-slate-700 bg-slate-950 xl:h-full">
-          <div className="flex h-8 shrink-0 items-center bg-slate-900/60">
+          <div className="flex min-h-[calc(3.25rem-1px)] shrink-0 flex-wrap items-center gap-2 border-b border-slate-700 bg-slate-900/80 px-2.5 py-2">
             <button
               type="button"
               onClick={() => setForce((enabled) => !enabled)}
               aria-pressed={force}
-              className={`flex h-full items-center gap-1.5 px-2 text-[10px] font-semibold leading-none cursor-pointer transition-colors ${force ? 'bg-amber-500/15 text-amber-100' : 'text-slate-300 hover:bg-amber-500/10'}`}
+              className={`flex h-8 shrink-0 items-center gap-1.5 font-sans text-xs font-semibold leading-none cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-amber-300 ${force ? 'text-amber-100' : 'text-slate-200 hover:text-amber-200'}`}
+              aria-label={t('cart.force_update')}
               title={t('cart.force_desc')}
             >
-              <Flame className="h-3.5 w-3.5 shrink-0 text-amber-400" aria-hidden="true" />
-              <span className="relative top-px flex h-4 items-center whitespace-nowrap leading-none">{t('cart.force_update')}</span>
-              <span aria-hidden="true" className={`relative h-4 w-7 shrink-0 rounded-full transition-colors ${force ? 'bg-amber-500' : 'bg-slate-700'}`}>
-                <span className={`absolute left-0.5 top-0.5 h-3 w-3 rounded-full bg-white transition-transform ${force ? 'translate-x-3' : ''}`} />
+              <Flame className="h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
+              <span className="flex h-4 items-center whitespace-nowrap leading-none">{t('scripts.force_short')}</span>
+              <span aria-hidden="true" className={`relative h-5 w-8 shrink-0 transition-colors ${force ? 'bg-amber-500' : 'bg-slate-700'}`}>
+                <span className={`absolute left-0.5 top-0.5 h-4 w-4 bg-white transition-transform ${force ? 'translate-x-3' : ''}`} />
               </span>
             </button>
+            <div className="ml-auto flex h-8 shrink-0 gap-1">
             <button
               type="button"
               disabled={!command}
-              onClick={() => setShowAiPrompt((showing) => !showing)}
+              onClick={() => {
+                setShowAiPrompt(true);
+                void copyContent(aiPrompt, true);
+              }}
               aria-pressed={showAiPrompt}
-              aria-label={showAiPrompt ? t('scripts.manual_install') : t('scripts.ai_prompt')}
-              title={showAiPrompt ? t('scripts.manual_install') : t('scripts.ai_prompt')}
-              className={`ml-auto grid h-full w-9 place-items-center bg-violet-500/25 text-violet-100 transition-colors hover:bg-violet-500/35 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer ${showAiPrompt ? 'ring-1 ring-inset ring-violet-300/60' : ''}`}
+              aria-label={t('scripts.copy_prompt')}
+              title={t('scripts.copy_prompt')}
+              className="flex h-8 w-22 shrink-0 items-center justify-center gap-1.5 border border-violet-400/50 bg-violet-500/15 px-2 font-sans text-[11px] font-semibold text-violet-200 ring-1 ring-inset ring-violet-400/70 transition-colors cursor-pointer hover:bg-violet-500/25 aria-pressed:bg-violet-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {showAiPrompt ? <Terminal className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+              <Bot className="h-4 w-4" aria-hidden="true" />
+              <span>{t('scripts.ai_short')}</span>
             </button>
             <button
               type="button"
               disabled={!command}
-              onClick={copyCommand}
-              aria-label={showAiPrompt ? t('scripts.copy_prompt') : t('remediation.copy_cmd')}
-              title={showAiPrompt ? t('scripts.copy_prompt') : t('remediation.copy_cmd')}
-              className="grid h-full w-9 place-items-center bg-emerald-500/20 text-emerald-100 transition-colors hover:bg-emerald-400/70 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+              onClick={() => {
+                setShowAiPrompt(false);
+                void copyContent(command);
+              }}
+              aria-pressed={!showAiPrompt}
+              aria-label={t('remediation.copy_cmd')}
+              title={t('remediation.copy_cmd')}
+              className="flex h-8 w-22 shrink-0 items-center justify-center gap-1.5 border border-emerald-500/40 bg-emerald-500/15 px-2 font-sans text-[11px] font-semibold text-emerald-300 transition-colors cursor-pointer ring-1 ring-inset ring-emerald-400 hover:border-emerald-300/70 hover:ring-emerald-300 hover:text-emerald-200 aria-pressed:border-emerald-300 aria-pressed:bg-emerald-500/35 aria-pressed:text-emerald-100 aria-pressed:ring-emerald-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <Copy className="h-4 w-4" />
+              <Terminal className="h-4 w-4" aria-hidden="true" />
+              <span>{t('scripts.manual_short')}</span>
             </button>
+            </div>
           </div>
           <textarea
             readOnly

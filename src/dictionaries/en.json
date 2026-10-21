@@ -240,6 +240,12 @@
   },
   "scripts": {
     "title": "Update scripts",
+    "ai_short": "Prompt",
+    "manual_short": "Manual",
+    "force_short": "Force",
+    "command_copied": "Command copied",
+    "prompt_copied": "AI prompt copied",
+    "copy_failed": "Copy failed",
     "security_short": "Security",
     "major_short": "Major",
     "safe_short": "Minor",

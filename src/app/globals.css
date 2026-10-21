@@ -43,6 +43,10 @@ body {
 
 /* Sonner follows the same compact terminal surface as the application. */
 [data-sonner-toaster][data-x-position='center'] {
+  width: min(356px, calc(100vw - 2rem)) !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
   --normal-bg: #071721;
   --normal-border: rgba(0, 207, 160, 0.48);
   --normal-text: #e8fffa;
@@ -57,42 +61,69 @@ body {
 [data-sonner-toast].upcheck-toast {
   width: fit-content !important;
   min-width: 0 !important;
-  max-width: calc(100vw - 2rem);
+  max-width: 100% !important;
+  left: 50% !important;
+  right: auto !important;
+  translate: -50% 0;
   min-height: 0 !important;
-  padding: 0.65rem 0.8rem !important;
-  border-radius: 0;
+  /* The header's 40px actions sit 12px from the top of its 64px row. */
+  height: 2.5rem !important;
+  padding: 0 0.8rem !important;
+  border-radius: 0 !important;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
   font-family: "IBM Plex Mono", "Cascadia Code", "SFMono-Regular", Consolas, monospace;
 }
 
-/* Accent the confirmation by its action without turning the toast into a
-   colored card: the terminal surface stays neutral and the colour is a slim
-   left rail with a restrained border. */
+[data-sonner-toast].upcheck-toast [data-content] {
+  min-width: 0;
+  overflow: hidden;
+}
+
+[data-sonner-toast].upcheck-toast [data-title] {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Match the notification's surface, outline and icon to the selected action. */
 [data-sonner-toast].upcheck-toast--teal,
 [data-sonner-toast].upcheck-toast--violet,
 [data-sonner-toast].upcheck-toast--blue,
+[data-sonner-toast].upcheck-toast--amber,
+[data-sonner-toast].upcheck-toast--cyan,
 [data-sonner-toast].upcheck-toast--red {
-  background: #071721 !important;
+  background: color-mix(in srgb, var(--toast-accent) 16%, #071721) !important;
+  border-color: color-mix(in srgb, var(--toast-accent) 80%, transparent) !important;
+  color: color-mix(in srgb, var(--toast-accent) 30%, white) !important;
+  box-shadow: inset 3px 0 var(--toast-accent), 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+[data-sonner-toast].upcheck-toast [data-icon] {
+  color: var(--toast-accent, currentColor);
 }
 
 [data-sonner-toast].upcheck-toast--teal {
-  border-color: rgba(0, 220, 165, 0.46) !important;
-  box-shadow: inset 3px 0 #00b894, 0 12px 28px rgba(0, 0, 0, 0.3);
+  --toast-accent: #00dca5;
 }
 
 [data-sonner-toast].upcheck-toast--violet {
-  border-color: rgba(167, 139, 250, 0.46) !important;
-  box-shadow: inset 3px 0 #a78bfa, 0 12px 28px rgba(0, 0, 0, 0.3);
+  --toast-accent: #a78bfa;
 }
 
 [data-sonner-toast].upcheck-toast--blue {
-  border-color: rgba(56, 189, 248, 0.46) !important;
-  box-shadow: inset 3px 0 #38bdf8, 0 12px 28px rgba(0, 0, 0, 0.3);
+  --toast-accent: #38bdf8;
 }
 
 [data-sonner-toast].upcheck-toast--red {
-  border-color: rgba(251, 113, 133, 0.46) !important;
-  box-shadow: inset 3px 0 #fb7185, 0 12px 28px rgba(0, 0, 0, 0.3);
+  --toast-accent: #fb7185;
+}
+
+[data-sonner-toast].upcheck-toast--amber {
+  --toast-accent: #fbbf24;
+}
+
+[data-sonner-toast].upcheck-toast--cyan {
+  --toast-accent: #22d3ee;
 }
 
 /* Filtering packages replaces a large portion of the list. Keep browsers from

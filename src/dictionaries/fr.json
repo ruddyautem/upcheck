@@ -240,6 +240,12 @@
   },
   "scripts": {
     "title": "Scripts de mise à jour",
+    "ai_short": "Prompt",
+    "manual_short": "Manuel",
+    "force_short": "Forcer",
+    "command_copied": "Commande copiée",
+    "prompt_copied": "Prompt IA copié",
+    "copy_failed": "Échec de copie",
     "security_short": "Sécurité",
     "major_short": "Majeures",
     "safe_short": "Mineures",

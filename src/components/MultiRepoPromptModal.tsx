@@ -15,10 +15,15 @@ interface MultiRepoPromptModalProps {
 }
 
 const presets: UpdatePreset[] = ['security', 'major', 'safe', 'all'];
+const presetColors: Record<UpdatePreset, string> = {
+  security: 'border-red-500/40 bg-red-500/15 text-red-300 ring-red-400 hover:border-red-300/70 hover:text-red-200 aria-pressed:border-red-300 aria-pressed:bg-red-500/35 aria-pressed:text-red-100 aria-pressed:ring-red-300',
+  major: 'border-amber-500/40 bg-amber-500/15 text-amber-300 ring-amber-400 hover:border-amber-300/70 hover:text-amber-200 aria-pressed:border-amber-300 aria-pressed:bg-amber-500/35 aria-pressed:text-amber-100 aria-pressed:ring-amber-300',
+  safe: 'border-cyan-500/40 bg-cyan-500/15 text-cyan-300 ring-cyan-400 hover:border-cyan-300/70 hover:text-cyan-200 aria-pressed:border-cyan-300 aria-pressed:bg-cyan-500/35 aria-pressed:text-cyan-100 aria-pressed:ring-cyan-300',
+  all: 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300 ring-emerald-400 hover:border-emerald-300/70 hover:text-emerald-200 aria-pressed:border-emerald-300 aria-pressed:bg-emerald-500/35 aria-pressed:text-emerald-100 aria-pressed:ring-emerald-300',
+};
 
 function PromptPreview({ prompt }: { prompt: string }) {
   const lines = prompt.split('\n');
-  let commandFollows = false;
 
   return (
     <div
@@ -31,15 +36,13 @@ function PromptPreview({ prompt }: { prompt: string }) {
           return <div key={key} className="my-3 border-t border-violet-500/35" />;
         }
         if (line.startsWith('## ')) {
-          commandFollows = false;
           return <div key={key} className="mt-3 border-l-2 border-violet-400 bg-violet-500/10 px-3 py-1.5 text-xs font-bold text-violet-100 first:mt-0">{line.slice(3)}</div>;
         }
         if (line === 'Commande prévue :' || line === 'Intended command:') {
-          commandFollows = true;
           return <div key={key} className="mt-3 text-[10px] font-bold uppercase tracking-wider text-emerald-400">{line}</div>;
         }
-        if (commandFollows && line) {
-          commandFollows = false;
+        const previousLine = lines[index - 1];
+        if ((previousLine === 'Commande prévue :' || previousLine === 'Intended command:') && line) {
           return <code key={key} className="mt-1 block whitespace-pre-wrap break-words border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-2 text-emerald-100">{line}</code>;
         }
         if (line === 'Paquets à mettre à jour :' || line === 'Packages to update:') {
@@ -60,7 +63,7 @@ export function MultiRepoPromptModal({ repositories, packageManager, onChangePac
   const copyPrompt = async () => {
     if (!prompt) return;
     await navigator.clipboard.writeText(prompt);
-    toast.success(t('cart.copied'), { className: 'upcheck-toast--violet' });
+    toast.success(t('scripts.prompt_copied'), { className: 'upcheck-toast--violet' });
   };
 
   return (
@@ -82,7 +85,7 @@ export function MultiRepoPromptModal({ repositories, packageManager, onChangePac
             {presets.map((item) => {
               const count = repositories.reduce((total, repository) => total + getUpdatePresetPackages(repository.packages, item).length, 0);
               const repositoryCount = repositories.filter((repository) => getUpdatePresetPackages(repository.packages, item).length > 0).length;
-              return <button key={item} type="button" onClick={() => setPreset(item)} aria-pressed={preset === item} className={`border px-3 py-2 text-left text-xs font-semibold transition-colors ${preset === item ? 'border-violet-300 bg-violet-500/25 text-violet-100' : 'border-slate-700 bg-slate-950/50 text-slate-300 hover:border-violet-400/60'}`}><span className="block leading-snug">{t(`scripts.${item}`)}</span><span className="mt-1 block font-mono text-[10px] text-slate-400">{count} · {repositoryCount} {t('owner_scan.scanned')}</span></button>;
+              return <button key={item} type="button" onClick={() => setPreset(item)} aria-pressed={preset === item} className={`border px-3 py-2 text-left text-xs font-semibold transition-colors cursor-pointer ring-1 ring-inset focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current ${presetColors[item]}`}><span className="block leading-snug">{t(`scripts.${item}`)}</span><span className="mt-1 block font-mono text-[10px] opacity-80">{count} · {repositoryCount} {t('owner_scan.scanned')}</span></button>;
             })}
           </div>
           <label className={`flex cursor-pointer items-center justify-between gap-3 border p-3 text-xs ${force ? 'border-amber-500/70 bg-amber-500/15' : 'border-amber-500/30 bg-amber-950/15'}`}>

@@ -72,7 +72,7 @@ export function OwnerScanSummary({
               onClick={() => onSelectRepository(repository.repoInfo.fullName)}
               className={`min-w-0 p-2.5 rounded-lg border text-left transition-colors cursor-pointer ${
                 isActive
-                  ? 'border-blue-500/70 bg-blue-500/10'
+                  ? 'border-emerald-500/70 bg-emerald-500/10'
                   : 'border-slate-800 bg-slate-950/50 hover:border-slate-700 hover:bg-slate-950'
               }`}
               aria-pressed={isActive}

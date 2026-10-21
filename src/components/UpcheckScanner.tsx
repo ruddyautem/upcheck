@@ -137,7 +137,7 @@ export function UpcheckScanner({
 
   return (
     <div
-      className={`w-full max-w-6xl mx-auto flex flex-col items-center text-center ${compact ? "py-3" : "h-full flex-1 py-8 sm:py-12 lg:min-h-0 lg:py-0"}`}
+      className={`w-full max-w-6xl mx-auto flex flex-col items-center text-center ${compact ? "py-3" : "h-full flex-1 py-8 sm:py-12 lg:min-h-0 lg:justify-center lg:py-0"}`}
     >
       {/* 1. Centered Upcheck Brand Header */}
       {!compact && (
