@@ -69,14 +69,14 @@ export function TokenModal({ token, onSaveToken, onClose }: TokenModalProps) {
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
               <span>{t('token.local_storage_note')}</span>
             </div>
-            <p className="text-[11px] leading-relaxed">
+            <p className="text-[0.6875rem] leading-relaxed">
               {t('token.rate_limit_desc')}
             </p>
             <a
               href="https://github.com/settings/tokens"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[11px] text-cyan-400 hover:text-cyan-300"
+              className="inline-flex items-center gap-1 text-[0.6875rem] text-cyan-400 hover:text-cyan-300"
             >
               <span>{t('token.generate_link')}</span>
               <ExternalLink className="w-3 h-3" />

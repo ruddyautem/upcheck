@@ -124,7 +124,7 @@ export function PackageTable({
         <div className="min-w-0 overflow-x-auto sm:px-1.5 xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
           <table className="package-table w-full text-left border-separate border-spacing-y-1">
             <thead>
-              <tr className="border-b border-slate-700 bg-slate-900 text-[11px] font-extrabold tracking-wider text-slate-300 uppercase">
+              <tr className="border-b border-slate-700 bg-slate-900 text-[0.6875rem] font-extrabold tracking-wider text-slate-300 uppercase">
                 <th className={compactTable ? 'px-3 py-2' : 'px-4 py-3'}>{t('table.col_package')}</th>
                 <th className={compactTable ? 'px-3 py-2' : 'px-4 py-3'}>{t('table.col_current')}</th>
                 <th className={compactTable ? 'px-3 py-2' : 'px-4 py-3'}>{t('table.col_latest')}</th>
@@ -184,7 +184,7 @@ export function PackageTable({
                           <div className={compactTable ? 'flex items-center gap-2' : 'flex items-center gap-3'}>
                             {/* Avatar initial */}
                             <div
-                              className={`${compactTable ? 'h-6 w-6 text-[10px]' : 'h-7 w-7 text-xs'} shrink-0 rounded-lg flex items-center justify-center font-bold uppercase font-mono border ${getAvatarColor(
+                              className={`${compactTable ? 'h-6 w-6 text-[0.625rem]' : 'h-7 w-7 text-xs'} shrink-0 rounded-lg flex items-center justify-center font-bold uppercase font-mono border ${getAvatarColor(
                                 pkg.name
                               )}`}
                             >
@@ -195,12 +195,12 @@ export function PackageTable({
                               <div className="font-mono font-bold text-xs text-white group-hover:text-blue-300 transition-colors flex flex-wrap items-center gap-1.5 sm:whitespace-nowrap">
                                 <span className="min-w-0 break-all sm:break-normal">{pkg.name}</span>
                                 {pkg.hasBreakingChanges && (
-                                  <span className="shrink-0 text-[8px] leading-none font-sans px-1 py-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-500/40 font-black tracking-wide" title="Major version migration risk">
+                                  <span className="shrink-0 text-[0.5rem] leading-none font-sans px-1 py-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-500/40 font-black tracking-wide" title="Major version migration risk">
                                     {t('table.breaks_code')}
                                   </span>
                                 )}
                               </div>
-                              <div className="text-[10px] text-slate-400 font-sans sm:whitespace-nowrap">
+                              <div className="text-[0.625rem] text-slate-400 font-sans sm:whitespace-nowrap">
                                 {pkg.isDevDependency ? 'DevDependency' : 'Dependency'} • package.json
                               </div>
                             </div>
@@ -237,13 +237,13 @@ export function PackageTable({
                             }}
                             aria-expanded={isExpanded}
                             aria-label={isExpanded ? `Close advisories for ${pkg.name}` : `Show advisories for ${pkg.name}`}
-                            className={`group/status inline-flex w-40 shrink-0 items-stretch overflow-hidden rounded border text-[10px] leading-none font-semibold whitespace-nowrap transition-colors cursor-pointer ${compactTable ? 'h-7' : 'h-8'} ${pkg.isUpdateDeferred ? 'border-slate-600 bg-slate-800/60 text-slate-400' : config.badgeClass}`}
+                            className={`group/status inline-flex w-40 shrink-0 items-stretch overflow-hidden rounded border text-[0.625rem] leading-none font-semibold whitespace-nowrap transition-colors cursor-pointer ${compactTable ? 'h-7' : 'h-8'} ${pkg.isUpdateDeferred ? 'border-slate-600 bg-slate-800/60 text-slate-400' : config.badgeClass}`}
                           >
                             {statusContent}
                             <span className="flex w-8 items-center justify-center border-l border-current/20 bg-slate-950/25 transition-colors group-hover/status:bg-slate-950/45">
                               <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ease-out ${isExpanded ? 'rotate-180' : ''}`} />
                             </span>
-                          </button> : <span className={`inline-flex w-40 items-stretch justify-center rounded border text-[10px] leading-none font-semibold whitespace-nowrap ${compactTable ? 'h-7' : 'h-8'} ${pkg.isUpdateDeferred ? 'border-slate-600 bg-slate-800/60 text-slate-400' : config.badgeClass}`}>
+                          </button> : <span className={`inline-flex w-40 items-stretch justify-center rounded border text-[0.625rem] leading-none font-semibold whitespace-nowrap ${compactTable ? 'h-7' : 'h-8'} ${pkg.isUpdateDeferred ? 'border-slate-600 bg-slate-800/60 text-slate-400' : config.badgeClass}`}>
                             {statusContent}
                           </span>}
                         </td>
@@ -282,7 +282,7 @@ export function PackageTable({
                                 <Megaphone className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                                 <div>
                                   <span className="font-bold text-amber-300">{t('inspector.deprecate_banner')}:</span>
-                                  <p className="text-slate-300 mt-0.5 font-mono text-[11px] leading-relaxed">
+                                  <p className="text-slate-300 mt-0.5 font-mono text-[0.6875rem] leading-relaxed">
                                     {pkg.deprecatedReason}
                                   </p>
                                 </div>
@@ -302,18 +302,18 @@ export function PackageTable({
                                       <div className="flex items-center justify-between gap-2 flex-wrap">
                                         <div className="flex items-center gap-2 font-mono">
                                           <span className="font-bold text-red-400">{adv.id}</span>
-                                          <span className="px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 text-[10px] font-bold">
+                                          <span className="px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 text-[0.625rem] font-bold">
                                             {adv.severity}
                                           </span>
                                         </div>
                                         {adv.fixedIn && (
-                                          <span className="text-[11px] font-mono text-emerald-400 font-semibold">
+                                          <span className="text-[0.6875rem] font-mono text-emerald-400 font-semibold">
                                             {t('inspector.fixed_in')} {adv.fixedIn}
                                           </span>
                                         )}
                                       </div>
-                                      <p className="text-[11px] text-slate-300">{adv.title}</p>
-                                      <a href={adv.advisoryUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:text-cyan-200 hover:underline">
+                                      <p className="text-[0.6875rem] text-slate-300">{adv.title}</p>
+                                      <a href={adv.advisoryUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[0.6875rem] text-cyan-300 hover:text-cyan-200 hover:underline">
                                         <span>{t('inspector.ref_link')}</span>
                                         <ExternalLink className="w-3 h-3" />
                                       </a>

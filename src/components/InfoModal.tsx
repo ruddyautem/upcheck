@@ -77,7 +77,7 @@ export function InfoModal({ onClose }: InfoModalProps) {
                   <span className="w-2 h-2 rounded-full bg-red-500"></span>
                   🔴 {t('info.cat_critical')}
                 </span>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[0.6875rem] text-slate-400">
                   {t('info.cat_critical_desc')}
                 </p>
               </div>
@@ -87,7 +87,7 @@ export function InfoModal({ onClose }: InfoModalProps) {
                   <span className="w-2 h-2 rounded-full bg-orange-500"></span>
                   🟠 {t('info.cat_security')}
                 </span>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[0.6875rem] text-slate-400">
                   {t('info.cat_security_desc')}
                 </p>
               </div>
@@ -97,7 +97,7 @@ export function InfoModal({ onClose }: InfoModalProps) {
                   <span className="w-2 h-2 rounded-full bg-amber-500"></span>
                   ⚠️ {t('info.cat_deprecated')}
                 </span>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[0.6875rem] text-slate-400">
                   {t('info.cat_deprecated_desc')}
                 </p>
               </div>
@@ -107,7 +107,7 @@ export function InfoModal({ onClose }: InfoModalProps) {
                   <span className="w-2 h-2 rounded-full bg-blue-500"></span>
                   🔵 {t('info.cat_major')}
                 </span>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[0.6875rem] text-slate-400">
                   {t('info.cat_major_desc')}
                 </p>
               </div>
@@ -117,7 +117,7 @@ export function InfoModal({ onClose }: InfoModalProps) {
                   <span className="w-2 h-2 rounded-full bg-sky-500"></span>
                   🔵 {t('info.cat_minor')}
                 </span>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[0.6875rem] text-slate-400">
                   {t('info.cat_minor_desc')}
                 </p>
               </div>
@@ -127,7 +127,7 @@ export function InfoModal({ onClose }: InfoModalProps) {
                   <span className="w-2 h-2 rounded-full bg-slate-400"></span>
                   ⚪ {t('info.cat_patch')}
                 </span>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[0.6875rem] text-slate-400">
                   {t('info.cat_patch_desc')}
                 </p>
               </div>
@@ -137,7 +137,7 @@ export function InfoModal({ onClose }: InfoModalProps) {
                   <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                   🟢 {t('info.cat_up_to_date')}
                 </span>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[0.6875rem] text-slate-400">
                   {t('info.cat_up_to_date_desc')}
                 </p>
               </div>

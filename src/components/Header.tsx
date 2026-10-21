@@ -72,7 +72,7 @@ export function Header({
             <span className="text-xl font-extrabold tracking-tight text-white font-sans">
               upcheck<span className="text-blue-400">.</span>
             </span>
-            <p className="hidden text-[10px] leading-snug text-slate-400 sm:block xl:text-[11px]">
+            <p className="hidden truncate text-[0.625rem] leading-snug text-slate-400 sm:block xl:text-[0.6875rem]">
               <span className="xl:hidden">{t('header.subtitle_short')}</span>
               <span className="hidden xl:inline">{t('header.subtitle')}</span>
             </p>
@@ -142,14 +142,14 @@ export function Header({
         </div>
 
         {/* Desktop action buttons. */}
-        <div className="ml-auto hidden w-auto shrink-0 items-center justify-end gap-2.5 sm:flex">
-          <div className="flex h-10 items-center gap-0.5 border border-slate-800 bg-slate-900 p-0.5">
+        <div className="ml-auto hidden w-auto shrink-0 items-center justify-end gap-2 sm:flex">
+          <div className="flex h-9 items-center gap-0.5 border border-slate-800 bg-slate-900 p-0.5 [&_svg]:h-3.5 [&_svg]:w-5">
             <button
               type="button"
               onClick={() => setLanguage('fr')}
               aria-label="Français"
               aria-pressed={language === 'fr'}
-              className={`flex h-9 w-9 items-center justify-center border transition-colors cursor-pointer ${
+              className={`flex h-7.5 w-7.5 items-center justify-center border transition-colors cursor-pointer ${
                 language === 'fr'
                   ? 'border-emerald-400/70 bg-emerald-500/20'
                   : 'border-transparent hover:border-slate-600 hover:bg-slate-800'
@@ -163,7 +163,7 @@ export function Header({
               onClick={() => setLanguage('en')}
               aria-label="English"
               aria-pressed={language === 'en'}
-              className={`flex h-9 w-9 items-center justify-center border transition-colors cursor-pointer ${
+              className={`flex h-7.5 w-7.5 items-center justify-center border transition-colors cursor-pointer ${
                 language === 'en'
                   ? 'border-emerald-400/70 bg-emerald-500/20'
                   : 'border-transparent hover:border-slate-600 hover:bg-slate-800'
@@ -177,7 +177,7 @@ export function Header({
           <button
             onClick={onOpenInfoModal}
             aria-label={t('header.how_it_works')}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 p-0 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white cursor-pointer lg:w-auto lg:gap-1.5 lg:px-3"
+            className="flex h-9 w-9 shrink-0 items-center justify-center whitespace-nowrap rounded-xl border border-slate-800 bg-slate-900 p-0 text-[0.625rem] font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white cursor-pointer lg:w-32 lg:gap-1 lg:px-2"
             title="How Upcheck detects vulnerabilities & announcements"
           >
             <Info className="w-3.5 h-3.5 text-slate-400" />
@@ -187,7 +187,7 @@ export function Header({
           <button
             onClick={onOpenTokenModal}
             aria-label={t('header.token')}
-            className={`flex h-10 w-10 items-center justify-center rounded-xl border p-0 text-xs font-medium transition-colors cursor-pointer lg:w-auto lg:gap-1.5 lg:px-3 ${
+            className={`flex h-9 w-9 shrink-0 items-center justify-center whitespace-nowrap rounded-xl border p-0 text-[0.625rem] font-medium transition-colors cursor-pointer lg:w-[8.25rem] lg:gap-1 lg:px-2 ${
               hasCustomToken
                 ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20'
                 : 'bg-slate-900 text-slate-300 hover:text-white border-slate-800 hover:bg-slate-800'
@@ -207,7 +207,7 @@ export function Header({
             rel="noopener noreferrer"
             aria-label="GitHub"
             title="GitHub"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white lg:w-auto lg:gap-1.5 lg:px-3"
+            className="flex h-9 w-9 shrink-0 items-center justify-center whitespace-nowrap rounded-xl border border-slate-800 bg-slate-900 text-[0.625rem] font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white lg:w-22 lg:gap-1 lg:px-2"
           >
             <GithubIcon className="w-3.5 h-3.5" />
             <span className="hidden lg:inline">GitHub</span>

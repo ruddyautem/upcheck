@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Scale typography and rem-based controls together on spacious desktops. */
+@media (min-width: 1536px) {
+  html { font-size: 112.5%; }
+}
+
 :root {
   color-scheme: dark;
   --bg-main: #050b12;
@@ -69,6 +74,7 @@ body {
   /* The header's 40px actions sit 12px from the top of its 64px row. */
   height: 2.5rem !important;
   padding: 0 0.8rem !important;
+  font-size: 0.8125rem;
   border-radius: 0 !important;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
   font-family: "IBM Plex Mono", "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -132,6 +138,37 @@ body {
 .package-breakdown-viewport,
 .package-breakdown-content {
   overflow-anchor: none;
+}
+
+/* Let the report use the viewport's remaining height, rather than adding a
+   fixed-height inventory below its summary. Long lists scroll in their panels. */
+@media (min-width: 1280px) and (min-height: 720px) {
+  .report-fit-shell {
+    height: 100dvh;
+    min-height: 0;
+  }
+  .report-fit-shell > header { flex-shrink: 0; }
+  .report-fit-shell > main {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-block: 1rem;
+  }
+  .report-fit-shell > main > * { margin-block: 0; }
+  .report-fit-shell .report-results {
+    flex: 1;
+    height: auto;
+  }
+  .report-fit-shell .report-panels {
+    grid-template-rows: 3.25rem minmax(0, 1fr);
+    align-content: stretch;
+  }
+  .report-fit-shell .package-breakdown { height: auto; }
+  .report-fit-shell .report-owner-summary {
+    flex-shrink: 0;
+    max-height: min(14rem, 26dvh);
+    overflow-y: auto;
+  }
 }
 
 @media (min-width: 1024px) and (max-height: 780px) {

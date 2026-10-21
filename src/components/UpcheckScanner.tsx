@@ -177,7 +177,7 @@ export function UpcheckScanner({
                       <History className='w-3.5 h-3.5 text-blue-400' />
                       {t("input.recent_group")}
                     </span>
-                    <button type='button' onClick={onClearHistory} className='text-[11px] text-slate-500 hover:text-emerald-300 cursor-pointer'>
+                    <button type='button' onClick={onClearHistory} className='text-[0.6875rem] text-red-400 hover:text-red-300 cursor-pointer'>
                       {t("input.clear_recent")}
                     </button>
                   </div>
@@ -200,7 +200,7 @@ export function UpcheckScanner({
                         ) : (
                           <div className={`w-10 h-10 rounded-lg flex flex-col items-center justify-center shrink-0 ${getGradeBadgeClass(item.grade)}`}>
                             <span className='font-black text-sm leading-none'>{item.grade}</span>
-                            <span className='text-[8px] font-bold uppercase tracking-wider leading-none mt-0.5 opacity-90'>{t("overview.grade")}</span>
+                            <span className='text-[0.5rem] font-bold uppercase tracking-wider leading-none mt-0.5 opacity-90'>{t("overview.grade")}</span>
                           </div>
                         )}
 
@@ -208,14 +208,14 @@ export function UpcheckScanner({
                           <div className='font-mono text-xs font-bold text-slate-200 group-hover:text-emerald-300 truncate transition-colors'>
                             {item.isMultiScan ? t("input.multi_scan") : item.fullName}
                           </div>
-                          <div className='text-[10px] text-slate-500 mt-0.5'>
+                          <div className='text-[0.625rem] text-slate-500 mt-0.5'>
                             {item.isMultiScan
                               ? `${item.repositoryCount || 0} ${t("input.repositories")} · ${item.totalPackages} ${t("owner_scan.packages")}`
                               : `${item.totalPackages} ${t("owner_scan.packages")}`}
                           </div>
                           <time
                             dateTime={item.timestamp}
-                            className='mt-1 flex min-w-0 items-center gap-1 whitespace-nowrap text-[9px] text-slate-500 sm:text-[10px]'
+                            className='mt-1 flex min-w-0 items-center gap-1 whitespace-nowrap text-[0.5625rem] text-slate-500 sm:text-[0.625rem]'
                             title={checkedAt}
                           >
                             <Clock className='h-3 w-3 shrink-0 text-emerald-400' aria-hidden='true' />
@@ -259,7 +259,7 @@ export function UpcheckScanner({
                   <div className='text-xs font-semibold leading-relaxed text-slate-200'>
                     {t("input.upload_file")}
                   </div>
-                  <div className='mt-1 hidden text-[11px] leading-relaxed text-slate-400 sm:block'>
+                  <div className='mt-1 hidden text-[0.6875rem] leading-relaxed text-slate-400 sm:block'>
                     {t("input.drag_drop_hint")}
                   </div>
                 </div>

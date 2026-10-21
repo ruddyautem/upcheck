@@ -106,7 +106,7 @@ export function GitHubScanForm({
               key={option}
               type='button'
               onClick={() => switchMode(option)}
-              className={`inline-flex h-12 min-w-0 items-center justify-center gap-1 px-1 py-1 text-center text-[10px] font-semibold leading-tight transition-colors sm:h-auto sm:gap-2 sm:px-2 sm:py-3 sm:text-xs lg:py-3.5 cursor-pointer ${
+              className={`inline-flex h-12 min-w-0 items-center justify-center gap-1 px-1 py-1 text-center text-[0.625rem] font-semibold leading-tight transition-colors sm:h-auto sm:gap-2 sm:px-2 sm:py-3 sm:text-xs lg:py-3.5 cursor-pointer ${
                 active
                   ? 'bg-slate-100 text-slate-950'
                   : 'text-slate-400 hover:text-slate-100'
@@ -143,7 +143,7 @@ export function GitHubScanForm({
         <div className='flex min-h-0 flex-col rounded-xl border border-slate-800 bg-slate-950/50 overflow-hidden text-left'>
           <div className='shrink-0 p-3 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5'>
             <div className='text-xs font-semibold text-slate-200'>{t('input.select_repos')}</div>
-            <div className='text-[11px] text-slate-400'>
+            <div className='text-[0.6875rem] text-slate-400'>
               {selected.length}{Number.isFinite(selectionLimit) ? ` / ${selectionLimit}` : ''} {t('input.selected')}
               {!hasToken && <span className='text-amber-300'> · {t('input.no_token_limit')}</span>}
             </div>

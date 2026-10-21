@@ -28,7 +28,7 @@ function PromptPreview({ prompt }: { prompt: string }) {
   return (
     <div
       aria-label="AI update prompt preview"
-      className="h-72 w-full overflow-y-auto border border-slate-800 bg-slate-950 p-3 font-mono text-[11px] leading-relaxed text-slate-300"
+      className="h-72 w-full overflow-y-auto border border-slate-800 bg-slate-950 p-3 font-mono text-[0.6875rem] leading-relaxed text-slate-300"
     >
       {lines.map((line, index) => {
         const key = `${index}-${line}`;
@@ -39,14 +39,14 @@ function PromptPreview({ prompt }: { prompt: string }) {
           return <div key={key} className="mt-3 border-l-2 border-violet-400 bg-violet-500/10 px-3 py-1.5 text-xs font-bold text-violet-100 first:mt-0">{line.slice(3)}</div>;
         }
         if (line === 'Commande prévue :' || line === 'Intended command:') {
-          return <div key={key} className="mt-3 text-[10px] font-bold uppercase tracking-wider text-emerald-400">{line}</div>;
+          return <div key={key} className="mt-3 text-[0.625rem] font-bold uppercase tracking-wider text-emerald-400">{line}</div>;
         }
         const previousLine = lines[index - 1];
         if ((previousLine === 'Commande prévue :' || previousLine === 'Intended command:') && line) {
           return <code key={key} className="mt-1 block whitespace-pre-wrap break-words border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-2 text-emerald-100">{line}</code>;
         }
         if (line === 'Paquets à mettre à jour :' || line === 'Packages to update:') {
-          return <div key={key} className="mt-3 text-[10px] font-bold uppercase tracking-wider text-sky-300">{line}</div>;
+          return <div key={key} className="mt-3 text-[0.625rem] font-bold uppercase tracking-wider text-sky-300">{line}</div>;
         }
         return <div key={key} className={line.startsWith('- ') ? 'whitespace-pre-wrap text-slate-200' : 'whitespace-pre-wrap'}>{line || '\u00a0'}</div>;
       })}
@@ -85,7 +85,7 @@ export function MultiRepoPromptModal({ repositories, packageManager, onChangePac
             {presets.map((item) => {
               const count = repositories.reduce((total, repository) => total + getUpdatePresetPackages(repository.packages, item).length, 0);
               const repositoryCount = repositories.filter((repository) => getUpdatePresetPackages(repository.packages, item).length > 0).length;
-              return <button key={item} type="button" onClick={() => setPreset(item)} aria-pressed={preset === item} className={`border px-3 py-2 text-left text-xs font-semibold transition-colors cursor-pointer ring-1 ring-inset focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current ${presetColors[item]}`}><span className="block leading-snug">{t(`scripts.${item}`)}</span><span className="mt-1 block font-mono text-[10px] opacity-80">{count} · {repositoryCount} {t('owner_scan.scanned')}</span></button>;
+              return <button key={item} type="button" onClick={() => setPreset(item)} aria-pressed={preset === item} className={`border px-3 py-2 text-left text-xs font-semibold transition-colors cursor-pointer ring-1 ring-inset focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current ${presetColors[item]}`}><span className="block leading-snug">{t(`scripts.${item}`)}</span><span className="mt-1 block font-mono text-[0.625rem] opacity-80">{count} · {repositoryCount} {t('owner_scan.scanned')}</span></button>;
             })}
           </div>
           <label className={`flex cursor-pointer items-center justify-between gap-3 border p-3 text-xs ${force ? 'border-amber-500/70 bg-amber-500/15' : 'border-amber-500/30 bg-amber-950/15'}`}>

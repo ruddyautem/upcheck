@@ -75,7 +75,7 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
                 type="button"
                 onClick={() => onChangePackageManager(manager)}
                 aria-pressed={packageManager === manager}
-                className={`grid h-full min-w-12 place-items-center px-2 text-center text-[10px] leading-none font-mono font-semibold transition-colors cursor-pointer ${packageManager === manager ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
+                className={`grid h-full min-w-12 place-items-center px-2 text-center text-[0.625rem] leading-none font-mono font-semibold transition-colors cursor-pointer ${packageManager === manager ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
               >
                 {manager}
               </button>
@@ -93,10 +93,10 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
                 onClick={() => selectPreset(id)}
                 aria-pressed={activePreset === id}
                 title={t(`scripts.${id}`)}
-                className={`flex h-8 min-w-0 items-center justify-between gap-1 border px-2 text-left font-sans text-[11px] font-semibold transition-colors cursor-pointer ring-1 ring-inset ${color} ${ring} ${hover} ${active}`}
+                className={`flex h-8 min-w-0 items-center justify-between gap-1 border px-2 text-left font-sans text-[0.6875rem] font-semibold transition-colors cursor-pointer ring-1 ring-inset ${color} ${ring} ${hover} ${active}`}
               >
                 <span className="flex h-4 items-center whitespace-nowrap leading-none">{t(`scripts.${id}_short`)}</span>
-                <span className={`grid h-4 min-w-4 shrink-0 place-items-center border px-0.5 text-[9px] leading-none ${badge}`}>{count}</span>
+                <span className={`grid h-4 min-w-4 shrink-0 place-items-center border px-0.5 text-[0.5625rem] leading-none ${badge}`}>{count}</span>
               </button>
             );
           })}
@@ -133,7 +133,7 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
               aria-pressed={showAiPrompt}
               aria-label={t('scripts.copy_prompt')}
               title={t('scripts.copy_prompt')}
-              className="flex h-8 w-22 shrink-0 items-center justify-center gap-1.5 border border-violet-400/50 bg-violet-500/15 px-2 font-sans text-[11px] font-semibold text-violet-200 ring-1 ring-inset ring-violet-400/70 transition-colors cursor-pointer hover:bg-violet-500/25 aria-pressed:bg-violet-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex h-8 w-22 shrink-0 items-center justify-center gap-1.5 border border-violet-400/50 bg-violet-500/15 px-2 font-sans text-[0.6875rem] font-semibold text-violet-200 ring-1 ring-inset ring-violet-400/70 transition-colors cursor-pointer hover:bg-violet-500/25 aria-pressed:bg-violet-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Bot className="h-4 w-4" aria-hidden="true" />
               <span>{t('scripts.ai_short')}</span>
@@ -148,7 +148,7 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
               aria-pressed={!showAiPrompt}
               aria-label={t('remediation.copy_cmd')}
               title={t('remediation.copy_cmd')}
-              className="flex h-8 w-22 shrink-0 items-center justify-center gap-1.5 border border-emerald-500/40 bg-emerald-500/15 px-2 font-sans text-[11px] font-semibold text-emerald-300 transition-colors cursor-pointer ring-1 ring-inset ring-emerald-400 hover:border-emerald-300/70 hover:ring-emerald-300 hover:text-emerald-200 aria-pressed:border-emerald-300 aria-pressed:bg-emerald-500/35 aria-pressed:text-emerald-100 aria-pressed:ring-emerald-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex h-8 w-22 shrink-0 items-center justify-center gap-1.5 border border-emerald-500/40 bg-emerald-500/15 px-2 font-sans text-[0.6875rem] font-semibold text-emerald-300 transition-colors cursor-pointer ring-1 ring-inset ring-emerald-400 hover:border-emerald-300/70 hover:ring-emerald-300 hover:text-emerald-200 aria-pressed:border-emerald-300 aria-pressed:bg-emerald-500/35 aria-pressed:text-emerald-100 aria-pressed:ring-emerald-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Terminal className="h-4 w-4" aria-hidden="true" />
               <span>{t('scripts.manual_short')}</span>
@@ -159,7 +159,7 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
             readOnly
             aria-label={showAiPrompt ? t('scripts.ai_prompt') : t(`scripts.${activePreset}`)}
             value={displayedContent || t('scripts.none')}
-            className="min-h-0 flex-1 w-full resize-none overflow-auto whitespace-pre-wrap break-words bg-transparent p-3 text-[11px] leading-relaxed font-mono text-slate-100 outline-none selection:bg-emerald-500/40"
+            className="min-h-0 flex-1 w-full resize-none overflow-auto whitespace-pre-wrap break-words bg-transparent p-3 text-[0.6875rem] leading-relaxed font-mono text-slate-100 outline-none selection:bg-emerald-500/40"
           />
         </div>
       </aside>

@@ -341,7 +341,7 @@ export default function Home({ reportId }: { reportId?: string }) {
   };
 
   return (
-    <div className={`app-shell text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white antialiased ${!result && !error ? 'min-h-screen lg:h-dvh lg:overflow-hidden' : 'min-h-screen'}`}>
+    <div className={`app-shell text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white antialiased ${result && !isScanOpen && !error ? 'report-fit-shell' : ''} ${!result && !error ? 'min-h-screen lg:h-dvh lg:overflow-hidden' : 'min-h-screen'}`}>
       {/* Top Header */}
       <Header
         onOpenTokenModal={() => setShowTokenModal(true)}
@@ -392,13 +392,13 @@ export default function Home({ reportId }: { reportId?: string }) {
 
         {/* Scanned report */}
         {result && (
-          <div className="h-full min-h-0 flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-3 duration-300">
+          <div className="report-results h-full min-h-0 flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-3 duration-300">
             <section className="shrink-0 border border-slate-800 bg-slate-900/80 px-4 py-4 sm:px-5 flex flex-col xl:flex-row xl:items-center gap-4">
               <div className="min-w-0 flex-1">
                 <div className="flex items-start gap-3 sm:items-center sm:gap-4 min-w-0">
                   <span className={`shrink-0 inline-flex flex-col items-center justify-center w-16 h-16 border ${getGradeBadgeClass(result.healthScore.grade)}`}>
                     <span className="text-3xl font-black leading-none">{result.healthScore.grade}</span>
-                    <span className="mt-1.5 text-[9px] font-bold tracking-[0.14em] leading-none text-white">SCORE</span>
+                    <span className="mt-1.5 text-[0.5625rem] font-bold tracking-[0.14em] leading-none text-white">SCORE</span>
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
@@ -406,7 +406,7 @@ export default function Home({ reportId }: { reportId?: string }) {
                       <span aria-hidden="true" className="hidden h-3 border-l border-slate-700 sm:block" />
                       <time
                         dateTime={result.analyzedAt}
-                        className="inline-flex min-w-0 max-w-full items-center text-[9px] text-slate-400 whitespace-normal sm:text-[11px]"
+                        className="inline-flex min-w-0 max-w-full items-center text-[0.5625rem] text-slate-400 whitespace-normal sm:text-[0.6875rem]"
                         title={`${t('overview.last_scan')} · ${new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'short' }).format(new Date(result.analyzedAt))}`}
                       >
                         <span className="sm:hidden">
@@ -442,24 +442,24 @@ export default function Home({ reportId }: { reportId?: string }) {
 
             <section className="shrink-0 grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3" aria-label="Report metrics">
               <button type="button" onClick={() => setTableFilter('all')} className="min-w-0 min-h-[5rem] text-left border border-slate-800 bg-slate-900/60 px-2.5 py-2 sm:px-3 sm:py-2.5 hover:border-emerald-500/50 transition-colors cursor-pointer">
-                <div className="break-words text-[9px] uppercase tracking-wide text-slate-400 sm:text-[10px] sm:tracking-wider">{t('metrics.packages_checked')}</div>
-                <div className="mt-1 flex items-end justify-between gap-2"><strong className="text-2xl text-white">{result.totalPackages}</strong><span className="text-[11px] text-slate-500">{result.dependenciesCount} deps</span></div>
+                <div className="break-words text-[0.5625rem] uppercase tracking-wide text-slate-400 sm:text-[0.625rem] sm:tracking-wider">{t('metrics.packages_checked')}</div>
+                <div className="mt-1 flex items-end justify-between gap-2"><strong className="text-2xl text-white">{result.totalPackages}</strong><span className="text-[0.6875rem] text-slate-500">{result.dependenciesCount} deps</span></div>
               </button>
               <button type="button" onClick={() => setTableFilter('security')} className="min-w-0 min-h-[5rem] text-left border border-slate-800 bg-slate-900/60 px-2.5 py-2 sm:px-3 sm:py-2.5 hover:border-red-500/50 transition-colors cursor-pointer">
-                <div className="break-words text-[9px] uppercase tracking-wide text-slate-400 sm:text-[10px] sm:tracking-wider">{t('metrics.security_alerts')}</div>
+                <div className="break-words text-[0.5625rem] uppercase tracking-wide text-slate-400 sm:text-[0.625rem] sm:tracking-wider">{t('metrics.security_alerts')}</div>
                 <div className="mt-1 flex items-end justify-between gap-2"><strong className="text-2xl text-red-400">{result.summaryCounts.critical + result.summaryCounts.security}</strong><ShieldAlert className="w-4 h-4 text-red-400" /></div>
               </button>
               <button type="button" onClick={() => setTableFilter('needs_attention')} className="min-w-0 min-h-[5rem] text-left border border-slate-800 bg-slate-900/60 px-2.5 py-2 sm:px-3 sm:py-2.5 hover:border-amber-500/50 transition-colors cursor-pointer">
-                <div className="break-words text-[9px] uppercase tracking-wide text-slate-400 sm:text-[10px] sm:tracking-wider">{t('metrics.need_update')}</div>
+                <div className="break-words text-[0.5625rem] uppercase tracking-wide text-slate-400 sm:text-[0.625rem] sm:tracking-wider">{t('metrics.need_update')}</div>
                 <div className="mt-1 flex items-end justify-between gap-2"><strong className="text-2xl text-amber-300">{result.packages.filter((pkg) => pkg.category !== 'up_to_date' && !pkg.isUpdateDeferred).length}</strong><ArrowUpRight className="w-4 h-4 text-amber-400" /></div>
               </button>
               <button type="button" onClick={() => setTableFilter('up_to_date')} className="min-w-0 min-h-[5rem] text-left border border-slate-800 bg-slate-900/60 px-2.5 py-2 sm:px-3 sm:py-2.5 hover:border-emerald-500/50 transition-colors cursor-pointer">
-                <div className="break-words text-[9px] uppercase tracking-wide text-slate-400 sm:text-[10px] sm:tracking-wider">{t('metrics.up_to_date')}</div>
+                <div className="break-words text-[0.5625rem] uppercase tracking-wide text-slate-400 sm:text-[0.625rem] sm:tracking-wider">{t('metrics.up_to_date')}</div>
                 <div className="mt-1 flex items-end justify-between gap-2"><strong className="text-2xl text-emerald-400">{result.summaryCounts.up_to_date}</strong><Check className="mb-1 h-4 w-4 text-emerald-400" aria-hidden="true" /></div>
               </button>
             </section>
 
-            <div className="content-start min-h-0 grid flex-1 grid-cols-1 gap-4 xl:[--report-panel-height:clamp(24rem,48dvh,32rem)] 2xl:[--report-panel-height:clamp(34rem,76dvh,48rem)] xl:grid-cols-[minmax(0,1fr)_clamp(13rem,24vw,22rem)] xl:grid-rows-[3.25rem_var(--report-panel-height)]">
+            <div className="report-panels content-start min-h-0 grid flex-1 grid-cols-1 gap-4 xl:[--report-panel-height:clamp(24rem,48dvh,32rem)] 2xl:[--report-panel-height:clamp(34rem,76dvh,48rem)] xl:grid-cols-[minmax(0,1fr)_clamp(13rem,24vw,22rem)] xl:grid-rows-[3.25rem_var(--report-panel-height)]">
               <UpdateScriptsPanel
                 key={result.repoInfo.fullName}
                 packages={result.packages}
