@@ -46,8 +46,8 @@ export function OwnerScanSummary({
           </div>
         </div>
         <div className="grid w-full grid-cols-1 gap-2 self-start sm:flex sm:w-auto sm:flex-wrap sm:items-center">
-          <button type="button" onClick={onRescanAll} disabled={isLoading} className="inline-flex w-full cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap border border-slate-700 bg-slate-950/50 px-2.5 py-1.5 text-[11px] font-semibold text-slate-200 hover:border-emerald-500/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:py-1">
-            <RefreshCw className={`h-3.5 w-3.5 text-emerald-400 ${isLoading ? 'animate-spin' : ''}`} />
+          <button type="button" onClick={onRescanAll} disabled={isLoading} className="inline-flex w-full cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap border border-emerald-600 bg-emerald-600 px-2.5 py-1.5 text-[11px] font-semibold text-white hover:border-emerald-500 hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:py-1">
+            <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} />
             {t('overview.rescan')} {t('owner_scan.all')}
           </button>
           {analysis.results.length > 1 && (

@@ -424,8 +424,8 @@ export default function Home({ reportId }: { reportId?: string }) {
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 max-[480px]:grid max-[480px]:grid-cols-2">
-                 <button type="button" onClick={handleRescan} disabled={isLoading} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border border-slate-700 text-slate-200 hover:text-white hover:border-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer max-[480px]:w-full max-[480px]:justify-center">
-                   <RefreshCw className={`w-3.5 h-3.5 text-emerald-400 ${isLoading ? 'animate-spin' : ''}`} />
+                 <button type="button" onClick={handleRescan} disabled={isLoading} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border border-emerald-600 bg-emerald-600 text-white hover:border-emerald-500 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer max-[480px]:w-full max-[480px]:justify-center">
+                   <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
                    {t('overview.rescan')}
                  </button>
                 <button type="button" onClick={() => setShowRemediation(true)} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border border-slate-700 text-slate-200 hover:text-white hover:border-emerald-500/50 cursor-pointer max-[480px]:w-full max-[480px]:justify-center">
@@ -434,7 +434,7 @@ export default function Home({ reportId }: { reportId?: string }) {
                 <button type="button" onClick={() => setShowExport(true)} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border border-slate-700 text-slate-200 hover:text-white hover:border-emerald-500/50 cursor-pointer max-[480px]:w-full max-[480px]:justify-center">
                   <Download className="w-3.5 h-3.5 text-emerald-400" /> {t('overview.export')}
                 </button>
-                <button type="button" onClick={() => setIsScanOpen((open) => !open)} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-500 cursor-pointer max-[480px]:w-full max-[480px]:justify-center" aria-expanded={isScanOpen}>
+                <button type="button" onClick={() => setIsScanOpen((open) => !open)} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border border-slate-700 text-slate-200 hover:text-white hover:border-emerald-500/50 cursor-pointer max-[480px]:w-full max-[480px]:justify-center" aria-expanded={isScanOpen}>
                   <ScanSearch className="w-3.5 h-3.5" /> {isScanOpen ? t('report.close_scan') : <><span className="max-[480px]:hidden">{t('report.open_scan')}</span><span className="hidden max-[480px]:inline">{t('report.open_scan_short')}</span></>}
                 </button>
               </div>
