@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { Key, Info } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ChevronDown, Key, Info, Menu, X } from 'lucide-react';
 import { GithubIcon } from '@/components/GithubIcon';
 import { useAppSettings } from '@/lib/settingsContext';
 import { Link } from '@/i18n/navigation';
@@ -36,6 +36,31 @@ export function Header({
   onOpenInfoModal,
 }: HeaderProps) {
   const { language, setLanguage, t } = useAppSettings();
+  const [mobileMenu, setMobileMenu] = useState<'language' | 'actions' | null>(null);
+  const mobileControlsRef = useRef<HTMLDivElement>(null);
+  const languageButtonRef = useRef<HTMLButtonElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!mobileMenu) return;
+    const dismissOutside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !mobileControlsRef.current?.contains(event.target)) {
+        setMobileMenu(null);
+      }
+    };
+    const dismissOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMobileMenu(null);
+        (mobileMenu === 'language' ? languageButtonRef : menuButtonRef).current?.focus();
+      }
+    };
+    document.addEventListener('pointerdown', dismissOutside);
+    document.addEventListener('keydown', dismissOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', dismissOutside);
+      document.removeEventListener('keydown', dismissOnEscape);
+    };
+  }, [mobileMenu]);
 
   return (
     <header className="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-xl sticky top-0 z-30 transition-colors">
@@ -54,8 +79,70 @@ export function Header({
           </div>
         </Link>
 
-        {/* Action Buttons */}
-        <div className="ml-auto flex w-auto shrink-0 items-center justify-end gap-1.5 sm:gap-2.5">
+        {/* Mobile language picker and navigation. */}
+        <div ref={mobileControlsRef} className="relative ml-auto flex shrink-0 items-center gap-2 sm:hidden">
+          <button
+            ref={languageButtonRef}
+            type="button"
+            onClick={() => setMobileMenu((open) => open === 'language' ? null : 'language')}
+            aria-label={t('header.language')}
+            aria-expanded={mobileMenu === 'language'}
+            aria-controls="mobile-language-picker"
+            className="flex h-10 items-center justify-center gap-1.5 border border-slate-800 bg-slate-900 px-2 text-slate-300 hover:border-emerald-400/60 focus-visible:outline-2 focus-visible:outline-emerald-400"
+          >
+            <FlagIcon country={language} />
+            <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+          <button
+            ref={menuButtonRef}
+            type="button"
+            onClick={() => setMobileMenu((open) => open === 'actions' ? null : 'actions')}
+            aria-label={mobileMenu === 'actions' ? t('header.close_menu') : t('header.open_menu')}
+            aria-expanded={mobileMenu === 'actions'}
+            aria-controls="mobile-header-actions"
+            className="flex h-10 w-10 items-center justify-center border border-slate-800 bg-slate-900 text-slate-200 hover:border-emerald-400/60 focus-visible:outline-2 focus-visible:outline-emerald-400"
+          >
+            {mobileMenu === 'actions' ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
+          </button>
+
+          {mobileMenu === 'language' && (
+            <div id="mobile-language-picker" className="absolute right-0 top-full mt-2 grid w-40 gap-2 border border-slate-800 bg-slate-950 p-2 shadow-xl">
+              {(['fr', 'en'] as const).map((country) => (
+                <button
+                  key={country}
+                  type="button"
+                  onClick={() => { setMobileMenu(null); setLanguage(country); }}
+                  aria-pressed={language === country}
+                  className="flex min-h-11 w-full cursor-pointer items-center gap-3 border border-slate-800 bg-slate-900 px-3 text-left text-xs font-medium text-slate-300 transition-colors hover:border-slate-600 hover:bg-slate-800 hover:text-white aria-pressed:border-emerald-400/70 aria-pressed:bg-emerald-500/20 aria-pressed:text-emerald-200 focus-visible:outline-2 focus-visible:outline-emerald-400"
+                >
+                  <FlagIcon country={country} />
+                  {country === 'fr' ? 'Français' : 'English'}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {mobileMenu === 'actions' && (
+            <nav id="mobile-header-actions" aria-label={t('header.open_menu')} className="absolute right-0 top-full mt-2 grid w-56 max-w-[calc(100vw-1.5rem)] gap-2 border border-slate-800 bg-slate-950 p-2 shadow-xl">
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenu(null)} className="flex min-h-11 items-center gap-3 border border-slate-800 bg-slate-900 px-3 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white focus-visible:outline-2 focus-visible:outline-emerald-400">
+                <GithubIcon className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                GitHub
+              </a>
+              <button type="button" onClick={() => { setMobileMenu(null); onOpenTokenModal(); }} className={`flex min-h-11 w-full cursor-pointer items-center gap-3 border px-3 text-left text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-emerald-400 ${hasCustomToken ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20' : 'border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white'}`}>
+                <Key className={`h-3.5 w-3.5 shrink-0 ${hasCustomToken ? 'text-emerald-400' : 'text-slate-400'}`} aria-hidden="true" />
+                {t('header.token')}
+                {hasCustomToken && <span className="ml-auto h-1.5 w-1.5 bg-emerald-400" aria-hidden="true" />}
+              </button>
+              <button type="button" onClick={() => { setMobileMenu(null); onOpenInfoModal(); }} className="flex min-h-11 w-full cursor-pointer items-center gap-3 border border-slate-800 bg-slate-900 px-3 text-left text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white focus-visible:outline-2 focus-visible:outline-emerald-400">
+                <Info className="h-3.5 w-3.5 shrink-0 text-slate-400" aria-hidden="true" />
+                {t('header.how_it_works')}
+              </button>
+            </nav>
+          )}
+        </div>
+
+        {/* Desktop action buttons. */}
+        <div className="ml-auto hidden w-auto shrink-0 items-center justify-end gap-2.5 sm:flex">
           <div className="flex h-10 items-center gap-0.5 border border-slate-800 bg-slate-900 p-0.5">
             <button
               type="button"

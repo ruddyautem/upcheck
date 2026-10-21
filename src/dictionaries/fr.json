@@ -1,5 +1,8 @@
 {
   "header": {
+    "language": "Choisir la langue",
+    "open_menu": "Ouvrir le menu",
+    "close_menu": "Fermer le menu",
     "subtitle": "Inspecteur intelligent de dépendances et sécurité GitHub",
     "subtitle_short": "Inspecteur de dépendances et sécurité GitHub",
     "system_ok": "Système opérationnel",

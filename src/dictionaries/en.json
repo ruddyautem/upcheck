@@ -1,5 +1,8 @@
 {
   "header": {
+    "language": "Choose language",
+    "open_menu": "Open menu",
+    "close_menu": "Close menu",
     "subtitle": "Intelligent GitHub Dependency & Security Inspector",
     "subtitle_short": "GitHub dependency & security inspector",
     "system_ok": "System operational",
