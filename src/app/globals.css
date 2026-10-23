@@ -166,8 +166,6 @@ body {
   .report-fit-shell .package-breakdown { height: auto; }
   .report-fit-shell .report-owner-summary {
     flex-shrink: 0;
-    max-height: min(14rem, 26dvh);
-    overflow-y: auto;
   }
 }
 
