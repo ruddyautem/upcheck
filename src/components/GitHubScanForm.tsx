@@ -168,7 +168,7 @@ export function GitHubScanForm({
 
       {error && <p className='text-xs text-red-300' role="alert">{error}</p>}
 
-      {children}
+      {!(mode === 'multiple' && repositories.length > 0) && children}
 
       <button
         type='submit'
