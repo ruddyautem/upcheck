@@ -16,11 +16,14 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
+import { isPackageUpdateDeferred, isTypeScript7Update, UpdateOptions } from '@/lib/updateCommands';
 import { CATEGORY_CONFIGS } from '@/lib/categories';
 import { useAppSettings } from '@/lib/settingsContext';
 
 interface PackageTableProps {
   packages: PackageAnalysis[];
+  updateOptions?: UpdateOptions;
+  onToggleTypeScript7?: () => void;
   externalTab?: TableFilterTab;
 }
 
@@ -39,12 +42,14 @@ function getResponsivePageSize() {
 export function PackageTable({
   packages,
   externalTab,
+  updateOptions = {},
+  onToggleTypeScript7,
 }: PackageTableProps) {
   const { t } = useAppSettings();
-  const [activeTab, setActiveTab] = useState<TableFilterTab>(externalTab || 'all');
+  const activeTab = externalTab || 'all';
   const [expandedPackage, setExpandedPackage] = useState<string | null>(null);
   const [closingPackage, setClosingPackage] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [requestedPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
   React.useEffect(() => {
@@ -53,18 +58,6 @@ export function PackageTable({
     window.addEventListener('resize', updatePageSize);
     return () => window.removeEventListener('resize', updatePageSize);
   }, []);
-
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [pageSize]);
-
-  // Sync external tab filter if changed
-  React.useEffect(() => {
-    if (externalTab) {
-      setActiveTab(externalTab);
-      setCurrentPage(1);
-    }
-  }, [externalTab]);
 
   // Filter packages based on activeTab
   const filteredPackages = useMemo(() => {
@@ -85,13 +78,9 @@ export function PackageTable({
     return list;
   }, [packages, activeTab]);
 
-  // Reset to page 1 on filter changes
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [activeTab]);
-
   // Pagination
   const totalPages = pageSize === 0 ? 1 : Math.max(1, Math.ceil(filteredPackages.length / pageSize));
+  const currentPage = Math.min(requestedPage, totalPages);
   const paginatedPackages = useMemo(() => {
     if (pageSize === 0) return filteredPackages;
     const start = (currentPage - 1) * pageSize;
@@ -136,9 +125,11 @@ export function PackageTable({
                 <>
                 {paginatedPackages.map((pkg) => {
                   const isExpanded = expandedPackage === pkg.name;
+                  const isDeferred = isPackageUpdateDeferred(pkg, updateOptions);
+                  const hasTypeScriptToggle = isTypeScript7Update(pkg) && Boolean(onToggleTypeScript7);
                   const config = CATEGORY_CONFIGS[pkg.category];
                   const hasDetails = Boolean(pkg.breakingWarning?.trim() || pkg.deprecatedReason?.trim() || pkg.advisories.length);
-                  const latestVersionClass = pkg.isUpdateDeferred
+                  const latestVersionClass = isDeferred
                     ? 'text-slate-500 font-semibold'
                     : pkg.category === 'up_to_date'
                     ? 'text-emerald-400 font-semibold'
@@ -149,7 +140,7 @@ export function PackageTable({
                     : 'text-cyan-400 font-semibold';
                   const statusContent = (
                     <span className="flex flex-1 items-center justify-center gap-1 px-1">
-                      {pkg.isUpdateDeferred && <Minus className="w-3 h-3 text-slate-400" />}
+                      {isDeferred && <Minus className="w-3 h-3 text-slate-400" />}
                       {pkg.category === 'critical' && <ShieldAlert className="w-3 h-3 text-red-400" />}
                       {pkg.category === 'security' && <ShieldAlert className="w-3 h-3 text-orange-400" />}
                       {pkg.category === 'deprecated' && <AlertTriangle className="w-3 h-3 text-amber-400" />}
@@ -158,7 +149,7 @@ export function PackageTable({
                       {pkg.category === 'patch' && <Wrench className="w-3 h-3 text-slate-400" />}
                       {pkg.category === 'up_to_date' && <CheckCircle2 className="w-3 h-3 text-emerald-400" />}
                       <span>
-                        {pkg.isUpdateDeferred
+                        {isDeferred
                           ? <>
                               <span className="sm:hidden">{t('category.deferred_short')}</span>
                               <span className="hidden sm:inline">{t('category.deferred')}</span>
@@ -177,7 +168,7 @@ export function PackageTable({
                           setClosingPackage(expandedPackage);
                           setExpandedPackage(isExpanded ? null : pkg.name);
                         } : undefined}
-                        className={`package-row group text-xs transition-colors ${hasDetails ? 'cursor-pointer' : ''} ${pkg.category === 'critical' ? 'package-row--critical' : ''} ${pkg.isUpdateDeferred ? 'opacity-65' : ''}`}
+                        className={`package-row group text-xs transition-colors ${hasDetails ? 'cursor-pointer' : ''} ${pkg.category === 'critical' ? 'package-row--critical' : ''} ${isDeferred && !hasTypeScriptToggle ? 'opacity-65' : ''}`}
                       >
                         {/* Package Name & Type */}
                         <td className={compactTable ? 'px-3 py-2' : 'px-4 py-3'}>
@@ -191,17 +182,34 @@ export function PackageTable({
                               {pkg.name.charAt(0)}
                             </div>
 
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                               <div className="font-mono font-bold text-xs text-white group-hover:text-blue-300 transition-colors flex flex-wrap items-center gap-1.5 sm:whitespace-nowrap">
                                 <span className="min-w-0 break-all sm:break-normal">{pkg.name}</span>
+
                                 {pkg.hasBreakingChanges && (
                                   <span className="shrink-0 text-[0.5rem] leading-none font-sans px-1 py-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-500/40 font-black tracking-wide" title="Major version migration risk">
                                     {t('table.breaks_code')}
                                   </span>
                                 )}
                               </div>
-                              <div className="text-[0.625rem] text-slate-400 font-sans sm:whitespace-nowrap">
-                                {pkg.isDevDependency ? 'DevDependency' : 'Dependency'} • package.json
+                              <div className="min-w-0 text-[0.625rem] text-slate-400 font-sans" style={hasTypeScriptToggle ? { contain: 'inline-size' } : undefined}>
+                                {hasTypeScriptToggle ? (
+                                  <button
+                                    type="button"
+                                    onClick={(event) => { event.stopPropagation(); onToggleTypeScript7?.(); }}
+                                    aria-pressed={Boolean(updateOptions.allowTypeScript7)}
+                                    aria-label={t('scripts.include_typescript7')}
+                                    title={t('scripts.typescript7_help')}
+                                    className={`inline-flex max-w-full cursor-pointer items-center gap-1.5 text-left leading-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300 ${updateOptions.allowTypeScript7 ? 'text-amber-200' : 'text-slate-400 hover:text-amber-200'}`}
+                                  >
+                                    <span className="min-w-0 whitespace-normal">{t('scripts.typescript7_anyway')}</span>
+                                    <span aria-hidden="true" className={`relative h-4 w-7 shrink-0 transition-colors ${updateOptions.allowTypeScript7 ? 'bg-amber-500' : 'bg-slate-700'}`}>
+                                      <span className={`absolute left-0.5 top-0.5 h-3 w-3 bg-white transition-transform ${updateOptions.allowTypeScript7 ? 'translate-x-3' : ''}`} />
+                                    </span>
+                                  </button>
+                                ) : (
+                                  <span>{pkg.isPeerDependency ? 'PeerDependency' : pkg.isDevDependency ? 'DevDependency' : 'Dependency'} • package.json</span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -211,18 +219,18 @@ export function PackageTable({
                         <td className={`package-version-cell package-version-cell--current font-mono text-slate-300 ${compactTable ? 'px-3 py-2' : 'px-4 py-3'}`}>
                           <span className="hidden sm:inline">{pkg.currentVersion}</span>
                           <span className="package-version-pair sm:hidden">
-                            <span className="sr-only">{t('table.col_current')}: {pkg.currentVersion}. {t('table.col_latest')}: {pkg.latestVersion}</span>
+                            <span className="sr-only">{t('table.col_current')}: {pkg.currentVersion}. {t('table.col_latest')}: {pkg.latestVersion || '—'}</span>
                             <span aria-hidden="true">{pkg.currentVersion}</span>
                             <span aria-hidden="true" className="text-slate-400">→</span>
-                            <span aria-hidden="true" className={latestVersionClass}>{pkg.latestVersion}</span>
+                            <span aria-hidden="true" className={latestVersionClass}>{pkg.latestVersion || '—'}</span>
                           </span>
                         </td>
 
                         {/* Latest Version */}
-                        <td className={`package-version-cell package-version-cell--latest font-mono ${compactTable ? 'px-3 py-2' : 'px-4 py-3'}`} aria-label={`${t('table.col_latest')}: ${pkg.latestVersion}`}>
+                        <td className={`package-version-cell package-version-cell--latest font-mono ${compactTable ? 'px-3 py-2' : 'px-4 py-3'}`} aria-label={`${t('table.col_latest')}: ${pkg.latestVersion || '—'}`}>
                           <span className="sr-only sm:hidden">{t('table.col_latest')}</span>
                           <span className={latestVersionClass}>
-                            {pkg.latestVersion}
+                            {pkg.latestVersion || '—'}
                           </span>
                         </td>
 
@@ -237,13 +245,13 @@ export function PackageTable({
                             }}
                             aria-expanded={isExpanded}
                             aria-label={isExpanded ? `Close advisories for ${pkg.name}` : `Show advisories for ${pkg.name}`}
-                            className={`group/status inline-flex w-40 shrink-0 items-stretch overflow-hidden rounded border text-[0.625rem] leading-none font-semibold whitespace-nowrap transition-colors cursor-pointer ${compactTable ? 'h-7' : 'h-8'} ${pkg.isUpdateDeferred ? 'border-slate-600 bg-slate-800/60 text-slate-400' : config.badgeClass}`}
+                            className={`group/status inline-flex w-40 shrink-0 items-stretch overflow-hidden rounded border text-[0.625rem] leading-none font-semibold whitespace-nowrap transition-colors cursor-pointer ${compactTable ? 'h-7' : 'h-8'} ${isDeferred ? 'border-slate-600 bg-slate-800/60 text-slate-400' : config.badgeClass}`}
                           >
                             {statusContent}
                             <span className="flex w-8 items-center justify-center border-l border-current/20 bg-slate-950/25 transition-colors group-hover/status:bg-slate-950/45">
                               <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ease-out ${isExpanded ? 'rotate-180' : ''}`} />
                             </span>
-                          </button> : <span className={`inline-flex w-40 items-stretch justify-center rounded border text-[0.625rem] leading-none font-semibold whitespace-nowrap ${compactTable ? 'h-7' : 'h-8'} ${pkg.isUpdateDeferred ? 'border-slate-600 bg-slate-800/60 text-slate-400' : config.badgeClass}`}>
+                          </button> : <span className={`inline-flex w-40 items-stretch justify-center rounded border text-[0.625rem] leading-none font-semibold whitespace-nowrap ${compactTable ? 'h-7' : 'h-8'} ${isDeferred ? 'border-slate-600 bg-slate-800/60 text-slate-400' : config.badgeClass}`}>
                             {statusContent}
                           </span>}
                         </td>

@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { ArrowUp, Bot, ChevronsUp, Flame, Layers, ShieldCheck, Terminal } from 'lucide-react';
 import { toast } from 'sonner';
 import { PackageAnalysis, PackageManager } from '@/types';
-import { buildAiUpdatePrompt, buildUpdateCommand, getUpdatePresetPackages, UpdatePreset } from '@/lib/updateCommands';
+import { buildAiUpdatePrompt, buildUpdateCommand, getUpdatePresetPackages, UpdateOptions, UpdatePreset } from '@/lib/updateCommands';
 import { useAppSettings } from '@/lib/settingsContext';
 
 interface UpdateScriptsPanelProps {
   packages: PackageAnalysis[];
+  updateOptions?: UpdateOptions;
   packageManager: PackageManager;
   onChangePackageManager: (manager: PackageManager) => void;
   onSelectPreset: (preset: UpdatePreset) => void;
@@ -21,14 +22,14 @@ const presets: { id: UpdatePreset; color: string; ring: string; hover: string; a
   { id: 'all', color: 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300', ring: 'ring-emerald-400', hover: 'hover:border-emerald-300/70 hover:ring-emerald-300 hover:text-emerald-200', active: 'aria-pressed:border-emerald-300 aria-pressed:bg-emerald-500/35 aria-pressed:text-emerald-100 aria-pressed:ring-emerald-300', badge: 'border-emerald-400/70 bg-emerald-950/60' },
 ];
 
-export function UpdateScriptsPanel({ packages, packageManager, onChangePackageManager, onSelectPreset }: UpdateScriptsPanelProps) {
+export function UpdateScriptsPanel({ updateOptions = {}, packages, packageManager, onChangePackageManager, onSelectPreset }: UpdateScriptsPanelProps) {
   const { language, t } = useAppSettings();
   const [activePreset, setActivePreset] = useState<UpdatePreset>('all');
   const [force, setForce] = useState(false);
   const [showAiPrompt, setShowAiPrompt] = useState(false);
-  const selected = getUpdatePresetPackages(packages, activePreset);
-  const command = buildUpdateCommand(selected, packageManager, force, activePreset === 'safe' ? 'compatible' : 'latest');
-  const aiPrompt = buildAiUpdatePrompt(selected, activePreset, packageManager, force, language);
+  const selected = getUpdatePresetPackages(packages, activePreset, updateOptions);
+  const command = buildUpdateCommand(selected, packageManager, force, activePreset === 'safe' ? 'compatible' : 'latest', updateOptions);
+  const aiPrompt = buildAiUpdatePrompt(selected, activePreset, packageManager, force, language, updateOptions);
   const displayedContent = showAiPrompt ? aiPrompt : command;
 
   const copyContent = async (content: string, isAiPrompt = false, preset = activePreset) => {
@@ -51,10 +52,11 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
     setShowAiPrompt(false);
     onSelectPreset(preset);
     const nextCommand = buildUpdateCommand(
-      getUpdatePresetPackages(packages, preset),
+      getUpdatePresetPackages(packages, preset, updateOptions),
       packageManager,
       force,
       preset === 'safe' ? 'compatible' : 'latest',
+      updateOptions,
     );
     if (!nextCommand) {
       toast.info(t('scripts.none'));
@@ -85,7 +87,7 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
 
         <div className="grid min-w-0 flex-1 grid-cols-2 gap-1 sm:min-w-[18rem] sm:grid-cols-4" aria-label={t('scripts.select_plan')}>
           {presets.map(({ id, color, ring, hover, active, badge }) => {
-            const count = getUpdatePresetPackages(packages, id).length;
+            const count = getUpdatePresetPackages(packages, id, updateOptions).length;
             return (
               <button
                 key={id}
@@ -122,6 +124,7 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
                 <span className={`absolute left-0.5 top-0.5 h-4 w-4 bg-white transition-transform ${force ? 'translate-x-3' : ''}`} />
               </span>
             </button>
+
             <div className="ml-auto flex h-8 shrink-0 gap-1">
             <button
               type="button"
@@ -161,6 +164,7 @@ export function UpdateScriptsPanel({ packages, packageManager, onChangePackageMa
             value={displayedContent || t('scripts.none')}
             className="min-h-0 flex-1 w-full resize-none overflow-auto whitespace-pre-wrap break-words bg-transparent p-3 text-[0.6875rem] leading-relaxed font-mono text-slate-100 outline-none selection:bg-emerald-500/40"
           />
+
         </div>
       </aside>
     </>

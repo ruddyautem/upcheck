@@ -1,19 +1,18 @@
 'use client';
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import type { AppLocale } from '@/i18n/routing';
+import { writeBrowserStorage } from './browserStorage';
 
 export type Language = AppLocale;
-export type Theme = 'dark' | 'light';
 
 interface AppSettingsContextType {
-  theme: Theme;
   language: Language;
   locale: string;
-  toggleTheme: () => void;
-  setTheme: (theme: Theme) => void;
+  githubToken: string;
+  setGithubToken: (token: string) => void;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
 }
@@ -25,11 +24,10 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
   const translate = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
-  const theme: Theme = 'dark';
+  const [githubToken, setGithubToken] = useState('');
   const locale = language === 'fr' ? 'fr-FR' : 'en-US';
 
-  const setTheme = (_t: Theme) => {};
-  const toggleTheme = () => {};
+  useEffect(() => { writeBrowserStorage('upcheck_github_token', null); }, []);
 
   const setLanguage = (lang: Language) => {
     if (lang !== language) {
@@ -42,11 +40,10 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
   return (
     <AppSettingsContext.Provider
       value={{
-        theme,
         language,
         locale,
-        toggleTheme,
-        setTheme,
+        githubToken,
+        setGithubToken,
         setLanguage,
         t,
       }}

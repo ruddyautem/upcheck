@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { Bot, Copy, Flame, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { PackageManager, RepoAnalysisResult } from '@/types';
-import { buildMultiRepoAiUpdatePrompt, getUpdatePresetPackages, UpdatePreset } from '@/lib/updateCommands';
+import { buildMultiRepoAiUpdatePrompt, getUpdatePresetPackages, UpdateOptions, UpdatePreset } from '@/lib/updateCommands';
 import { useAppSettings } from '@/lib/settingsContext';
 
 interface MultiRepoPromptModalProps {
   repositories: RepoAnalysisResult[];
+  updateOptions?: UpdateOptions;
   packageManager: PackageManager;
   onChangePackageManager: (manager: PackageManager) => void;
   onClose: () => void;
@@ -54,16 +55,18 @@ function PromptPreview({ prompt }: { prompt: string }) {
   );
 }
 
-export function MultiRepoPromptModal({ repositories, packageManager, onChangePackageManager, onClose }: MultiRepoPromptModalProps) {
+export function MultiRepoPromptModal({ updateOptions = {}, repositories, packageManager, onChangePackageManager, onClose }: MultiRepoPromptModalProps) {
   const { language, t } = useAppSettings();
   const [preset, setPreset] = useState<UpdatePreset>('all');
   const [force, setForce] = useState(false);
-  const prompt = buildMultiRepoAiUpdatePrompt(repositories, preset, packageManager, force, language);
+  const prompt = buildMultiRepoAiUpdatePrompt(repositories, preset, packageManager, force, language, updateOptions);
 
   const copyPrompt = async () => {
     if (!prompt) return;
-    await navigator.clipboard.writeText(prompt);
-    toast.success(t('scripts.prompt_copied'), { className: 'upcheck-toast--violet' });
+    try {
+      await navigator.clipboard.writeText(prompt);
+      toast.success(t('scripts.prompt_copied'), { className: 'upcheck-toast--violet' });
+    } catch { toast.error(t('scripts.copy_failed')); }
   };
 
   return (
@@ -83,14 +86,14 @@ export function MultiRepoPromptModal({ repositories, packageManager, onChangePac
           </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {presets.map((item) => {
-              const count = repositories.reduce((total, repository) => total + getUpdatePresetPackages(repository.packages, item).length, 0);
-              const repositoryCount = repositories.filter((repository) => getUpdatePresetPackages(repository.packages, item).length > 0).length;
+              const count = repositories.reduce((total, repository) => total + getUpdatePresetPackages(repository.packages, item, updateOptions).length, 0);
+              const repositoryCount = repositories.filter((repository) => getUpdatePresetPackages(repository.packages, item, updateOptions).length > 0).length;
               return <button key={item} type="button" onClick={() => setPreset(item)} aria-pressed={preset === item} className={`border px-3 py-2 text-left text-xs font-semibold transition-colors cursor-pointer ring-1 ring-inset focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current ${presetColors[item]}`}><span className="block leading-snug">{t(`scripts.${item}`)}</span><span className="mt-1 block font-mono text-[0.625rem] opacity-80">{count} · {repositoryCount} {t('owner_scan.scanned')}</span></button>;
             })}
           </div>
           <label className={`flex cursor-pointer items-center justify-between gap-3 border p-3 text-xs ${force ? 'border-amber-500/70 bg-amber-500/15' : 'border-amber-500/30 bg-amber-950/15'}`}>
             <span className="flex items-center gap-2 font-semibold text-slate-100"><Flame className="h-4 w-4 text-amber-400" />{t('cart.force_update')}</span>
-            <input type="checkbox" checked={force} onChange={(event) => setForce(event.target.checked)} className="check-control check-control--major" />
+            <input type="checkbox" checked={force && packageManager !== 'yarn'} disabled={packageManager === 'yarn'} onChange={(event) => setForce(event.target.checked)} className="check-control check-control--major" />
           </label>
           <PromptPreview prompt={prompt || t('scripts.none')} />
         </div>

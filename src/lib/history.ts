@@ -1,3 +1,10 @@
+import { parseGitHubUrl, repositoryTargetKey } from './repositoryTarget';
+
+function targetKey(value: string) {
+  const target = parseGitHubUrl(value);
+  return target ? repositoryTargetKey(target) : value;
+}
+
 export interface HistoryItem {
   fullName: string;
   repoUrl: string;
@@ -21,7 +28,8 @@ export function getRepoHistory(): HistoryItem[] {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? parsed.filter((item) => item && typeof item.fullName === 'string'
+      && typeof item.repoUrl === 'string' && typeof item.timestamp === 'string' && Number.isFinite(Date.parse(item.timestamp))) : [];
   } catch {
     return [];
   }
@@ -33,7 +41,7 @@ export function saveRepoToHistory(item: Omit<HistoryItem, 'timestamp'>): History
     const existing = getRepoHistory();
     // Filter out duplicate
     const filtered = existing.filter(
-      (h) => h.fullName.toLowerCase() !== item.fullName.toLowerCase()
+      (h) => h.fullName.toLowerCase() !== item.fullName.toLowerCase() || h.repoUrl !== item.repoUrl || Boolean(h.isMultiScan) !== Boolean(item.isMultiScan)
     );
 
     const newItem: HistoryItem = {
@@ -53,12 +61,15 @@ export function updateRepoHistoryItem(
   fullName: string,
   updates: Partial<Omit<HistoryItem, 'fullName' | 'timestamp'>>,
   isMultiScan = false,
+  analysisKey?: string,
 ): HistoryItem[] {
   if (typeof window === 'undefined') return [];
   try {
     const normalizedName = fullName.toLowerCase();
     const updated = getRepoHistory().map((item) =>
       item.fullName.toLowerCase() === normalizedName && Boolean(item.isMultiScan) === isMultiScan
+        && (!analysisKey || item.analysisKey === analysisKey)
+        && (isMultiScan || updates.repoUrl === undefined || targetKey(item.repoUrl) === targetKey(updates.repoUrl))
         ? { ...item, ...updates, timestamp: new Date().toISOString() }
         : item,
     );

@@ -12,9 +12,11 @@ import {
   Layers,
   Upload,
 } from "lucide-react";
+import Image from 'next/image';
 import { GithubIcon } from "@/components/GithubIcon";
 import { GitHubScanForm } from "@/components/GitHubScanForm";
 import { RawPackageJson } from "@/types";
+import { isValidPackageManifest } from "@/lib/manifest";
 import { HistoryItem } from "@/lib/history";
 import { useAppSettings } from "@/lib/settingsContext";
 
@@ -84,11 +86,12 @@ export function UpcheckScanner({
   };
 
   const processJsonString = (rawJson: string, fallbackTitle: string) => {
+    if (isLoading) return;
     setPasteError(null);
     try {
       const parsed = JSON.parse(rawJson);
-      if (!parsed.dependencies && !parsed.devDependencies) {
-        setPasteError(t("input.err_no_deps"));
+      if (!isValidPackageManifest(parsed)) {
+        setPasteError(t("input.err_manifest"));
         return;
       }
       onAnalyzeCustomJson(
@@ -101,7 +104,8 @@ export function UpcheckScanner({
   };
 
   const handleFileUpload = (file: File) => {
-    if (!file) return;
+    if (!file || isLoading) return;
+    if (file.size > 256 * 1024) { setPasteError(t("input.err_file_size")); return; }
     const reader = new FileReader();
     reader.onload = (event) => {
       const content = event.target?.result as string;
@@ -143,7 +147,7 @@ export function UpcheckScanner({
       {!compact && (
         <div className='home-scanner-hero mb-8 flex shrink-0 flex-col items-center gap-4 lg:mb-6 lg:gap-3'>
           <div className='flex items-center gap-3'>
-            <img src='/icon.svg' alt='' aria-hidden='true' className='h-10 w-10 shrink-0 sm:h-12 sm:w-12' />
+            <Image width={48} height={48} unoptimized src='/icon.svg' alt='' aria-hidden='true' className='h-10 w-10 shrink-0 sm:h-12 sm:w-12' />
             <h1 className='text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white font-sans'>
               upcheck<span className='text-blue-500'>.</span>
             </h1>

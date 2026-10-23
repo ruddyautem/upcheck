@@ -5,65 +5,56 @@ import { RepoAnalysisResult } from '@/types';
 import { X, Copy, Terminal, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppSettings } from '@/lib/settingsContext';
-import { buildUpdateCommand, getUpdatePresetPackages } from '@/lib/updateCommands';
+import { buildUpdateCommand, buildUpdatedManifest, getUpdatePresetPackages, UpdateOptions } from '@/lib/updateCommands';
 
 interface RemediationModalProps {
   result: RepoAnalysisResult;
+  updateOptions?: UpdateOptions;
   onClose: () => void;
 }
 
-export function RemediationModal({ result, onClose }: RemediationModalProps) {
+export function RemediationModal({ result, onClose, updateOptions = {} }: RemediationModalProps) {
   const { t } = useAppSettings();
   const [activeTab, setActiveTab] = useState<'scripts' | 'packageJson'>('packageJson');
 
   const { packages } = result;
 
   // 1. Critical/Security packages
-  const vulnerablePackages = getUpdatePresetPackages(packages, 'security');
+  const vulnerablePackages = getUpdatePresetPackages(packages, 'security', updateOptions);
 
   // 2. Safe packages (minor and patch)
-  const safePackages = getUpdatePresetPackages(packages, 'safe');
+  const safePackages = getUpdatePresetPackages(packages, 'safe', updateOptions);
 
   // 3. Outdated packages
-  const allOutdated = getUpdatePresetPackages(packages, 'all');
+  const allOutdated = getUpdatePresetPackages(packages, 'all', updateOptions);
 
   const copyText = async (text: string, tone: 'red' | 'blue' | 'teal' = 'teal') => {
-    navigator.clipboard.writeText(text);
-    toast.success(t('cart.copied'), { className: `upcheck-toast--${tone}` });
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(t('cart.copied'), { className: `upcheck-toast--${tone}` });
+    } catch { toast.error(t('scripts.copy_failed')); }
   };
 
   // Build commands
   const bunVulnCmd = vulnerablePackages.length > 0
-    ? buildUpdateCommand(vulnerablePackages, 'bun', false)
+    ? buildUpdateCommand(vulnerablePackages, 'bun', false, 'latest', updateOptions)
     : t('remediation.no_vulns');
 
   const bunSafeCmd = safePackages.length > 0
-    ? buildUpdateCommand(safePackages, 'bun', false, 'compatible')
+    ? buildUpdateCommand(safePackages, 'bun', false, 'compatible', updateOptions)
     : t('remediation.all_safe');
 
   const bunAllCmd = allOutdated.length > 0
-    ? buildUpdateCommand(allOutdated, 'bun', false)
+    ? buildUpdateCommand(allOutdated, 'bun', false, 'latest', updateOptions)
     : t('remediation.all_up_to_date');
 
   // Build upgraded package.json
-  const upgradedPackageJson = {
-    name: result.repoInfo.repo,
-    dependencies: {} as Record<string, string>,
-    devDependencies: {} as Record<string, string>,
-  };
+  const upgradedPackageJson = buildUpdatedManifest(result, updateOptions);
 
-  packages.forEach((pkg) => {
-    const targetVersion = `^${pkg.latestVersion}`;
-    if (pkg.isDevDependency) {
-      upgradedPackageJson.devDependencies[pkg.name] = targetVersion;
-    } else {
-      upgradedPackageJson.dependencies[pkg.name] = targetVersion;
-    }
-  });
-
-  const jsonString = JSON.stringify(upgradedPackageJson, null, 2);
+  const jsonString = upgradedPackageJson ? JSON.stringify(upgradedPackageJson, null, 2) : t('remediation.manifest_unavailable');
 
   const downloadJson = () => {
+    if (!upgradedPackageJson) return;
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -199,11 +190,12 @@ export function RemediationModal({ result, onClose }: RemediationModalProps) {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-400">
-                  {t('remediation.latest_note')} (<code className="text-slate-300">^latest</code>)
+                  {t('remediation.latest_note')}
                 </span>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => copyText(jsonString, 'blue')}
+                    disabled={!upgradedPackageJson}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono transition-colors cursor-pointer"
                   >
                     <Copy className="w-3.5 h-3.5" />
@@ -211,6 +203,7 @@ export function RemediationModal({ result, onClose }: RemediationModalProps) {
                   </button>
                   <button
                     onClick={downloadJson}
+                    disabled={!upgradedPackageJson}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition-colors cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" />

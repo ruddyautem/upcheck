@@ -19,6 +19,8 @@ export function ExportModal({ result, onClose }: ExportModalProps) {
     let md = `# 🛡️ Upcheck Dependency Audit Report\n\n`;
     md += `**Repository**: [${result.repoInfo.fullName}](https://github.com/${result.repoInfo.fullName})\n`;
     md += `**Audit Date**: ${new Date(result.analyzedAt).toUTCString()}\n`;
+    if (result.isIncomplete) md += '**Incomplete scan**: Some versions or advisory severities could not be verified.\n';
+    if (result.isEstimated) md += '**Estimated versions**: Manifest ranges do not identify installed versions. Audit the lockfile separately.\n';
     md += `**Health Score**: **${result.healthScore.score} / 100** (Grade: **${result.healthScore.grade}** - ${result.healthScore.label})\n`;
     md += `**Total Dependencies**: ${result.totalPackages} (${result.dependenciesCount} prod, ${result.devDependenciesCount} dev)\n\n`;
 
@@ -52,8 +54,10 @@ export function ExportModal({ result, onClose }: ExportModalProps) {
   const markdownContent = generateMarkdownReport();
 
   const handleCopyMarkdown = async () => {
-    await navigator.clipboard.writeText(markdownContent);
-    toast.success(t('export.copied'), { className: 'upcheck-toast--blue' });
+    try {
+      await navigator.clipboard.writeText(markdownContent);
+      toast.success(t('export.copied'), { className: 'upcheck-toast--blue' });
+    } catch { toast.error(t('scripts.copy_failed')); }
   };
 
   const handleDownloadMarkdown = () => {

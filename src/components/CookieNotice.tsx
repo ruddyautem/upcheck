@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { readBrowserStorage, useBrowserReady, writeBrowserStorage } from '@/lib/browserStorage';
 import { useAppSettings } from '@/lib/settingsContext';
 import { Link } from '@/i18n/navigation';
 
@@ -8,17 +9,15 @@ const NOTICE_KEY = 'upcheck_privacy_notice_seen';
 
 export function CookieNotice() {
   const { t } = useAppSettings();
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    setIsVisible(localStorage.getItem(NOTICE_KEY) !== 'true');
-  }, []);
+  const ready = useBrowserReady();
+  const [dismissed, setDismissed] = useState(false);
+  const isVisible = ready && !dismissed && readBrowserStorage(NOTICE_KEY) !== 'true';
 
   if (!isVisible) return null;
 
   const dismiss = () => {
-    localStorage.setItem(NOTICE_KEY, 'true');
-    setIsVisible(false);
+    writeBrowserStorage(NOTICE_KEY, 'true');
+    setDismissed(true);
   };
 
   return (

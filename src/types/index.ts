@@ -5,7 +5,8 @@ export type UpdateCategory =
   | 'major'        // Major version bump (likely breaking changes)
   | 'minor'        // Minor version bump (backwards-compatible new features)
   | 'patch'        // Patch version bump (backwards-compatible bug fixes)
-  | 'up_to_date';  // Already at the latest version
+  | 'up_to_date'   // Already at the latest version
+  | 'unknown';     // Unsupported source or unverified registry metadata
 
 export type AdvisorySeverity = 'CRITICAL' | 'HIGH' | 'MODERATE' | 'LOW' | 'UNKNOWN';
 
@@ -38,6 +39,10 @@ export interface PackageAnalysis {
   urgencyScore: number;         // 1 (lowest) to 5 (highest critical)
   isDevDependency: boolean;
   isPeerDependency: boolean;
+  dependencyGroups?: DependencyGroup[];
+  declaredSpecs?: Partial<Record<DependencyGroup, string>>;
+  registryName?: string;
+  versionSource?: 'exact' | 'range' | 'unsupported';
   deprecatedReason?: string | null; // Maintainer announcement / deprecation note
   homepage?: string;
   repositoryUrl?: string;
@@ -62,11 +67,23 @@ export interface HealthScore {
   description: string;
 }
 
+export type DependencyGroup = 'dependencies' | 'devDependencies' | 'peerDependencies' | 'optionalDependencies';
+
 export interface RawPackageJson {
+  [key: string]: unknown;
   name?: string;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
+  optionalDependencies?: Record<string, string>;
+}
+
+export interface RepoTarget {
+  owner: string;
+  repo: string;
+  path?: string;
+  branch?: string;
+  resolveBranch?: boolean;
 }
 
 export interface RepoMeta {
@@ -80,9 +97,13 @@ export interface RepoMeta {
   openIssues?: number;
   updatedAt?: string;
   isCustomJson?: boolean;
+  target?: RepoTarget;
 }
 
 export interface RepoAnalysisResult {
+  originalManifest?: RawPackageJson;
+  isEstimated?: boolean;
+  isIncomplete?: boolean;
   repoInfo: RepoMeta;
   totalPackages: number;
   dependenciesCount: number;
@@ -95,6 +116,7 @@ export interface RepoAnalysisResult {
     minor: number;
     patch: number;
     up_to_date: number;
+    unknown?: number;
   };
   healthScore: HealthScore;
   packages: PackageAnalysis[];

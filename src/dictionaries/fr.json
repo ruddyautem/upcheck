@@ -54,7 +54,9 @@
     "open_scan_short": "Nouveau scan",
     "close_scan": "Masquer l’analyseur",
     "inventory": "Inventaire des paquets",
-    "expired": "Ce rapport temporaire n’est plus disponible. Lancez une nouvelle analyse pour créer un autre lien de rapport."
+    "expired": "Ce rapport temporaire n’est plus disponible. Lancez une nouvelle analyse pour créer un autre lien de rapport.",
+    "incomplete": "Cette analyse est incomplète. Certaines versions ou sévérités n’ont pas pu être vérifiées. Vérifiez ces dépendances avant toute mise à jour.",
+    "estimated": "Les versions sont estimées à partir des plages du package.json. Un audit du lockfile est nécessaire pour vérifier les versions installées et les dépendances transitives."
   },
   "alerts": {
     "priority": "Points prioritaires",
@@ -85,9 +87,10 @@
     "major": "Majeure",
     "minor": "Mineure",
     "patch": "Correctif",
-    "deferred": "Mise à jour reportée",
+    "deferred": "Reportée",
     "deferred_short": "Reportée",
-    "up_to_date": "À jour"
+    "up_to_date": "À jour",
+    "unknown": "Non vérifié"
   },
   "input": {
     "github_repo": "Dépôt GitHub",
@@ -119,7 +122,9 @@
     "drag_drop_hint": "ou glissez-déposez votre fichier ici",
     "browse_files": "Parcourir",
     "err_no_deps": "Le JSON ne contient pas de clés \"dependencies\" ou \"devDependencies\".",
-    "err_invalid_json": "Format JSON invalide. Veuillez vérifier la syntaxe de votre package.json."
+    "err_invalid_json": "Format JSON invalide. Veuillez vérifier la syntaxe de votre package.json.",
+    "err_manifest": "Fournissez entre 1 et 500 dépendances valides, y compris les dépendances de développement, paires ou optionnelles.",
+    "err_file_size": "Le manifeste doit faire moins de 256 Ko."
   },
   "owner_scan": {
     "title": "Dépôts analysés pour",
@@ -263,7 +268,13 @@
     "ai_prompt": "Prompt IA",
     "show_command": "Voir la commande",
     "manual_install": "Installation manuelle",
-    "copy_prompt": "Copier le prompt"
+    "copy_prompt": "Copier le prompt",
+    "include_typescript7": "Inclure les mises à jour TypeScript 7+",
+    "typescript7_help": "Désactivé par défaut. Inclut TypeScript 7+ dans les commandes, prompts IA et exports package.json de ce rapport. Vérifiez la compatibilité d’ESLint et de vos outils avant la mise à jour.",
+    "typescript7_enable": "Activer TS 7",
+    "typescript7_enabled": "TS 7 activé",
+    "typescript7_eslint": "pas encore ESLint",
+    "typescript7_anyway": "ESLint indisponible. MAJ quand même ?"
   },
   "error": {
     "analysis_title": "Erreur d’analyse"
@@ -278,7 +289,7 @@
     "deprecation_title": "Annonces des mainteneurs et avis de dépréciation",
     "deprecation_desc": "Lorsqu’un mainteneur déprécie un paquet (ex. request, moment), il publie un motif officiel sur npm. Upcheck extrait ce message et le met en évidence.",
     "osv_title": "Base de sécurité Google OSV",
-    "osv_desc": "Upcheck interroge api.osv.dev (Open Source Vulnerabilities) pour chaque dépendance et version. Cela fournit les CVE vérifiées, les avis GHSA, les scores CVSS et les versions de correction.",
+    "osv_desc": "Upcheck interroge OSV pour les versions directes analysées et récupère les détails des alertes. Les sévérités inconnues sont signalées. Cela ne remplace pas un audit du lockfile.",
     "hierarchy_title": "Hiérarchie des catégories et couleurs",
     "cat_critical": "Vulnérabilité critique",
     "cat_critical_desc": "CVE/GHSA de sévérité élevée ou critique (CVSS ≥ 7.0). Nécessite une mise à jour ou un correctif immédiat.",
@@ -318,9 +329,10 @@
     "no_vulns": "# Aucune vulnérabilité critique détectée !",
     "all_safe": "# Toutes les dépendances sont déjà à niveau !",
     "all_up_to_date": "# Tout est déjà parfaitement à jour !",
-    "latest_note": "Toutes les dépendances définies à la dernière version",
+    "latest_note": "Mises à jour vérifiées uniquement. La configuration du projet, les groupes et les paquets différés sont conservés.",
     "copy_json": "Copier le JSON",
-    "download_json": "Télécharger"
+    "download_json": "Télécharger",
+    "manifest_unavailable": "Relancez l’analyse pour générer une copie mise à jour du manifeste original."
   },
   "cookie": {
     "message": "Upcheck n’utilise aucun cookie publicitaire ou analytique. Il conserve uniquement l’historique et le cache des analyses dans ce navigateur ; un jeton GitHub facultatif reste en mémoire pendant la session.",

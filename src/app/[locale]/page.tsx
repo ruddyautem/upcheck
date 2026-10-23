@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { PackageTable, TableFilterTab } from '@/components/PackageTable';
 import { UpcheckScanner } from '@/components/UpcheckScanner';
 import { UpdateScriptsPanel } from '@/components/UpdateScriptsPanel';
-import { UpdatePreset } from '@/lib/updateCommands';
+import { getUpdatePresetPackages, UpdatePreset } from '@/lib/updateCommands';
 import { RemediationModal } from '@/components/RemediationModal';
 import { ExportModal } from '@/components/ExportModal';
 import { TokenModal } from '@/components/TokenModal';
@@ -18,26 +18,37 @@ import { clearAnalysisCache, getCachedAnalysis, saveAnalysisToCache } from '@/li
 import { clearLocalReports, getLocalReport, saveLocalReport } from '@/lib/localReports';
 import { triggerCelebration } from '@/lib/confetti';
 import { useAppSettings } from '@/lib/settingsContext';
+import { useBrowserReady } from '@/lib/browserStorage';
+import { getRepositoryTarget, repositoryTargetKey, repositoryTargetUrl } from '@/lib/repositoryTarget';
 import { Link, useRouter } from '@/i18n/navigation';
 import { AlertCircle, ArrowUpRight, Check, Download, RefreshCw, ScanSearch, ShieldAlert, Terminal } from 'lucide-react';
 
 export default function Home({ reportId }: { reportId?: string }) {
-  const { t, locale } = useAppSettings();
+  const { t, locale, githubToken, setGithubToken } = useAppSettings();
+  const ready = useBrowserReady();
+  const storedReport = useMemo(() => ready && reportId ? getLocalReport(reportId) : null, [ready, reportId]);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<RepoAnalysisResult | null>(null);
-  const [ownerAnalysis, setOwnerAnalysis] = useState<OwnerAnalysisResult | null>(null);
-  const [isScanOpen, setIsScanOpen] = useState(true);
+  const [errorOverride, setError] = useState<string | null>(null);
+  const [resultOverride, setResult] = useState<RepoAnalysisResult | null>(null);
+  const result = resultOverride ?? storedReport?.result ?? null;
+  const error = errorOverride ?? (ready && reportId && !result ? t('report.expired') : null);
+  const [ownerOverride, setOwnerAnalysis] = useState<OwnerAnalysisResult | null | undefined>(undefined);
+  const ownerAnalysis = ownerOverride === undefined ? storedReport?.ownerAnalysis ?? null : ownerOverride;
+  const [isScanOpen, setIsScanOpen] = useState(!reportId);
 
   // Recent scans history
-  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [historyOverride, setHistory] = useState<HistoryItem[] | null>(null);
+  const initialHistory = useMemo(() => ready ? getRepoHistory() : [], [ready]);
+  const history = historyOverride ?? initialHistory;
 
   // Filter for table synced with metric cards
   const [tableFilter, setTableFilter] = useState<TableFilterTab>('needs_attention');
 
   // Script package manager
   const [packageManager, setPackageManager] = useState<PackageManager>('bun');
+  const [allowTypeScript7, setAllowTypeScript7] = useState(false);
+  const updateOptions = { allowTypeScript7 };
   const inventoryViewportRef = useRef<HTMLDivElement>(null);
 
   // Modals
@@ -47,14 +58,17 @@ export default function Home({ reportId }: { reportId?: string }) {
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showMultiRepoPrompt, setShowMultiRepoPrompt] = useState(false);
 
-  // GitHub token
-  const [githubToken, setgithubToken] = useState('');
 
   const openReport = (
     nextResult: RepoAnalysisResult,
     nextOwnerAnalysis: OwnerAnalysisResult | null,
     existingReportId?: string | null,
   ) => {
+    setAllowTypeScript7(false);
+    setResult(nextResult);
+    setOwnerAnalysis(nextOwnerAnalysis);
+    setIsScanOpen(false);
+    setError(null);
     const nextReportId = existingReportId ?? saveLocalReport({ result: nextResult, ownerAnalysis: nextOwnerAnalysis });
     if (nextReportId) {
       router.push(`/report/${nextReportId}`);
@@ -76,26 +90,8 @@ export default function Home({ reportId }: { reportId?: string }) {
     return 'text-red-300';
   };
 
-  useEffect(() => {
-    // Tokens used by older versions are removed rather than kept in persistent storage.
-    localStorage.removeItem('upcheck_github_token');
-    setHistory(getRepoHistory());
-    if (!reportId) return;
-
-    const storedReport = getLocalReport(reportId);
-    if (!storedReport) {
-      setError(t('report.expired'));
-      return;
-    }
-
-    setResult(storedReport.result);
-    setOwnerAnalysis(storedReport.ownerAnalysis);
-    setTableFilter('needs_attention');
-    setIsScanOpen(false);
-  }, [reportId]);
-
   const handleSaveToken = (token: string) => {
-    setgithubToken(token);
+    setGithubToken(token);
   };
 
   const handleAnalyzeRepo = async (target: string | string[], forceRefresh = false) => {
@@ -104,7 +100,7 @@ export default function Home({ reportId }: { reportId?: string }) {
       if (cachedResult) {
         const cachedReportId = saveLocalReport({ result: cachedResult, ownerAnalysis: null });
         setHistory(updateRepoHistoryItem(cachedResult.repoInfo.fullName, {
-          repoUrl: cachedResult.repoInfo.fullName,
+          repoUrl: repositoryTargetUrl(getRepositoryTarget(cachedResult.repoInfo)),
           score: cachedResult.healthScore.score,
           grade: cachedResult.healthScore.grade,
           totalPackages: cachedResult.totalPackages,
@@ -144,11 +140,11 @@ export default function Home({ reportId }: { reportId?: string }) {
         }
         setOwnerAnalysis(batch);
         setResult(firstResult);
-        batch.results.forEach(saveAnalysisToCache);
+        batch.results.forEach((repository) => saveAnalysisToCache(repository));
       } else {
         setOwnerAnalysis(null);
         setResult(data.data);
-        saveAnalysisToCache(data.data as RepoAnalysisResult);
+        saveAnalysisToCache(data.data as RepoAnalysisResult, target as string);
       }
       setTableFilter('needs_attention');
       setIsScanOpen(false);
@@ -166,11 +162,11 @@ export default function Home({ reportId }: { reportId?: string }) {
         criticalCount: batch.results.reduce((total, repository) => total + repository.summaryCounts.critical, 0),
         isMultiScan: true,
         analysisKey: reportKey || undefined,
-        repositoryTargets: Array.isArray(target) ? target : undefined,
+        repositoryTargets: batch.results.map((repository) => repositoryTargetUrl(getRepositoryTarget(repository.repoInfo))),
         repositoryCount: batch.results.length,
       } : {
         fullName: activeResult.repoInfo.fullName,
-        repoUrl: target as string,
+        repoUrl: repositoryTargetUrl(getRepositoryTarget(activeResult.repoInfo)),
         score: activeResult.healthScore.score,
         grade: activeResult.healthScore.grade,
         totalPackages: activeResult.totalPackages,
@@ -184,8 +180,8 @@ export default function Home({ reportId }: { reportId?: string }) {
       if (activeResult.healthScore.score >= 85) {
         triggerCelebration();
       }
-    } catch (err: any) {
-      setError(err.message || 'Error communicating with analysis server.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error communicating with analysis server.');
     } finally {
       setIsLoading(false);
     }
@@ -228,8 +224,8 @@ export default function Home({ reportId }: { reportId?: string }) {
       if (data.data.healthScore.score >= 85) {
         triggerCelebration();
       }
-    } catch (err: any) {
-      setError(err.message || 'Error analyzing package.json.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error analyzing package.json.');
     } finally {
       setIsLoading(false);
     }
@@ -251,8 +247,12 @@ export default function Home({ reportId }: { reportId?: string }) {
 
   const handleRescan = async () => {
     if (!result?.repoInfo.fullName) return;
+    if (result.repoInfo.isCustomJson) {
+      if (result.originalManifest) await handleAnalyzeCustomJson(result.originalManifest, result.repoInfo.repo);
+      return;
+    }
     if (!ownerAnalysis) {
-      await handleAnalyzeRepo(result.repoInfo.fullName, true);
+      await handleAnalyzeRepo(repositoryTargetUrl(getRepositoryTarget(result.repoInfo)), true);
       return;
     }
 
@@ -264,7 +264,7 @@ export default function Home({ reportId }: { reportId?: string }) {
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ repoUrl: result.repoInfo.fullName, githubToken: githubToken || undefined }),
+        body: JSON.stringify({ repoUrl: repositoryTargetUrl(getRepositoryTarget(result.repoInfo)), githubToken: githubToken || undefined }),
       });
       const data = await res.json();
       if (!res.ok || !data.success || data.mode !== 'repository') {
@@ -276,7 +276,7 @@ export default function Home({ reportId }: { reportId?: string }) {
         ...ownerAnalysis,
         analyzedAt: new Date().toISOString(),
         results: ownerAnalysis.results.map((repository) =>
-          repository.repoInfo.fullName === refreshedResult.repoInfo.fullName ? refreshedResult : repository
+          repositoryTargetKey(getRepositoryTarget(repository.repoInfo)) === repositoryTargetKey(getRepositoryTarget(refreshedResult.repoInfo)) ? refreshedResult : repository
         ),
       };
       setResult(refreshedResult);
@@ -293,9 +293,9 @@ export default function Home({ reportId }: { reportId?: string }) {
         totalPackages: refreshedOwnerAnalysis.results.reduce((total, repository) => total + repository.totalPackages, 0),
         criticalCount: refreshedOwnerAnalysis.results.reduce((total, repository) => total + repository.summaryCounts.critical, 0),
         repositoryCount: refreshedOwnerAnalysis.results.length,
-      }, true);
+      }, true, reportId);
       const historyAfterScoreUpdate = updateRepoHistoryItem(refreshedResult.repoInfo.fullName, {
-        repoUrl: refreshedResult.repoInfo.fullName,
+        repoUrl: repositoryTargetUrl(getRepositoryTarget(refreshedResult.repoInfo)),
         score: refreshedResult.healthScore.score,
         grade: refreshedResult.healthScore.grade,
         totalPackages: refreshedResult.totalPackages,
@@ -303,15 +303,15 @@ export default function Home({ reportId }: { reportId?: string }) {
       });
       setHistory(historyAfterScoreUpdate.length > 0 ? historyAfterScoreUpdate : historyAfterOwnerUpdate);
       setTableFilter('needs_attention');
-    } catch (err: any) {
-      setError(err.message || 'Error communicating with analysis server.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error communicating with analysis server.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSelectOwnerRepository = (fullName: string) => {
-    const nextResult = ownerAnalysis?.results.find((repository) => repository.repoInfo.fullName === fullName);
+  const handleSelectOwnerRepository = (targetKey: string) => {
+    const nextResult = ownerAnalysis?.results.find((repository) => repositoryTargetKey(getRepositoryTarget(repository.repoInfo)) === targetKey);
     if (!nextResult) return;
     setResult(nextResult);
     setTableFilter('needs_attention');
@@ -319,7 +319,7 @@ export default function Home({ reportId }: { reportId?: string }) {
 
   const handleRescanAll = () => {
     if (!ownerAnalysis) return;
-    void handleAnalyzeRepo(ownerAnalysis.results.map((repository) => repository.repoInfo.fullName), true);
+    void handleAnalyzeRepo(ownerAnalysis.results.map((repository) => repositoryTargetUrl(getRepositoryTarget(repository.repoInfo))), true);
   };
 
   const handleClearLocalReports = () => {
@@ -381,8 +381,9 @@ export default function Home({ reportId }: { reportId?: string }) {
 
         {ownerAnalysis && result && (
           <OwnerScanSummary
+            updateOptions={updateOptions}
             analysis={ownerAnalysis}
-            activeRepository={result.repoInfo.fullName}
+            activeRepository={repositoryTargetKey(getRepositoryTarget(result.repoInfo))}
             isLoading={isLoading}
             onSelectRepository={handleSelectOwnerRepository}
             onRescanAll={handleRescanAll}
@@ -393,6 +394,11 @@ export default function Home({ reportId }: { reportId?: string }) {
         {/* Scanned report */}
         {result && (
           <div className="report-results h-full min-h-0 flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-3 duration-300">
+            {result.isIncomplete && (
+              <p role="status" className="border border-amber-500/40 bg-amber-950/30 p-3 text-xs text-amber-200">
+                {t('report.incomplete')}
+              </p>
+            )}
             <section className="shrink-0 border border-slate-800 bg-slate-900/80 px-4 py-4 sm:px-5 flex flex-col xl:flex-row xl:items-center gap-4">
               <div className="min-w-0 flex-1">
                 <div className="flex items-start gap-3 sm:items-center sm:gap-4 min-w-0">
@@ -403,6 +409,7 @@ export default function Home({ reportId }: { reportId?: string }) {
                   <div className="min-w-0 flex-1">
                     <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                       <div className="min-w-0 break-all font-mono text-xs text-emerald-300 sm:text-sm">{result.repoInfo.fullName}</div>
+                      {result.repoInfo.target && <span className="break-all font-mono text-[0.625rem] text-slate-400">{result.repoInfo.target.branch} · {result.repoInfo.target.path}</span>}
                       <span aria-hidden="true" className="hidden h-3 border-l border-slate-700 sm:block" />
                       <time
                         dateTime={result.analyzedAt}
@@ -451,7 +458,7 @@ export default function Home({ reportId }: { reportId?: string }) {
               </button>
               <button type="button" onClick={() => setTableFilter('needs_attention')} className="min-w-0 min-h-[5rem] text-left border border-slate-800 bg-slate-900/60 px-2.5 py-2 sm:px-3 sm:py-2.5 hover:border-amber-500/50 transition-colors cursor-pointer">
                 <div className="break-words text-[0.5625rem] uppercase tracking-wide text-slate-400 sm:text-[0.625rem] sm:tracking-wider">{t('metrics.need_update')}</div>
-                <div className="mt-1 flex items-end justify-between gap-2"><strong className="text-2xl text-amber-300">{result.packages.filter((pkg) => pkg.category !== 'up_to_date' && !pkg.isUpdateDeferred).length}</strong><ArrowUpRight className="w-4 h-4 text-amber-400" /></div>
+                <div className="mt-1 flex items-end justify-between gap-2"><strong className="text-2xl text-amber-300">{getUpdatePresetPackages(result.packages, 'all', updateOptions).length}</strong><ArrowUpRight className="w-4 h-4 text-amber-400" /></div>
               </button>
               <button type="button" onClick={() => setTableFilter('up_to_date')} className="min-w-0 min-h-[5rem] text-left border border-slate-800 bg-slate-900/60 px-2.5 py-2 sm:px-3 sm:py-2.5 hover:border-emerald-500/50 transition-colors cursor-pointer">
                 <div className="break-words text-[0.5625rem] uppercase tracking-wide text-slate-400 sm:text-[0.625rem] sm:tracking-wider">{t('metrics.up_to_date')}</div>
@@ -461,7 +468,8 @@ export default function Home({ reportId }: { reportId?: string }) {
 
             <div className="report-panels content-start min-h-0 grid flex-1 grid-cols-1 gap-4 xl:[--report-panel-height:clamp(24rem,48dvh,32rem)] 2xl:[--report-panel-height:clamp(34rem,76dvh,48rem)] xl:grid-cols-[minmax(0,1fr)_clamp(13rem,24vw,22rem)] xl:grid-rows-[3.25rem_var(--report-panel-height)]">
               <UpdateScriptsPanel
-                key={result.repoInfo.fullName}
+                updateOptions={updateOptions}
+                key={JSON.stringify(result.repoInfo.target || result.repoInfo.fullName)}
                 packages={result.packages}
                 packageManager={packageManager}
                 onChangePackageManager={setPackageManager}
@@ -475,6 +483,9 @@ export default function Home({ reportId }: { reportId?: string }) {
                 <div ref={inventoryViewportRef} className="package-breakdown-viewport min-h-0 flex-1 overflow-y-auto">
                   <div className="package-breakdown-content xl:h-full">
                     <PackageTable
+                      onToggleTypeScript7={() => setAllowTypeScript7((enabled) => !enabled)}
+                      updateOptions={updateOptions}
+                      key={`${JSON.stringify(result.repoInfo.target || result.repoInfo.fullName)}:${tableFilter}`}
                       packages={result.packages}
                       externalTab={tableFilter}
                     />
@@ -500,6 +511,7 @@ export default function Home({ reportId }: { reportId?: string }) {
       {/* Modals */}
       {showRemediation && result && (
         <RemediationModal
+          updateOptions={updateOptions}
           result={result}
           onClose={() => setShowRemediation(false)}
         />
@@ -526,6 +538,7 @@ export default function Home({ reportId }: { reportId?: string }) {
 
       {showMultiRepoPrompt && ownerAnalysis && (
         <MultiRepoPromptModal
+          updateOptions={updateOptions}
           repositories={ownerAnalysis.results}
           packageManager={packageManager}
           onChangePackageManager={setPackageManager}

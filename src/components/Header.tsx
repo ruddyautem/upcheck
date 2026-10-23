@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { ChevronDown, Key, Info, Menu, X } from 'lucide-react';
+import Image from 'next/image';
 import { GithubIcon } from '@/components/GithubIcon';
 import { useAppSettings } from '@/lib/settingsContext';
 import { Link } from '@/i18n/navigation';
@@ -67,7 +68,7 @@ export function Header({
       <div className="max-w-[1480px] mx-auto px-3 sm:px-7 lg:px-10 min-h-16 py-3 sm:py-0 flex flex-wrap items-center justify-between gap-2 sm:gap-3">
         {/* Logo and Name */}
         <Link href="/" aria-label="Upcheck home" className="flex min-w-32 flex-1 items-center gap-2 sm:gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
-          <img src="/icon.svg" alt="" aria-hidden="true" className="w-8 h-8 shrink-0" />
+          <Image width={32} height={32} unoptimized src="/icon.svg" alt="" aria-hidden="true" className="w-8 h-8 shrink-0" />
           <div className="min-w-0">
             <span className="text-xl font-extrabold tracking-tight text-white font-sans">
               upcheck<span className="text-blue-400">.</span>

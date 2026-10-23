@@ -17,6 +17,13 @@ export interface CategoryConfig {
 }
 
 export const CATEGORY_CONFIGS: Record<UpdateCategory, CategoryConfig> = {
+  unknown: {
+    id: 'unknown', label: 'Unverified', shortLabel: 'Unverified', urgency: 'medium',
+    badgeClass: 'bg-amber-500/15 text-amber-300 border border-amber-500/30',
+    borderClass: 'border-amber-500/40', glowClass: '', bgClass: 'bg-amber-500/10',
+    textClass: 'text-amber-300', cardClass: 'border-amber-500/30', iconName: 'CircleAlert',
+    actionText: 'Review manually', description: 'This dependency could not be verified.',
+  },
   critical: {
     id: 'critical',
     label: 'Critical Vulnerability',

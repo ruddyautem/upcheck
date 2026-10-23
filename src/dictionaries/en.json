@@ -54,7 +54,9 @@
     "open_scan_short": "New scan",
     "close_scan": "Hide scanner",
     "inventory": "Package inventory",
-    "expired": "This temporary report is no longer available. Run a new scan to create another report link."
+    "expired": "This temporary report is no longer available. Run a new scan to create another report link.",
+    "incomplete": "This scan is incomplete. Some package versions or advisory severities could not be verified. Review unverified dependencies before updating.",
+    "estimated": "Versions are estimated from package.json ranges. Installed versions and transitive dependencies require a lockfile audit."
   },
   "alerts": {
     "priority": "Priority findings",
@@ -85,9 +87,10 @@
     "major": "Major Update",
     "minor": "Minor Update",
     "patch": "Patch Update",
-    "deferred": "Temporarily deferred",
+    "deferred": "Deferred",
     "deferred_short": "Deferred",
-    "up_to_date": "Up to Date"
+    "up_to_date": "Up to Date",
+    "unknown": "Unverified"
   },
   "input": {
     "github_repo": "GitHub Repository",
@@ -119,7 +122,9 @@
     "drag_drop_hint": "or drag and drop your file here",
     "browse_files": "Browse",
     "err_no_deps": "JSON does not contain \"dependencies\" or \"devDependencies\" keys.",
-    "err_invalid_json": "Invalid JSON format. Please verify your package.json syntax."
+    "err_invalid_json": "Invalid JSON format. Please verify your package.json syntax.",
+    "err_manifest": "Provide 1 to 500 valid dependency entries, including development, peer, or optional dependencies.",
+    "err_file_size": "The manifest must be smaller than 256 KB."
   },
   "owner_scan": {
     "title": "Repositories scanned for",
@@ -263,7 +268,13 @@
     "ai_prompt": "AI Prompt",
     "show_command": "Show Command",
     "manual_install": "Manual Install",
-    "copy_prompt": "Copy Prompt"
+    "copy_prompt": "Copy Prompt",
+    "include_typescript7": "Include TypeScript 7+ updates",
+    "typescript7_help": "Off by default. Includes TypeScript 7+ in this report’s commands, AI prompts, and package.json exports. Check ESLint and tooling compatibility before updating.",
+    "typescript7_enable": "Enable TS 7",
+    "typescript7_enabled": "TS 7 enabled",
+    "typescript7_eslint": "no ESLint yet",
+    "typescript7_anyway": "ESLint unavailable. Update anyway?"
   },
   "error": {
     "analysis_title": "Analysis Error"
@@ -278,7 +289,7 @@
     "deprecation_title": "Maintainer Announcements & Deprecation Notices",
     "deprecation_desc": "When a package author or maintainer deprecates a package (e.g. request, moment), they publish an official announcement reason to NPM. Upcheck extracts this string and surfaces it prominently.",
     "osv_title": "Google OSV Security Database",
-    "osv_desc": "Upcheck batch-queries api.osv.dev (Open Source Vulnerabilities) for every dependency and version. This provides verified CVEs, GitHub Security Advisories (GHSAs), CVSS severity ratings, and target fixed versions.",
+    "osv_desc": "Upcheck queries OSV for the analyzed direct dependency versions and fetches advisory details. Unknown severities are marked explicitly; this does not replace a lockfile audit.",
     "hierarchy_title": "Categorization & Color Hierarchy",
     "cat_critical": "Critical Vulnerability",
     "cat_critical_desc": "Known high or critical severity CVE/GHSA (CVSS ≥ 7.0). Requires immediate update or patching.",
@@ -318,9 +329,10 @@
     "no_vulns": "# No critical vulnerabilities detected!",
     "all_safe": "# All dependencies already have modern features!",
     "all_up_to_date": "# Everything is already up to date!",
-    "latest_note": "All dependencies set to latest version",
+    "latest_note": "Verified updates only. Project settings, dependency groups and deferred packages are preserved.",
     "copy_json": "Copy JSON",
-    "download_json": "Download"
+    "download_json": "Download",
+    "manifest_unavailable": "Rescan this project to generate an updated copy of the original manifest."
   },
   "cookie": {
     "message": "Upcheck does not use advertising or analytics cookies. It stores your scan history and cache only in this browser; an optional GitHub token stays in memory for the current session.",

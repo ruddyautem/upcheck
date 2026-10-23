@@ -2,10 +2,13 @@
 
 import { Bot, CircleAlert, Clock, FolderGit2, RefreshCw } from 'lucide-react';
 import { OwnerAnalysisResult } from '@/types';
+import { getUpdatePresetPackages, UpdateOptions } from '@/lib/updateCommands';
 import { useAppSettings } from '@/lib/settingsContext';
+import { getRepositoryTarget, repositoryTargetKey } from '@/lib/repositoryTarget';
 
 interface OwnerScanSummaryProps {
   analysis: OwnerAnalysisResult;
+  updateOptions?: UpdateOptions;
   activeRepository: string;
   isLoading: boolean;
   onSelectRepository: (fullName: string) => void;
@@ -15,6 +18,7 @@ interface OwnerScanSummaryProps {
 
 export function OwnerScanSummary({
   analysis,
+  updateOptions = {},
   activeRepository,
   isLoading,
   onSelectRepository,
@@ -62,14 +66,15 @@ export function OwnerScanSummary({
 
       <div className="grid grid-cols-1 gap-2 min-[480px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
         {analysis.results.map((repository) => {
-          const isActive = repository.repoInfo.fullName === activeRepository;
-          const updates = repository.packages.filter((pkg) => pkg.category !== 'up_to_date' && !pkg.isUpdateDeferred).length;
+          const targetKey = repositoryTargetKey(getRepositoryTarget(repository.repoInfo));
+          const isActive = targetKey === activeRepository;
+          const updates = getUpdatePresetPackages(repository.packages, 'all', updateOptions).length;
           const checkedAt = formatCheckedAt(repository.analyzedAt);
           return (
             <button
-              key={repository.repoInfo.fullName}
+              key={targetKey}
               type="button"
-              onClick={() => onSelectRepository(repository.repoInfo.fullName)}
+              onClick={() => onSelectRepository(targetKey)}
               className={`min-w-0 p-2.5 rounded-lg border text-left transition-colors cursor-pointer ${
                 isActive
                   ? 'border-emerald-500/70 bg-emerald-500/10'

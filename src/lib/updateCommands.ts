@@ -1,22 +1,43 @@
 import { PackageAnalysis, PackageManager, RepoAnalysisResult } from '@/types';
+import semver from 'semver';
+import { DEPENDENCY_GROUPS, isPackageName, resolvePackageSpec } from './manifest';
+import { getRepositoryTarget } from './repositoryTarget';
 
 export type UpdatePreset = 'security' | 'safe' | 'major' | 'all';
 export type UpdatePromptLanguage = 'en' | 'fr';
+export interface UpdateOptions { allowTypeScript7?: boolean }
 
-export function isPackageEligibleForUpdate(pkg: PackageAnalysis) {
-  return !pkg.isUpdateDeferred;
+export function isTypeScript7Update(pkg: PackageAnalysis) {
+  return (pkg.registryName || pkg.name) === 'typescript' && Boolean(semver.valid(pkg.latestVersion)) && semver.major(pkg.latestVersion) >= 7;
 }
 
-export function getUpdatePresetPackages(packages: PackageAnalysis[], preset: UpdatePreset) {
+export function isPackageUpdateDeferred(pkg: PackageAnalysis, options: UpdateOptions = {}) {
+  if (isTypeScript7Update(pkg)) return !options.allowTypeScript7;
+  return Boolean(pkg.isUpdateDeferred);
+}
+
+export function isPackageEligibleForUpdate(pkg: PackageAnalysis, options: UpdateOptions = {}) {
+  return !isPackageUpdateDeferred(pkg, options) && pkg.category !== 'unknown'
+    && pkg.versionSource !== 'unsupported'
+    && isPackageName(pkg.name) && isPackageName(pkg.registryName || pkg.name)
+    && Boolean(semver.valid(pkg.currentVersion) && semver.valid(pkg.latestVersion))
+    && semver.gt(pkg.latestVersion, pkg.currentVersion)
+    && Object.values(pkg.declaredSpecs || {}).every((spec) => {
+      const resolved = resolvePackageSpec(pkg.name, spec);
+      return resolved && resolved.registryName === (pkg.registryName || pkg.name) && semver.lte(resolved.version, pkg.latestVersion);
+    });
+}
+
+export function getUpdatePresetPackages(packages: PackageAnalysis[], preset: UpdatePreset, options: UpdateOptions = {}) {
   switch (preset) {
     case 'security':
-      return packages.filter((pkg) => isPackageEligibleForUpdate(pkg) && (pkg.category === 'critical' || pkg.category === 'security'));
+      return packages.filter((pkg) => isPackageEligibleForUpdate(pkg, options) && (pkg.category === 'critical' || pkg.category === 'security'));
     case 'safe':
-      return packages.filter((pkg) => isPackageEligibleForUpdate(pkg) && (pkg.category === 'minor' || pkg.category === 'patch'));
+      return packages.filter((pkg) => isPackageEligibleForUpdate(pkg, options) && (pkg.category === 'minor' || pkg.category === 'patch'));
     case 'major':
-      return packages.filter((pkg) => isPackageEligibleForUpdate(pkg) && pkg.category === 'major');
+      return packages.filter((pkg) => isPackageEligibleForUpdate(pkg, options) && pkg.category === 'major');
     case 'all':
-      return packages.filter((pkg) => isPackageEligibleForUpdate(pkg) && pkg.category !== 'up_to_date');
+      return packages.filter((pkg) => isPackageEligibleForUpdate(pkg, options) && pkg.category !== 'up_to_date');
   }
 }
 
@@ -25,20 +46,45 @@ export function buildUpdateCommand(
   manager: PackageManager,
   force: boolean,
   target: 'latest' | 'compatible' = 'latest',
+  options: UpdateOptions = {},
 ) {
   const command = manager === 'npm' ? 'npm i' : `${manager} add`;
   const devFlag = manager === 'bun' ? '-d' : '-D';
-  const forceFlag = force ? ' --force' : '';
-  const formatPackage = (pkg: PackageAnalysis) =>
-    `${pkg.name}@${target === 'compatible' ? `^${pkg.latestVersion}` : 'latest'}`;
-  const production = packages.filter((pkg) => !pkg.isDevDependency).map(formatPackage);
-  const development = packages.filter((pkg) => pkg.isDevDependency).map(formatPackage);
+  const forceFlag = force && manager !== 'yarn' ? ' --force' : '';
+  const formatPackage = (pkg: PackageAnalysis) => {
+    const version = target === 'compatible' ? `^${pkg.latestVersion}` : pkg.latestVersion;
+    const spec = pkg.registryName && pkg.registryName !== pkg.name ? `npm:${pkg.registryName}@${version}` : version;
+    return `"${pkg.name}@${spec}"`;
+  };
   const commands: string[] = [];
-
-  if (production.length) commands.push(`${command}${forceFlag} ${production.join(' ')}`);
-  if (development.length) commands.push(`${command} ${devFlag}${forceFlag} ${development.join(' ')}`);
+  const eligible = packages.filter((pkg) => isPackageEligibleForUpdate(pkg, options));
+  for (const group of DEPENDENCY_GROUPS) {
+    const selected = eligible.filter((pkg) => (pkg.dependencyGroups || [pkg.isPeerDependency ? 'peerDependencies' : pkg.isDevDependency ? 'devDependencies' : 'dependencies']).includes(group));
+    const flag = group === 'devDependencies' ? ` ${devFlag}`
+      : group === 'peerDependencies' ? (manager === 'npm' || manager === 'pnpm' ? ' --save-peer' : ' --peer')
+      : group === 'optionalDependencies' ? (manager === 'npm' || manager === 'pnpm' ? ' --save-optional' : ' --optional') : '';
+    if (selected.length) commands.push(`${command}${flag}${forceFlag} ${selected.map(formatPackage).join(' ')}`);
+  }
 
   return commands.join(' && ');
+}
+
+export function buildUpdatedManifest(result: RepoAnalysisResult, options: UpdateOptions = {}) {
+  if (!result.originalManifest) return null;
+  const manifest = structuredClone(result.originalManifest);
+  for (const pkg of result.packages.filter((pkg) => isPackageEligibleForUpdate(pkg, options))) {
+    for (const group of DEPENDENCY_GROUPS) {
+      if (!manifest[group] || !Object.hasOwn(manifest[group], pkg.name)) continue;
+      const current = manifest[group]?.[pkg.name];
+      if (current === undefined) continue;
+      // Keep aliases and each declaration's pin/range style intact.
+      const prefix = current.startsWith('npm:') ? `npm:${pkg.registryName}@` : '';
+      const versionSpec = prefix ? current.slice(current.lastIndexOf('@') + 1) : current;
+      const operator = versionSpec.startsWith('^') ? '^' : versionSpec.startsWith('~') ? '~' : '';
+      manifest[group]![pkg.name] = `${prefix}${operator}${pkg.latestVersion}`;
+    }
+  }
+  return manifest;
 }
 
 function formatPackagesForPrompt(packages: PackageAnalysis[]) {
@@ -53,7 +99,9 @@ export function buildAiUpdatePrompt(
   manager: PackageManager,
   force: boolean,
   language: UpdatePromptLanguage,
+  options: UpdateOptions = {},
 ) {
+  packages = packages.filter((pkg) => isPackageEligibleForUpdate(pkg, options));
   if (!packages.length) return '';
 
   const packageList = formatPackagesForPrompt(packages);
@@ -62,8 +110,9 @@ export function buildAiUpdatePrompt(
     manager,
     force,
     preset === 'safe' ? 'compatible' : 'latest',
+    options,
   );
-  const forceInstruction = force
+  const forceInstruction = force && manager !== 'yarn'
     ? language === 'fr'
       ? `\n\nLe mode « Force Update » est activé. Utilise la commande prévue, y compris --force, puis vérifie le lockfile et exécute les tests après la mise à jour.`
       : `\n\nForce Update is enabled. Use the intended command, including --force, then verify the lockfile and run the tests after the update.`
@@ -96,9 +145,10 @@ export function buildMultiRepoAiUpdatePrompt(
   manager: PackageManager,
   force: boolean,
   language: UpdatePromptLanguage,
+  options: UpdateOptions = {},
 ) {
   const repositoriesWithUpdates = repositories
-    .map((repository) => ({ repository, packages: getUpdatePresetPackages(repository.packages, preset) }))
+    .map((repository) => ({ repository, packages: getUpdatePresetPackages(repository.packages, preset, options) }))
     .filter(({ packages }) => packages.length > 0);
 
   if (!repositoriesWithUpdates.length) return '';
@@ -106,7 +156,7 @@ export function buildMultiRepoAiUpdatePrompt(
   const title = language === 'fr'
     ? `Prépare une procédure de mise à jour ${preset === 'security' ? 'des alertes de sécurité' : 'des dépendances'} pour les dépôts ci-dessous. Travaille dépôt par dépôt : exécute uniquement la commande prévue dans le dépôt concerné, puis vérifie le lockfile et lance les tests de ce dépôt.`
     : `Prepare a ${preset === 'security' ? 'security' : 'dependency'} update procedure for the repositories below. Work repository by repository: run only the intended command in its matching repository, then verify that repository's lockfile and run its tests.`;
-  const forceInstruction = force
+  const forceInstruction = force && manager !== 'yarn'
     ? language === 'fr'
       ? '\n\nLe mode « Force Update » est activé : conserve --force dans chaque commande et signale ce risque avant exécution.'
       : '\n\nForce Update is enabled: keep --force in every command and flag this risk before execution.'
@@ -117,8 +167,12 @@ export function buildMultiRepoAiUpdatePrompt(
   const commandLabel = language === 'fr' ? 'Commande prévue :' : 'Intended command:';
   const packagesLabel = language === 'fr' ? 'Paquets à mettre à jour :' : 'Packages to update:';
   const sections = repositoriesWithUpdates.map(({ repository, packages }) => {
-    const command = buildUpdateCommand(packages, manager, force, preset === 'safe' ? 'compatible' : 'latest');
-    return `## ${repository.repoInfo.repo}\n${commandLabel}\n${command}\n\n${packagesLabel}\n${formatPackagesForPrompt(packages)}`;
+    const command = buildUpdateCommand(packages, manager, force, preset === 'safe' ? 'compatible' : 'latest', options);
+    const target = getRepositoryTarget(repository.repoInfo);
+    const location = language === 'fr'
+      ? `Branche : ${target.branch || 'branche par défaut'}. Manifeste : ${target.path || 'package.json'}. Exécute la commande dans le dossier de ce manifeste.`
+      : `Branch: ${target.branch || 'default branch'}. Manifest: ${target.path || 'package.json'}. Run the command in this manifest's directory.`;
+    return `## ${repository.repoInfo.fullName}\n${location}\n${commandLabel}\n${command}\n\n${packagesLabel}\n${formatPackagesForPrompt(packages)}`;
   });
 
   return `${title}${forceInstruction}${verificationInstruction}\n\n${sections.join('\n\n---\n\n')}`;

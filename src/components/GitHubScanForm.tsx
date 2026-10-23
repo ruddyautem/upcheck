@@ -35,7 +35,7 @@ export function GitHubScanForm({
   const [isDiscovering, setIsDiscovering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const hasToken = Boolean(githubToken);
-  const selectionLimit = hasToken ? Infinity : ANONYMOUS_REPOSITORY_LIMIT;
+  const selectionLimit = hasToken ? 20 : ANONYMOUS_REPOSITORY_LIMIT;
 
   const switchMode = (nextMode: 'single' | 'multiple') => {
     setMode(nextMode);
