@@ -1,9 +1,12 @@
 'use client';
 
 import React from 'react';
+import { getRepositoryTarget, repositoryTargetUrl } from '@/lib/repositoryTarget';
 import { RepoAnalysisResult } from '@/types';
 import { X, Copy, Download, FileText } from 'lucide-react';
 import { toast } from 'sonner';
+import { useDialog } from '@/hooks/useDialog';
+import { useId } from 'react';
 import { useAppSettings } from '@/lib/settingsContext';
 
 interface ExportModalProps {
@@ -13,11 +16,15 @@ interface ExportModalProps {
 
 export function ExportModal({ result, onClose }: ExportModalProps) {
   const { t } = useAppSettings();
+  const dialogRef = useDialog(onClose);
+  const titleId = useId();
 
   // Generate Markdown report
   const generateMarkdownReport = () => {
     let md = `# 🛡️ Upcheck Dependency Audit Report\n\n`;
-    md += `**Repository**: [${result.repoInfo.fullName}](https://github.com/${result.repoInfo.fullName})\n`;
+    md += `**Repository**: [${result.repoInfo.fullName}](${repositoryTargetUrl(getRepositoryTarget(result.repoInfo))})\n`;
+    const target = getRepositoryTarget(result.repoInfo);
+    md += `**Branch**: ${target.branch || "default"} · **Manifest**: ${target.path || "package.json"}\n`;
     md += `**Audit Date**: ${new Date(result.analyzedAt).toUTCString()}\n`;
     if (result.isIncomplete) md += '**Incomplete scan**: Some versions or advisory severities could not be verified.\n';
     if (result.isEstimated) md += '**Estimated versions**: Manifest ranges do not identify installed versions. Audit the lockfile separately.\n';
@@ -25,8 +32,8 @@ export function ExportModal({ result, onClose }: ExportModalProps) {
     md += `**Total Dependencies**: ${result.totalPackages} (${result.dependenciesCount} prod, ${result.devDependenciesCount} dev)\n\n`;
 
     md += `## 📊 Executive Summary\n`;
-    md += `- 🔴 **Critical Vulnerabilities**: ${result.summaryCounts.critical}\n`;
-    md += `- 🟠 **Security Advisories**: ${result.summaryCounts.security}\n`;
+    md += `- 🔴 **Packages with high/critical advisories**: ${result.summaryCounts.critical}\n`;
+    md += `- 🟠 **Packages with other security advisories**: ${result.summaryCounts.security}\n`;
     md += `- ⚠️ **Deprecated Packages**: ${result.summaryCounts.deprecated}\n`;
     md += `- 🟣 **Major Updates (Migration Review)**: ${result.packages.filter((pkg) => pkg.hasBreakingChanges).length}\n`;
     md += `- 🔵 **Minor Updates**: ${result.summaryCounts.minor}\n`;
@@ -82,7 +89,7 @@ export function ExportModal({ result, onClose }: ExportModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div 
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}
         className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
@@ -92,12 +99,13 @@ export function ExportModal({ result, onClose }: ExportModalProps) {
               <FileText className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">{t('export.title')}</h3>
+              <h3 id={titleId} className="text-lg font-bold text-white">{t('export.title')}</h3>
               <p className="text-xs text-slate-400">{t('export.subtitle')}</p>
             </div>
           </div>
 
           <button
+            aria-label={t('token.cancel_btn')}
             onClick={onClose}
             className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
           >

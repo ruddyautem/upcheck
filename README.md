@@ -231,3 +231,8 @@ Bun regression tests cover version comparisons, aliases, upstream failures, OSV 
 ### About
 
 Created by [Ruddy Autem](https://github.com/ruddyautem).
+
+
+### Vérifications complémentaires
+
+Les dialogues de jeton et d’export gèrent le focus, Tab, Maj+Tab, Échap et le retour au déclencheur. L’export Markdown conserve la branche et le chemin du manifeste, et compte les paquets affectés par des avis élevés/critiques. bun run test exécute les tests Bun du projet. Les limites en mémoire restent propres à chaque processus : en déploiement public sur plusieurs instances, configurer un proxy de confiance et un limiteur partagé au niveau de l’hébergement. Cette configuration externe n’est pas remplacée par un compteur local.

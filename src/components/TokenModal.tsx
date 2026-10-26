@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { X, Key, ShieldCheck, ExternalLink, Trash2 } from 'lucide-react';
+import { useDialog } from '@/hooks/useDialog';
+import { useId } from 'react';
 import { useAppSettings } from '@/lib/settingsContext';
 
 interface TokenModalProps {
@@ -12,6 +14,8 @@ interface TokenModalProps {
 
 export function TokenModal({ token, onSaveToken, onClose }: TokenModalProps) {
   const { t } = useAppSettings();
+  const dialogRef = useDialog(onClose);
+  const titleId = useId();
   const [val, setVal] = useState(token);
 
   const handleSave = (e: React.FormEvent) => {
@@ -27,7 +31,7 @@ export function TokenModal({ token, onSaveToken, onClose }: TokenModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div 
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}
         className="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
@@ -37,12 +41,13 @@ export function TokenModal({ token, onSaveToken, onClose }: TokenModalProps) {
               <Key className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">{t('token.title')}</h3>
+              <h3 id={titleId} className="text-lg font-bold text-white">{t('token.title')}</h3>
               <p className="text-xs text-slate-400">{t('token.subtitle')}</p>
             </div>
           </div>
 
           <button
+            aria-label={t('token.cancel_btn')}
             onClick={onClose}
             className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
           >
@@ -52,10 +57,11 @@ export function TokenModal({ token, onSaveToken, onClose }: TokenModalProps) {
 
         <form onSubmit={handleSave} className="p-6 space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">
+            <label htmlFor={`${titleId}-token`} className="text-xs font-semibold text-slate-300">
               {t('token.label')}
             </label>
             <input
+              id={`${titleId}-token`}
               type="password"
               value={val}
               onChange={(e) => setVal(e.target.value)}
