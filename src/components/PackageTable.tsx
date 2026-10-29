@@ -6,7 +6,7 @@ import {
   ChevronDown, 
   ShieldAlert, 
   AlertTriangle, 
-  ArrowUpRight, 
+  ChevronsUp,
   CheckCircle2, 
   ExternalLink, 
   Zap, 
@@ -15,6 +15,8 @@ import {
   Megaphone,
   ChevronLeft,
   ChevronRight,
+  CircleAlert,
+  OctagonAlert,
 } from 'lucide-react';
 import { isPackageUpdateDeferred, isTypeScript7Update, UpdateOptions } from '@/lib/updateCommands';
 import { CATEGORY_CONFIGS } from '@/lib/categories';
@@ -28,6 +30,16 @@ interface PackageTableProps {
 }
 
 export type TableFilterTab = 'all' | 'needs_attention' | 'security' | 'major' | 'minor_patch' | 'up_to_date';
+
+function isCriticalPackage(pkg: PackageAnalysis) {
+  return pkg.category === 'critical' && pkg.advisories.some((advisory) => advisory.severity === 'CRITICAL');
+}
+
+const groupOrder = ['critical', 'high_risk', 'security', 'deprecated', 'unknown', 'major', 'minor', 'patch', 'up_to_date'] as const;
+
+function getPackageGroup(pkg: PackageAnalysis): (typeof groupOrder)[number] {
+  return pkg.category === 'critical' && !isCriticalPackage(pkg) ? 'high_risk' : pkg.category;
+}
 
 function getResponsivePageSize() {
   if (typeof window === 'undefined') return 10;
@@ -75,7 +87,7 @@ export function PackageTable({
       list = list.filter((p) => p.category === 'up_to_date');
     }
 
-    return list;
+    return [...list].sort((a, b) => groupOrder.indexOf(getPackageGroup(a)) - groupOrder.indexOf(getPackageGroup(b)));
   }, [packages, activeTab]);
 
   // Pagination
@@ -87,22 +99,6 @@ export function PackageTable({
     return filteredPackages.slice(start, start + pageSize);
   }, [filteredPackages, currentPage, pageSize]);
 
-  // Avatar pastel color generator based on package initial
-  const getAvatarColor = (name: string) => {
-    const colors = [
-      'bg-red-500/20 text-red-300 border-red-500/30',
-      'bg-amber-500/20 text-amber-300 border-amber-500/30',
-      'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-      'bg-sky-500/20 text-sky-300 border-sky-500/30',
-      'bg-blue-500/20 text-blue-300 border-blue-500/30',
-      'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-      'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-    ];
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    return colors[Math.abs(hash) % colors.length];
-  };
-
   const emptyRowCount = pageSize === 0 ? 0 : Math.max(0, pageSize - Math.max(paginatedPackages.length, 1));
   const compactTable = pageSize > 0 && pageSize < 10;
 
@@ -112,6 +108,12 @@ export function PackageTable({
       <div className="report-surface w-full bg-slate-800/90 backdrop-blur-xl border border-slate-700 rounded-2xl overflow-hidden shadow-xl xl:flex xl:min-h-0 xl:flex-1 xl:flex-col">
         <div className="min-w-0 overflow-x-auto sm:px-1.5 xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
           <table className="package-table w-full text-left border-separate border-spacing-y-1">
+            <colgroup>
+              <col />
+              <col className="package-column-version" />
+              <col className="package-column-version" />
+              <col className="package-column-status" />
+            </colgroup>
             <thead>
               <tr className="border-b border-slate-700 bg-slate-900 text-[0.6875rem] font-extrabold tracking-wider text-slate-300 uppercase">
                 <th className={compactTable ? 'px-3 py-2' : 'px-4 py-3'}>{t('table.col_package')}</th>
@@ -123,11 +125,29 @@ export function PackageTable({
             <tbody className="text-xs">
               {paginatedPackages.length > 0 ? (
                 <>
-                {paginatedPackages.map((pkg) => {
+                {paginatedPackages.map((pkg, index) => {
                   const isExpanded = expandedPackage === pkg.name;
                   const isDeferred = isPackageUpdateDeferred(pkg, updateOptions);
+                  const isCriticalSeverity = isCriticalPackage(pkg);
+                  const group = getPackageGroup(pkg);
+                  const showGroupHeader = index === 0 || getPackageGroup(paginatedPackages[index - 1]) !== group;
                   const hasTypeScriptToggle = isTypeScript7Update(pkg) && Boolean(onToggleTypeScript7);
                   const config = CATEGORY_CONFIGS[pkg.category];
+                  const badgeClass = pkg.category === 'major'
+                    ? 'border border-amber-500/40 bg-amber-500/15 text-amber-300'
+                    : pkg.category === 'security'
+                    ? 'border border-red-500/40 bg-red-500/15 text-red-400'
+                    : config.badgeClass;
+                  const CategoryIcon = isDeferred ? Minus : {
+                    critical: isCriticalSeverity ? OctagonAlert : ShieldAlert,
+                    security: ShieldAlert,
+                    deprecated: AlertTriangle,
+                    major: ChevronsUp,
+                    minor: Zap,
+                    patch: Wrench,
+                    up_to_date: CheckCircle2,
+                    unknown: CircleAlert,
+                  }[pkg.category];
                   const hasDetails = Boolean(pkg.breakingWarning?.trim() || pkg.deprecatedReason?.trim() || pkg.advisories.length);
                   const latestVersionClass = isDeferred
                     ? 'text-slate-500 font-semibold'
@@ -136,15 +156,15 @@ export function PackageTable({
                     : pkg.category === 'critical'
                     ? 'text-red-400 font-bold'
                     : pkg.category === 'major'
-                    ? 'text-blue-400 font-bold'
+                    ? 'text-amber-300 font-bold'
                     : 'text-cyan-400 font-semibold';
                   const statusContent = (
                     <span className="flex flex-1 items-center justify-center gap-1 px-1">
                       {isDeferred && <Minus className="w-3 h-3 text-slate-400" />}
-                      {pkg.category === 'critical' && <ShieldAlert className="w-3 h-3 text-red-400" />}
-                      {pkg.category === 'security' && <ShieldAlert className="w-3 h-3 text-orange-400" />}
+                      {pkg.category === 'critical' && (isCriticalSeverity ? <OctagonAlert className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3 h-3 text-red-400" />)}
+                      {pkg.category === 'security' && <ShieldAlert className="w-3 h-3 text-red-400" />}
                       {pkg.category === 'deprecated' && <AlertTriangle className="w-3 h-3 text-amber-400" />}
-                      {pkg.category === 'major' && <ArrowUpRight className="w-3 h-3 text-blue-400" />}
+                      {pkg.category === 'major' && <ChevronsUp className="w-3 h-3 text-amber-300" />}
                       {pkg.category === 'minor' && <Zap className="w-3 h-3 text-sky-400" />}
                       {pkg.category === 'patch' && <Wrench className="w-3 h-3 text-slate-400" />}
                       {pkg.category === 'up_to_date' && <CheckCircle2 className="w-3 h-3 text-emerald-400" />}
@@ -155,7 +175,7 @@ export function PackageTable({
                               <span className="hidden sm:inline">{t('category.deferred')}</span>
                             </>
                           : pkg.category === 'critical'
-                          ? (pkg.advisories.some((advisory) => advisory.severity === 'CRITICAL') ? t('category.critical') : t('category.high_risk'))
+                          ? (isCriticalSeverity ? t('category.critical') : t('category.high_risk'))
                           : t(`category.${pkg.category}`)}
                       </span>
                     </span>
@@ -163,28 +183,37 @@ export function PackageTable({
 
                   return (
                     <React.Fragment key={pkg.name}>
+                      {showGroupHeader && (
+                        <tr className="package-group-header">
+                          <th colSpan={4} scope="colgroup">
+                            <span className="package-group-header__label">
+                              {isCriticalSeverity && <OctagonAlert aria-hidden="true" className="h-4 w-4" />}
+                              {t(`table.group_${group}`)}
+                            </span>
+                          </th>
+                        </tr>
+                      )}
                       <tr
                         onClick={hasDetails ? () => {
                           setClosingPackage(expandedPackage);
                           setExpandedPackage(isExpanded ? null : pkg.name);
                         } : undefined}
-                        className={`package-row group text-xs transition-colors ${hasDetails ? 'cursor-pointer' : ''} ${pkg.category === 'critical' ? 'package-row--critical' : ''} ${isDeferred && !hasTypeScriptToggle ? 'opacity-65' : ''}`}
+                        className={`package-row group text-xs transition-colors ${hasDetails ? 'cursor-pointer' : ''} ${pkg.category === 'critical' ? 'package-row--critical' : ''} ${isCriticalSeverity ? 'package-row--critical-severity' : ''} ${isDeferred && !hasTypeScriptToggle ? 'opacity-65' : ''}`}
                       >
                         {/* Package Name & Type */}
                         <td className={compactTable ? 'px-3 py-2' : 'px-4 py-3'}>
                           <div className={compactTable ? 'flex items-center gap-2' : 'flex items-center gap-3'}>
-                            {/* Avatar initial */}
+                            {/* Category icon mirrors the status label. */}
                             <div
-                              className={`${compactTable ? 'h-6 w-6 text-[0.625rem]' : 'h-7 w-7 text-xs'} shrink-0 rounded-lg flex items-center justify-center font-bold uppercase font-mono border ${getAvatarColor(
-                                pkg.name
-                              )}`}
+                              aria-hidden="true"
+                              className={`${compactTable ? 'h-6 w-6' : 'h-7 w-7'} shrink-0 rounded-lg flex items-center justify-center ${isDeferred ? 'border border-slate-500/30 bg-slate-500/15 text-slate-400' : badgeClass}`}
                             >
-                              {pkg.name.charAt(0)}
+                              <CategoryIcon className="h-3.5 w-3.5" />
                             </div>
 
                             <div className="min-w-0 flex-1">
-                              <div className="font-mono font-bold text-xs text-white group-hover:text-blue-300 transition-colors flex flex-wrap items-center gap-1.5 sm:whitespace-nowrap">
-                                <span className="min-w-0 break-all sm:break-normal">{pkg.name}</span>
+                              <div className="font-mono font-bold text-xs text-white group-hover:text-blue-300 transition-colors flex flex-wrap items-center gap-1.5">
+                                <span className="min-w-0 break-all">{pkg.name}</span>
 
                                 {pkg.hasBreakingChanges && (
                                   <span className="shrink-0 text-[0.5rem] leading-none font-sans px-1 py-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-500/40 font-black tracking-wide" title="Major version migration risk">
@@ -245,13 +274,13 @@ export function PackageTable({
                             }}
                             aria-expanded={isExpanded}
                             aria-label={isExpanded ? `Close advisories for ${pkg.name}` : `Show advisories for ${pkg.name}`}
-                            className={`group/status inline-flex w-40 shrink-0 items-stretch overflow-hidden rounded border text-[0.625rem] leading-none font-semibold whitespace-nowrap transition-colors cursor-pointer ${compactTable ? 'h-7' : 'h-8'} ${isDeferred ? 'border-slate-600 bg-slate-800/60 text-slate-400' : config.badgeClass}`}
+                            className={`group/status inline-flex w-40 shrink-0 items-stretch overflow-hidden rounded border text-[0.625rem] leading-none font-semibold whitespace-nowrap transition-colors cursor-pointer ${compactTable ? 'h-7' : 'h-8'} ${isDeferred ? 'border-slate-600 bg-slate-800/60 text-slate-400' : badgeClass}`}
                           >
                             {statusContent}
                             <span className="flex w-8 items-center justify-center border-l border-current/20 bg-slate-950/25 transition-colors group-hover/status:bg-slate-950/45">
                               <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ease-out ${isExpanded ? 'rotate-180' : ''}`} />
                             </span>
-                          </button> : <span className={`inline-flex w-40 items-stretch justify-center rounded border text-[0.625rem] leading-none font-semibold whitespace-nowrap ${compactTable ? 'h-7' : 'h-8'} ${isDeferred ? 'border-slate-600 bg-slate-800/60 text-slate-400' : config.badgeClass}`}>
+                          </button> : <span className={`inline-flex w-40 items-stretch justify-center rounded border text-[0.625rem] leading-none font-semibold whitespace-nowrap ${compactTable ? 'h-7' : 'h-8'} ${isDeferred ? 'border-slate-600 bg-slate-800/60 text-slate-400' : badgeClass}`}>
                             {statusContent}
                           </span>}
                         </td>

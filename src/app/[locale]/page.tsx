@@ -410,10 +410,10 @@ export default function Home({ reportId }: { reportId?: string }) {
                     <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                       <div className="min-w-0 break-all font-mono text-xs text-emerald-300 sm:text-sm">{result.repoInfo.fullName}</div>
                       {result.repoInfo.target && <span className="break-all font-mono text-[0.625rem] text-slate-400">{result.repoInfo.target.branch} · {result.repoInfo.target.path}</span>}
-                      <span aria-hidden="true" className="hidden h-3 border-l border-slate-700 sm:block" />
+                      <span aria-hidden="true" className="hidden h-3 border-l border-slate-700 sm:block xl:hidden" />
                       <time
                         dateTime={result.analyzedAt}
-                        className="inline-flex min-w-0 max-w-full items-center text-[0.5625rem] text-slate-400 whitespace-normal sm:text-[0.6875rem]"
+                        className="inline-flex min-w-0 max-w-full items-center text-[0.5625rem] text-slate-400 whitespace-normal sm:text-[0.6875rem] xl:basis-full"
                         title={`${t('overview.last_scan')} · ${new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'short' }).format(new Date(result.analyzedAt))}`}
                       >
                         <span className="sm:hidden">
